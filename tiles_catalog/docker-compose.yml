@@ -13,9 +13,11 @@ services:
       - DJANGO_SECURE_COOKIES=False
       - DJANGO_ALLOWED_HOSTS=80.225.237.255,localhost,127.0.0.1
       - DJANGO_CSRF_TRUSTED_ORIGINS=http://80.225.237.255:3000,http://localhost:3000,http://127.0.0.1:3000
+      - DJANGO_DB_PATH=/app/data/db.sqlite3
     volumes:
       - static_volume:/app/static_root
       - media_volume:/app/media
+      - db_data:/app/data
     depends_on: []
     networks:
       - glowall_network
@@ -45,3 +47,4 @@ networks:
 volumes:
   static_volume:
   media_volume:
+  db_data:

@@ -27,11 +27,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
-
-# Create directory for SQLite database
-RUN mkdir -p /app/data
+# Create directory for SQLite database and static files
+RUN mkdir -p /app/data /app/static_root /app/media
 
 # Create non-root user for security
 RUN adduser --disabled-password --gecos '' appuser && \
@@ -41,5 +38,5 @@ USER appuser
 # Expose port
 EXPOSE 3000
 
-# Run migrations on startup, then launch Gunicorn
-CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn --bind 0.0.0.0:3000 --workers 3 --threads 2 tiles_catalog.wsgi:application"]
+# Run migrations and collectstatic on startup, then launch Gunicorn
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:3000 --workers 3 --threads 2 tiles_catalog.wsgi:application"]
