@@ -44,16 +44,11 @@
                         </a>
                     </li>
                     
-                    <li class="nav-item has-submenu {% if 'categor' in request.resolver_match.url_name %}open{% endif %}">
-                        <a href="#" class="nav-link">
+                    <li class="nav-item">
+                        <a href="{% url 'admin_panel:category_list' %}" class="nav-link {% if 'categor' in request.resolver_match.url_name %}active{% endif %}">
                             <i class="fas fa-folder"></i>
                             <span>Categories</span>
-                            <i class="fas fa-chevron-down submenu-icon"></i>
                         </a>
-                        <ul class="submenu">
-                            <li><a href="{% url 'admin_panel:category_list' %}" class="{% if request.resolver_match.url_name == 'category_list' %}active{% endif %}">All Categories</a></li>
-                            <li><a href="{% url 'admin_panel:category_add' %}" class="{% if request.resolver_match.url_name == 'category_add' %}active{% endif %}">Add Category</a></li>
-                        </ul>
                     </li>
                     
                     <li class="nav-item has-submenu {% if 'material' in request.resolver_match.url_name %}open{% endif %}">
