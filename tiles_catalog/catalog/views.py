@@ -10,7 +10,7 @@ from .forms import ContactForm, ProductSearchForm
 def categories_context(request):
     """Context processor to add categories to all templates."""
     return {
-        'all_categories': Category.objects.filter(is_active=True, parent__isnull=True).annotate(
+        'all_categories': Category.objects.filter(is_active=True).annotate(
             product_count=Count('products', filter=Q(products__is_available=True))
         ),
         'all_materials': MaterialType.objects.all(),
@@ -27,8 +27,7 @@ def home(request):
     ).select_related('category', 'material_type')[:8]
     
     featured_categories = Category.objects.filter(
-        is_active=True, 
-        parent__isnull=True
+        is_active=True
     ).annotate(
         product_count=Count('products', filter=Q(products__is_available=True))
     )[:6]
@@ -58,9 +57,7 @@ def product_list(request):
     # Filter by category
     category_slug = request.GET.get('category', '')
     if category_slug:
-        products = products.filter(
-            Q(category__slug=category_slug) | Q(category__parent__slug=category_slug)
-        )
+        products = products.filter(category__slug=category_slug)
     
     # Filter by material type
     material_slug = request.GET.get('material', '')
@@ -119,10 +116,9 @@ def category_detail(request, slug):
     """Category detail view showing products in a category."""
     category = get_object_or_404(Category, slug=slug, is_active=True)
     
-    # Get products in this category and its children
-    child_categories = Category.objects.filter(parent=category, is_active=True)
+    # Get products in this category
     products = Product.objects.filter(
-        Q(category=category) | Q(category__in=child_categories),
+        category=category,
         is_available=True
     ).select_related('category', 'material_type')
     
@@ -144,7 +140,6 @@ def category_detail(request, slug):
     
     context = {
         'category': category,
-        'child_categories': child_categories,
         'products': products,
         'current_sort': sort,
         'page_title': f'{category.name} - Products',

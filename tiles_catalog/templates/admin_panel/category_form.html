@@ -29,22 +29,60 @@
             </div>
             
             <div class="form-group">
-                <label for="id_parent">Parent Category</label>
-                {{ form.parent }}
-                <small class="help-text">Leave blank for top-level category</small>
-            </div>
-            
-            <div class="form-group">
                 <label for="id_description">Description</label>
                 {{ form.description }}
             </div>
             
             <div class="form-group">
                 <label for="id_image">Category Image</label>
-                {{ form.image }}
+                <div class="file-upload-wrapper">
+                    <div class="file-upload-area">
+                        <input type="file" name="image" accept="image/*" id="id_image" class="file-upload-input">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="file-upload-text">
+                            <h4>Click or Drag Image to Upload</h4>
+                            <p>Supports JPG, PNG, WebP formats</p>
+                        </div>
+                        <div class="file-upload-hint">
+                            <i class="fas fa-info-circle"></i>
+                            Recommended size: 800x600px
+                        </div>
+                    </div>
+                    <div class="file-preview">
+                        <div class="file-preview-card">
+                            <div class="file-preview-image">
+                                <img src="" alt="Preview">
+                            </div>
+                            <div class="file-preview-info">
+                                <div class="file-preview-name">filename.jpg</div>
+                                <div class="file-preview-size">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>0 KB</span>
+                                </div>
+                            </div>
+                            <div class="file-preview-actions">
+                                <button type="button" class="btn-remove" title="Remove image">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 {% if category.image %}
                 <div class="current-image">
-                    <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                    <div class="current-image-label">
+                        <i class="fas fa-check-circle"></i>
+                        Current Image
+                    </div>
+                    <div class="current-image-card">
+                        <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                        <div class="current-image-info">
+                            <span>{{ category.image.name|slice:"9:" }}</span>
+                            <small>Upload a new image to replace</small>
+                        </div>
+                    </div>
                 </div>
                 {% endif %}
             </div>

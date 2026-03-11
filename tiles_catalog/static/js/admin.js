@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initAlerts();
     initForms();
     initBarFill();
+    initModernFileUpload();
 });
 
 /**
@@ -185,6 +186,119 @@ function initBarFill() {
         const width = bar.getAttribute('data-width');
         bar.style.width = width + '%';
     });
+}
+
+/**
+ * Modern File Upload
+ */
+function initModernFileUpload() {
+    const uploadAreas = document.querySelectorAll('.file-upload-area');
+    
+    uploadAreas.forEach(area => {
+        const input = area.querySelector('.file-upload-input');
+        const preview = area.closest('.file-upload-wrapper').querySelector('.file-preview');
+        const previewImage = preview?.querySelector('.file-preview-image img');
+        const previewName = preview?.querySelector('.file-preview-name');
+        const previewSize = preview?.querySelector('.file-preview-size span');
+        const removeBtn = preview?.querySelector('.btn-remove');
+        
+        if (!input) return;
+        
+        // Drag & Drop events
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            area.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            area.addEventListener(eventName, () => {
+                area.classList.add('dragover');
+            }, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            area.addEventListener(eventName, () => {
+                area.classList.remove('dragover');
+            }, false);
+        });
+        
+        // Handle dropped files
+        area.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                input.files = files;
+                handleFileSelect(files[0]);
+            }
+        }, false);
+        
+        // Handle file selection via click
+        input.addEventListener('change', (e) => {
+            if (input.files && input.files[0]) {
+                handleFileSelect(input.files[0]);
+            }
+        });
+        
+        // Handle file selection
+        function handleFileSelect(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file.');
+                return;
+            }
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (previewImage) {
+                    previewImage.src = e.target.result;
+                }
+                if (previewName) {
+                    previewName.textContent = file.name;
+                }
+                if (previewSize) {
+                    previewSize.textContent = formatFileSize(file.size);
+                }
+                if (preview) {
+                    preview.classList.add('visible');
+                }
+                area.classList.add('has-file');
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Remove file
+        if (removeBtn) {
+            removeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                input.value = '';
+                if (preview) {
+                    preview.classList.remove('visible');
+                }
+                area.classList.remove('has-file');
+                if (previewImage) {
+                    previewImage.src = '';
+                }
+                if (previewName) {
+                    previewName.textContent = '';
+                }
+            });
+        }
+    });
+}
+
+/**
+ * Format file size
+ */
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 /**

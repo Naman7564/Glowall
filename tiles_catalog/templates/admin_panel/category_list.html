@@ -17,7 +17,6 @@
                 <tr>
                     <th>Image</th>
                     <th>Category Name</th>
-                    <th>Parent</th>
                     <th>Products</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -36,7 +35,6 @@
                         {% endif %}
                     </td>
                     <td><strong>{{ category.name }}</strong></td>
-                    <td>{{ category.parent.name|default:"-" }}</td>
                     <td>{{ category.product_count }}</td>
                     <td>
                         {% if category.is_active %}
@@ -61,7 +59,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center">
+                    <td colspan="5" class="text-center">
                         <div class="empty-state">
                             <i class="fas fa-folder-open"></i>
                             <h3>No categories found</h3>

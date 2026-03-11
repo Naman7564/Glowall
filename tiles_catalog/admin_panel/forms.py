@@ -25,7 +25,7 @@ class CategoryForm(forms.ModelForm):
     
     class Meta:
         model = Category
-        fields = ['name', 'slug', 'description', 'image', 'parent', 'is_active']
+        fields = ['name', 'slug', 'description', 'image', 'is_active']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -39,9 +39,6 @@ class CategoryForm(forms.ModelForm):
                 'class': 'form-control',
                 'rows': 3,
                 'placeholder': 'Category description'
-            }),
-            'parent': forms.Select(attrs={
-                'class': 'form-control'
             }),
         }
 
