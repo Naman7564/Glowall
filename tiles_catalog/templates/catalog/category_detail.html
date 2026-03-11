@@ -1,0 +1,127 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - Glowall{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-title">{{ category.name }}</h1>
+        <nav class="breadcrumb">
+            <a href="{% url 'catalog:home' %}">Home</a>
+            <span>/</span>
+            <a href="{% url 'catalog:product_list' %}">Products</a>
+            <span>/</span>
+            <span>{{ category.name }}</span>
+        </nav>
+    </div>
+</section>
+
+{% if category.description %}
+<section class="category-intro">
+    <div class="container">
+        <p class="category-desc">{{ category.description }}</p>
+    </div>
+</section>
+{% endif %}
+
+{% if child_categories %}
+<section class="subcategories-section">
+    <div class="container">
+        <h2 class="section-title">Subcategories</h2>
+        <div class="categories-grid small">
+            {% for child in child_categories %}
+            <a href="{% url 'catalog:category_detail' child.slug %}" class="category-card">
+                <div class="category-info">
+                    <h3 class="category-name">{{ child.name }}</h3>
+                    <span class="category-count">{{ child.product_count }} Products</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="catalog-section">
+    <div class="container">
+        <div class="catalog-header">
+            <p class="results-count">{{ products.paginator.count }} products found</p>
+            <div class="sort-dropdown">
+                <label>Sort by:</label>
+                <select onchange="location.href='?sort=' + this.value">
+                    <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Newest First</option>
+                    <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+                    <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name A-Z</option>
+                    <option value="-name" {% if current_sort == '-name' %}selected{% endif %}>Name Z-A</option>
+                    <option value="price" {% if current_sort == 'price' %}selected{% endif %}>Price Low-High</option>
+                    <option value="-price" {% if current_sort == '-price' %}selected{% endif %}>Price High-Low</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="products-grid">
+            {% for product in products %}
+            <article class="product-card">
+                <a href="{% url 'catalog:product_detail' product.slug %}" class="product-link">
+                    <div class="product-image">
+                        {% if product.primary_image %}
+                        <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" loading="lazy">
+                        {% else %}
+                        <div class="product-placeholder">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        {% endif %}
+                        <div class="product-overlay">
+                            <span class="view-btn">View Details</span>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <span class="product-category">{{ product.category.name }}</span>
+                        <h3 class="product-name">{{ product.name }}</h3>
+                        <p class="product-size">{{ product.size_display }}</p>
+                        {% if product.price %}
+                        <p class="product-price">${{ product.price }}</p>
+                        {% endif %}
+                    </div>
+                </a>
+            </article>
+            {% empty %}
+            <div class="no-results">
+                <i class="fas fa-box-open"></i>
+                <h3>No products in this category</h3>
+                <p>Check back soon for new arrivals</p>
+                <a href="{% url 'catalog:product_list' %}" class="btn btn-primary">View All Products</a>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if products.has_other_pages %}
+        <nav class="pagination">
+            {% if products.has_previous %}
+            <a href="?page={{ products.previous_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="page-link prev">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+            {% endif %}
+            
+            <div class="page-numbers">
+                {% for num in products.paginator.page_range %}
+                    {% if products.number == num %}
+                    <span class="page-link active">{{ num }}</span>
+                    {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                    <a href="?page={{ num }}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="page-link">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            
+            {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="page-link next">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </nav>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

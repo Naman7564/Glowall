@@ -1,0 +1,78 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Categories - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Categories</h1>
+    <a href="{% url 'admin_panel:category_add' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Category
+    </a>
+</div>
+
+<div class="data-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Category Name</th>
+                    <th>Parent</th>
+                    <th>Products</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr>
+                    <td>
+                        {% if category.image %}
+                        <img src="{{ category.image.url }}" alt="{{ category.name }}" class="table-thumb">
+                        {% else %}
+                        <div class="table-thumb placeholder">
+                            <i class="fas fa-folder"></i>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td><strong>{{ category.name }}</strong></td>
+                    <td>{{ category.parent.name|default:"-" }}</td>
+                    <td>{{ category.product_count }}</td>
+                    <td>
+                        {% if category.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-danger">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'catalog:category_detail' category.slug %}" class="btn btn-sm btn-outline" title="View" target="_blank">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:category_edit' category.pk %}" class="btn btn-sm btn-outline" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:category_delete' category.pk %}" class="btn btn-sm btn-danger" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <h3>No categories found</h3>
+                            <p>Get started by adding your first category</p>
+                            <a href="{% url 'admin_panel:category_add' %}" class="btn btn-primary">Add Category</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

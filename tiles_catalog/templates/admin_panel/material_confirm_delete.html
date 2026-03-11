@@ -1,0 +1,19 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Delete Material Type - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Delete Material Type</h1>
+</div>
+
+<div class="confirm-card">
+    <div class="confirm-icon"><i class="fas fa-exclamation-triangle"></i></div>
+    <h2>Are you sure you want to delete "{{ material.name }}"?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'admin_panel:material_list' %}" class="btn btn-outline">Cancel</a>
+    </form>
+</div>
+{% endblock %}

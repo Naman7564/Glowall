@@ -1,0 +1,174 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Glowall - Premium Tiles & Marble Showroom{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="hero-overlay"></div>
+    </div>
+    <div class="hero-content">
+        <h1 class="hero-title">Premium Tiles & Marble</h1>
+        <p class="hero-subtitle">Transform your spaces with our exquisite collection of tiles, marble, granite, and natural stone</p>
+        <div class="hero-buttons">
+            <a href="{% url 'catalog:product_list' %}" class="btn hero-btn hero-btn-primary">Explore Collection</a>
+            <a href="{% url 'catalog:contact' %}" class="btn hero-btn hero-btn-accent">Get Quote</a>
+        </div>
+    </div>
+    <div class="hero-scroll">
+        <span>Scroll to discover</span>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="section featured-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">Our Collection</span>
+            <h2 class="section-title">Featured Products</h2>
+            <p class="section-desc">Discover our handpicked selection of premium tiles and marble</p>
+        </div>
+        
+        <div class="products-grid">
+            {% for product in featured_products %}
+            <article class="product-card">
+                <a href="{% url 'catalog:product_detail' product.slug %}" class="product-link">
+                    <div class="product-image">
+                        {% if product.primary_image %}
+                        <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" loading="lazy">
+                        {% else %}
+                        <div class="product-placeholder">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        {% endif %}
+                        <div class="product-overlay">
+                            <span class="view-btn">View Details</span>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <span class="product-category">{{ product.category.name }}</span>
+                        <h3 class="product-name">{{ product.name }}</h3>
+                        <p class="product-size">{{ product.size_display }}</p>
+                        {% if product.price %}
+                        <p class="product-price">${{ product.price }}</p>
+                        {% endif %}
+                    </div>
+                </a>
+            </article>
+            {% empty %}
+            <p class="no-products">No featured products available.</p>
+            {% endfor %}
+        </div>
+        
+        <div class="section-footer">
+            <a href="{% url 'catalog:product_list' %}" class="btn btn-secondary">View All Products</a>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="section categories-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">Browse By</span>
+            <h2 class="section-title">Categories</h2>
+            <p class="section-desc">Explore our diverse range of tile and marble categories</p>
+        </div>
+        
+        <div class="categories-grid">
+            {% for category in featured_categories %}
+            <a href="{% url 'catalog:category_detail' category.slug %}" class="category-card">
+                <div class="category-image">
+                    {% if category.image %}
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                    {% else %}
+                    <div class="category-placeholder" style="background: linear-gradient(135deg, #f5f5f5, #e0e0e0);">
+                        <i class="fas fa-th-large"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="category-info">
+                    <h3 class="category-name">{{ category.name }}</h3>
+                    <span class="category-count">{{ category.product_count }} Products</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="section features-section">
+    <div class="container">
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-gem"></i>
+                </div>
+                <h3 class="feature-title">Premium Quality</h3>
+                <p class="feature-desc">Only the finest tiles and marble from trusted suppliers worldwide</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-palette"></i>
+                </div>
+                <h3 class="feature-title">Vast Selection</h3>
+                <p class="feature-desc">Thousands of designs, colors, and finishes to choose from</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <h3 class="feature-title">Fast Delivery</h3>
+                <p class="feature-desc">Quick and reliable delivery to your doorstep</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3 class="feature-title">Expert Support</h3>
+                <p class="feature-desc">Professional guidance for your tile selection</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Preview -->
+<section class="section about-preview">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-image">
+                <div class="about-img-wrapper">
+                    <div class="about-placeholder">
+                        <i class="fas fa-store"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="about-content">
+                <span class="section-label">About Us</span>
+                <h2 class="section-title">Your Trusted Tile Partner</h2>
+                <p>With over 20 years of experience in the tile and marble industry, Glowall has established itself as a premier destination for quality building materials. Our showroom features an extensive collection of tiles, marble, granite, and natural stone sourced from the finest quarries and manufacturers worldwide.</p>
+                <p>Whether you're renovating your home or working on a commercial project, our team of experts is here to help you find the perfect materials to bring your vision to life.</p>
+                <a href="{% url 'catalog:about' %}" class="btn btn-primary">Learn More</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2 class="cta-title">Ready to Transform Your Space?</h2>
+            <p class="cta-desc">Visit our showroom or contact us for a free consultation</p>
+            <div class="cta-buttons">
+                <a href="{% url 'catalog:contact' %}" class="btn btn-white">Contact Us</a>
+                <a href="tel:+15551234567" class="btn btn-outline-white"><i class="fas fa-phone"></i> Call Now</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

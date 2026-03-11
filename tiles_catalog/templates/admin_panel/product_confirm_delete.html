@@ -1,0 +1,35 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Delete Product - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Delete Product</h1>
+</div>
+
+<div class="confirm-card">
+    <div class="confirm-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h2>Are you sure you want to delete this product?</h2>
+    <p class="confirm-text">This action cannot be undone.</p>
+    
+    <div class="confirm-item">
+        {% if product.primary_image %}
+        <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" class="confirm-thumb">
+        {% endif %}
+        <div class="confirm-details">
+            <strong>{{ product.name }}</strong>
+            <span>{{ product.category.name }} - {{ product.size_display }}</span>
+        </div>
+    </div>
+    
+    <form method="post" class="confirm-form">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-lg">
+            <i class="fas fa-trash"></i> Yes, Delete Product
+        </button>
+        <a href="{% url 'admin_panel:product_list' %}" class="btn btn-outline btn-lg">Cancel</a>
+    </form>
+</div>
+{% endblock %}

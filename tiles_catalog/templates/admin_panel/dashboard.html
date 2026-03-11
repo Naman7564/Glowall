@@ -1,0 +1,167 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Dashboard - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon products">
+            <i class="fas fa-box"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">{{ total_products }}</span>
+            <span class="stat-label">Total Products</span>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon categories">
+            <i class="fas fa-folder"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">{{ total_categories }}</span>
+            <span class="stat-label">Categories</span>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon available">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">{{ available_products }}</span>
+            <span class="stat-label">Available Products</span>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon featured">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">{{ featured_products }}</span>
+            <span class="stat-label">Featured Products</span>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon messages-icon">
+            <i class="fas fa-envelope"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">{{ unread_messages }}</span>
+            <span class="stat-label">Unread Messages</span>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Recent Products -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h2>Recent Products</h2>
+            <a href="{% url 'admin_panel:product_list' %}" class="view-all">View All</a>
+        </div>
+        <div class="card-body">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in recent_products %}
+                    <tr>
+                        <td>
+                            <div class="product-cell">
+                                {% if product.primary_image %}
+                                <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" class="product-thumb">
+                                {% else %}
+                                <div class="product-thumb placeholder">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                                {% endif %}
+                                <span>{{ product.name }}</span>
+                            </div>
+                        </td>
+                        <td>{{ product.category.name }}</td>
+                        <td>
+                            {% if product.is_available %}
+                            <span class="badge badge-success">Available</span>
+                            {% else %}
+                            <span class="badge badge-danger">Unavailable</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'admin_panel:product_edit' product.pk %}" class="btn btn-sm btn-outline">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No products yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Categories Overview -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h2>Categories Overview</h2>
+            <a href="{% url 'admin_panel:category_list' %}" class="view-all">View All</a>
+        </div>
+        <div class="card-body">
+            <div class="category-list">
+                {% for category in categories_with_count %}
+                <div class="category-item">
+                    <div class="category-info">
+                        <span class="category-name">{{ category.name }}</span>
+                        <span class="category-count">{{ category.product_count }} products</span>
+                    </div>
+                    <div class="category-bar">
+                        <div class="bar-fill" data-width="{% widthratio category.product_count total_products 100 %}"></div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-center">No categories yet</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="actions-grid">
+        <a href="{% url 'admin_panel:product_add' %}" class="action-card">
+            <i class="fas fa-plus-circle"></i>
+            <span>Add Product</span>
+        </a>
+        <a href="{% url 'admin_panel:category_add' %}" class="action-card">
+            <i class="fas fa-folder-plus"></i>
+            <span>Add Category</span>
+        </a>
+        <a href="{% url 'admin_panel:message_list' %}?read=unread" class="action-card">
+            <i class="fas fa-envelope-open"></i>
+            <span>View Messages</span>
+        </a>
+        <a href="{% url 'catalog:home' %}" class="action-card">
+            <i class="fas fa-external-link-alt"></i>
+            <span>View Site</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

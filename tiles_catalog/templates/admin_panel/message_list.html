@@ -1,0 +1,63 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Messages - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Contact Messages</h1>
+</div>
+
+<div class="filters-bar">
+    <a href="{% url 'admin_panel:message_list' %}" class="btn {% if not current_filter %}btn-primary{% else %}btn-outline{% endif %}">All</a>
+    <a href="?read=unread" class="btn {% if current_filter == 'unread' %}btn-primary{% else %}btn-outline{% endif %}">Unread</a>
+    <a href="?read=read" class="btn {% if current_filter == 'read' %}btn-primary{% else %}btn-outline{% endif %}">Read</a>
+</div>
+
+<div class="data-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for msg in messages %}
+                <tr class="{% if not msg.is_read %}unread-row{% endif %}">
+                    <td>
+                        {% if msg.is_read %}
+                        <span class="badge badge-secondary">Read</span>
+                        {% else %}
+                        <span class="badge badge-primary">New</span>
+                        {% endif %}
+                    </td>
+                    <td><strong>{{ msg.name }}</strong></td>
+                    <td>{{ msg.email }}</td>
+                    <td>{{ msg.subject|truncatechars:30 }}</td>
+                    <td>{{ msg.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'admin_panel:message_detail' msg.pk %}" class="btn btn-sm btn-outline">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:message_delete' msg.pk %}" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No messages found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Products - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Products</h1>
+    <a href="{% url 'admin_panel:product_add' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Product
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="filters-bar">
+    <form method="get" class="filters-form">
+        <div class="filter-group">
+            <input type="text" name="q" placeholder="Search products..." value="{{ search_query }}" class="form-control">
+        </div>
+        <div class="filter-group">
+            <select name="category" class="form-control">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if current_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <select name="availability" class="form-control">
+                <option value="">All Status</option>
+                <option value="available" {% if current_availability == 'available' %}selected{% endif %}>Available</option>
+                <option value="unavailable" {% if current_availability == 'unavailable' %}selected{% endif %}>Unavailable</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-secondary"><i class="fas fa-filter"></i> Filter</button>
+        <a href="{% url 'admin_panel:product_list' %}" class="btn btn-outline">Clear</a>
+    </form>
+</div>
+
+<div class="data-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Size</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Featured</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr data-product-id="{{ product.id }}">
+                    <td>
+                        {% if product.primary_image %}
+                        <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" class="table-thumb">
+                        {% else %}
+                        <div class="table-thumb placeholder">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ product.name }}</strong>
+                        <br><small class="text-muted">SKU: {{ product.sku }}</small>
+                    </td>
+                    <td>{{ product.category.name }}</td>
+                    <td>{{ product.size_display }}</td>
+                    <td>{% if product.price %}${{ product.price }}{% else %}-{% endif %}</td>
+                    <td>
+                        <button class="badge badge-toggle {% if product.is_available %}badge-success{% else %}badge-danger{% endif %}" 
+                                onclick="toggleAvailable({{ product.id }})">
+                            {% if product.is_available %}Available{% else %}Unavailable{% endif %}
+                        </button>
+                    </td>
+                    <td>
+                        <button class="badge badge-toggle {% if product.is_featured %}badge-warning{% else %}badge-secondary{% endif %}"
+                                onclick="toggleFeatured({{ product.id }})">
+                            {% if product.is_featured %}Featured{% else %}Normal{% endif %}
+                        </button>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'catalog:product_detail' product.slug %}" class="btn btn-sm btn-outline" title="View" target="_blank">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:product_edit' product.pk %}" class="btn btn-sm btn-outline" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:product_delete' product.pk %}" class="btn btn-sm btn-danger" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center">
+                        <div class="empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <h3>No products found</h3>
+                            <p>Get started by adding your first product</p>
+                            <a href="{% url 'admin_panel:product_add' %}" class="btn btn-primary">Add Product</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFeatured(productId) {
+    fetch(`/admin/products/${productId}/toggle-featured/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken'),
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function toggleAvailable(productId) {
+    fetch(`/admin/products/${productId}/toggle-available/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken'),
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

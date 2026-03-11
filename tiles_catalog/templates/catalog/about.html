@@ -1,0 +1,110 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}About Us - Glowall{% endblock %}
+
+{% block content %}
+<section class="page-header about-header">
+    <div class="container">
+        <h1 class="page-title">About Us</h1>
+        <nav class="breadcrumb">
+            <a href="{% url 'catalog:home' %}">Home</a>
+            <span>/</span>
+            <span>About</span>
+        </nav>
+    </div>
+</section>
+
+<section class="about-section">
+    <div class="container">
+        <div class="about-intro">
+            <h2>Your Premier Destination for Premium Tiles & Marble</h2>
+            <p>For over two decades, Glowall has been the trusted name in premium tiles, marble, granite, and natural stone. Our commitment to quality, exceptional customer service, and an unparalleled selection has made us the go-to destination for homeowners, designers, and contractors alike.</p>
+        </div>
+        
+        <div class="about-story">
+            <div class="story-content">
+                <h3>Our Story</h3>
+                <p>Founded in 2003, Glowall began as a small family-owned tile shop with a simple mission: to bring the world's finest tiles and marble to our local community. What started as a modest showroom has grown into a premier destination for discerning customers seeking quality materials for their homes and commercial projects.</p>
+                <p>Today, we proudly showcase thousands of products sourced from the finest quarries and manufacturers across Italy, Spain, Turkey, India, and beyond. Our curated collection reflects our passion for quality and our commitment to offering only the best to our customers.</p>
+            </div>
+            <div class="story-image">
+                <div class="story-placeholder">
+                    <i class="fas fa-building"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="values-section">
+            <h3>Our Values</h3>
+            <div class="values-grid">
+                <div class="value-item">
+                    <div class="value-icon">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <h4>Quality First</h4>
+                    <p>We source only the highest quality materials from trusted suppliers worldwide, ensuring every product meets our rigorous standards.</p>
+                </div>
+                <div class="value-item">
+                    <div class="value-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h4>Customer Focus</h4>
+                    <p>Your satisfaction is our priority. Our experienced team is dedicated to helping you find the perfect materials for your project.</p>
+                </div>
+                <div class="value-item">
+                    <div class="value-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h4>Sustainability</h4>
+                    <p>We're committed to responsible sourcing and work with suppliers who share our values for environmental stewardship.</p>
+                </div>
+                <div class="value-item">
+                    <div class="value-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h4>Innovation</h4>
+                    <p>We continuously update our collection with the latest designs and technologies in the tile and stone industry.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-section">
+            <div class="stat-item">
+                <span class="stat-number">20+</span>
+                <span class="stat-label">Years Experience</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">10,000+</span>
+                <span class="stat-label">Products</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">50,000+</span>
+                <span class="stat-label">Happy Customers</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">100+</span>
+                <span class="stat-label">Brands</span>
+            </div>
+        </div>
+        
+        <div class="team-section">
+            <h3>Our Team</h3>
+            <p>Our knowledgeable team brings decades of combined experience in the tile and stone industry. From design consultation to technical advice, we're here to support you at every step of your project.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2 class="cta-title">Visit Our Showroom</h2>
+            <p class="cta-desc">Experience our collection in person</p>
+            <div class="cta-buttons">
+                <a href="{% url 'catalog:contact' %}" class="btn btn-white">Contact Us</a>
+                <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-white">Browse Products</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

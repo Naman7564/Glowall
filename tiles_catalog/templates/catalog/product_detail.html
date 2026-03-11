@@ -1,0 +1,169 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Glowall{% endblock %}
+{% block meta_description %}{{ product.description|truncatewords:30 }}{% endblock %}
+
+{% block content %}
+<section class="product-detail">
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="{% url 'catalog:home' %}">Home</a>
+            <span>/</span>
+            <a href="{% url 'catalog:product_list' %}">Products</a>
+            <span>/</span>
+            <a href="{% url 'catalog:category_detail' product.category.slug %}">{{ product.category.name }}</a>
+            <span>/</span>
+            <span>{{ product.name }}</span>
+        </nav>
+        
+        <div class="product-detail-grid">
+            <!-- Product Images -->
+            <div class="product-gallery">
+                <div class="gallery-main">
+                    {% if product.primary_image %}
+                    <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" id="mainImage">
+                    {% else %}
+                    <div class="product-placeholder large">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if images.count > 1 %}
+                <div class="gallery-thumbs">
+                    {% for image in images %}
+                    <button class="thumb-btn {% if forloop.first %}active{% endif %}" onclick="changeImage('{{ image.image.url }}')">
+                        <img src="{{ image.image.url }}" alt="{{ product.name }} - Image {{ forloop.counter }}">
+                    </button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Product Info -->
+            <div class="product-info-detail">
+                <span class="product-category-badge">{{ product.category.name }}</span>
+                <h1 class="product-title">{{ product.name }}</h1>
+                
+                {% if product.sku %}
+                <p class="product-sku">SKU: {{ product.sku }}</p>
+                {% endif %}
+                
+                {% if product.price %}
+                <div class="product-price-large">
+                    <span class="price">${{ product.price }}</span>
+                    <span class="price-note">per unit</span>
+                </div>
+                {% endif %}
+                
+                <div class="product-status">
+                    {% if product.is_available %}
+                    <span class="status available"><i class="fas fa-check-circle"></i> In Stock</span>
+                    {% else %}
+                    <span class="status unavailable"><i class="fas fa-times-circle"></i> Out of Stock</span>
+                    {% endif %}
+                </div>
+                
+                <div class="product-description">
+                    <h3>Description</h3>
+                    <p>{{ product.description|linebreaks }}</p>
+                </div>
+                
+                <!-- Specifications -->
+                <div class="product-specs">
+                    <h3>Specifications</h3>
+                    <table class="specs-table">
+                        <tr>
+                            <th>Category</th>
+                            <td>{{ product.category.name }}</td>
+                        </tr>
+                        {% if product.material_type %}
+                        <tr>
+                            <th>Material Type</th>
+                            <td>{{ product.material_type.name }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>Size</th>
+                            <td>{{ product.size_display }}</td>
+                        </tr>
+                        {% if product.thickness_mm %}
+                        <tr>
+                            <th>Thickness</th>
+                            <td>{{ product.thickness_mm }} mm</td>
+                        </tr>
+                        {% endif %}
+                        {% if product.finish %}
+                        <tr>
+                            <th>Finish</th>
+                            <td>{{ product.finish.name }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if product.color %}
+                        <tr>
+                            <th>Color</th>
+                            <td>{{ product.color.name }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+                
+                <!-- Actions -->
+                <div class="product-actions">
+                    <a href="{% url 'catalog:contact' %}?subject=Inquiry about {{ product.name }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-envelope"></i> Request Quote
+                    </a>
+                    <a href="tel:+15551234567" class="btn btn-outline btn-lg">
+                        <i class="fas fa-phone"></i> Call Now
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Related Products -->
+        {% if related_products %}
+        <section class="related-products">
+            <h2 class="section-title">Related Products</h2>
+            <div class="products-grid">
+                {% for related in related_products %}
+                <article class="product-card">
+                    <a href="{% url 'catalog:product_detail' related.slug %}" class="product-link">
+                        <div class="product-image">
+                            {% if related.primary_image %}
+                            <img src="{{ related.primary_image.image.url }}" alt="{{ related.name }}" loading="lazy">
+                            {% else %}
+                            <div class="product-placeholder">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            {% endif %}
+                            <div class="product-overlay">
+                                <span class="view-btn">View Details</span>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <span class="product-category">{{ related.category.name }}</span>
+                            <h3 class="product-name">{{ related.name }}</h3>
+                            <p class="product-size">{{ related.size_display }}</p>
+                            {% if related.price %}
+                            <p class="product-price">${{ related.price }}</p>
+                            {% endif %}
+                        </div>
+                    </a>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changeImage(src) {
+    document.getElementById('mainImage').src = src;
+    document.querySelectorAll('.thumb-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard - Glowall{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Admin CSS -->
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+</head>
+<body class="admin-body">
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="{% url 'catalog:home' %}" class="sidebar-logo">
+                    <span class="logo-text">Glowall</span>
+                    <span class="logo-sub">Admin Panel</span>
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="{% url 'admin_panel:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item has-submenu {% if 'product' in request.resolver_match.url_name %}open{% endif %}">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-box"></i>
+                            <span>Products</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="{% url 'admin_panel:product_list' %}" class="{% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">All Products</a></li>
+                            <li><a href="{% url 'admin_panel:product_add' %}" class="{% if request.resolver_match.url_name == 'product_add' %}active{% endif %}">Add Product</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item has-submenu {% if 'categor' in request.resolver_match.url_name %}open{% endif %}">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-folder"></i>
+                            <span>Categories</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="{% url 'admin_panel:category_list' %}" class="{% if request.resolver_match.url_name == 'category_list' %}active{% endif %}">All Categories</a></li>
+                            <li><a href="{% url 'admin_panel:category_add' %}" class="{% if request.resolver_match.url_name == 'category_add' %}active{% endif %}">Add Category</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item has-submenu {% if 'material' in request.resolver_match.url_name %}open{% endif %}">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-cubes"></i>
+                            <span>Materials</span>
+                            <i class="fas fa-chevron-down submenu-icon"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="{% url 'admin_panel:material_list' %}">Material Types</a></li>
+                            <li><a href="{% url 'admin_panel:finish_list' %}">Finishes</a></li>
+                            <li><a href="{% url 'admin_panel:color_list' %}">Colors</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a href="{% url 'admin_panel:message_list' %}" class="nav-link {% if request.resolver_match.url_name == 'message_list' or request.resolver_match.url_name == 'message_detail' %}active{% endif %}">
+                            <i class="fas fa-envelope"></i>
+                            <span>Messages</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="{% url 'catalog:home' %}" class="nav-link">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>View Site</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <button class="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="topbar-right">
+                    <div class="user-menu">
+                        <button class="user-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i>
+                            <span>{{ user.username }}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-dropdown">
+                            <form method="post" action="{% url 'admin_panel:logout' %}" class="logout-form">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-action logout-btn">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Page Content -->
+            <div class="page-content">
+                <!-- Messages -->
+                {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                        <button class="alert-close">&times;</button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    
+    <script src="{% static 'js/admin.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

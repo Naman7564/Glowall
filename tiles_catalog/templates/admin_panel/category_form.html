@@ -1,0 +1,67 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}{{ title }} - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{{ title }}</h1>
+    <a href="{% url 'admin_panel:category_list' %}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Back to Categories
+    </a>
+</div>
+
+<div class="form-card">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <div class="form-group">
+                <label for="id_name">Category Name *</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <span class="error">{{ form.name.errors.0 }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_slug">Slug (leave blank for auto-generation)</label>
+                {{ form.slug }}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_parent">Parent Category</label>
+                {{ form.parent }}
+                <small class="help-text">Leave blank for top-level category</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_description">Description</label>
+                {{ form.description }}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_image">Category Image</label>
+                {{ form.image }}
+                {% if category.image %}
+                <div class="current-image">
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                    {{ form.is_active }} Active
+                </label>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-save"></i> Save Category
+            </button>
+            <a href="{% url 'admin_panel:category_list' %}" class="btn btn-outline btn-lg">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
