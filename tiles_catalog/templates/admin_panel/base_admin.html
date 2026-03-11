@@ -102,18 +102,32 @@
                 <div class="topbar-right">
                     <div class="user-menu">
                         <button class="user-btn" type="button" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-user-circle"></i>
-                            <span>{{ user.username }}</span>
-                            <i class="fas fa-chevron-down"></i>
+                            <div class="user-avatar">
+                                <span>{{ user.username|slice:":1"|upper }}</span>
+                            </div>
+                            <span class="user-name">{{ user.username }}</span>
+                            <i class="fas fa-chevron-down dropdown-caret"></i>
                         </button>
                         <div class="user-dropdown">
-                            <form method="post" action="{% url 'admin_panel:logout' %}" class="logout-form">
-                                {% csrf_token %}
-                                <button type="submit" class="dropdown-action logout-btn">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    <span>Logout</span>
-                                </button>
-                            </form>
+                            <div class="dropdown-header">
+                                <div class="dropdown-avatar">
+                                    <span>{{ user.username|slice:":1"|upper }}</span>
+                                </div>
+                                <div class="dropdown-user-info">
+                                    <span class="dropdown-username">{{ user.username }}</span>
+                                    <span class="dropdown-role">Administrator</span>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-content">
+                                <form method="post" action="{% url 'admin_panel:logout' %}" class="logout-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item logout-btn">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        <span>Log out</span>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
