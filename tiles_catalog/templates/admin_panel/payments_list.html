@@ -1,0 +1,107 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Payments - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title"><i class="fas fa-credit-card" style="color:#f5821f;margin-right:10px;"></i>Cashfree Payments
+    </h1>
+</div>
+
+{% if error_msg %}
+<div class="alert alert-warning"
+    style="background:#2d2250;border-left:4px solid #f5821f;padding:16px 20px;border-radius:8px;margin-bottom:24px;color:#ccc;">
+    <i class="fas fa-exclamation-triangle" style="color:#f5a623;margin-right:8px;"></i>
+    {{ error_msg }}
+    <p style="margin-top:8px;font-size:13px;">To see real payments, add your <code>CASHFREE_APP_ID</code> and
+        <code>CASHFREE_SECRET_KEY</code> in <code>.env</code> or <code>settings.py</code>.</p>
+</div>
+{% endif %}
+
+<!-- Payment Summary Stats -->
+<div class="stats-grid" style="margin-bottom:28px;">
+    <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#f5821f,#e67e22);">
+            <i class="fas fa-receipt"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">{{ payments|length }}</span>
+            <span class="stat-label">Total Orders</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#4CAF50,#1abc9c);">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">{{ paid_count }}</span>
+            <span class="stat-label">Paid</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#f5a623,#e67e22);">
+            <i class="fas fa-rupee-sign"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">₹{{ total_revenue|floatformat:2 }}</span>
+            <span class="stat-label">Total Revenue</span>
+        </div>
+    </div>
+</div>
+
+<!-- Payments Table -->
+<div class="dashboard-card" style="margin-top:0;">
+    <div class="card-header">
+        <h2>Cashfree Order Transactions</h2>
+        <span style="font-size:13px;color:#888;">Recent Cashfree orders</span>
+    </div>
+    <div class="card-body" style="padding:0;">
+        {% if payments %}
+        <table class="data-table" style="width:100%;">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer Email</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr>
+                    <td><code style="font-size:12px;color:#aaa;">{{ payment.id|truncatechars:28 }}</code></td>
+                    <td>{{ payment.customer_email }}</td>
+                    <td><strong>₹{{ payment.amount|floatformat:2 }}</strong></td>
+                    <td>{{ payment.currency }}</td>
+                    <td>
+                        {% if payment.status == 'PAID' or payment.status == 'SUCCESS' %}
+                        <span class="badge badge-success"><i class="fas fa-check"
+                                style="margin-right:4px;"></i>Paid</span>
+                        {% elif payment.status == 'ACTIVE' %}
+                        <span class="badge" style="background:#3498db;color:#fff;"><i class="fas fa-spinner"
+                                style="margin-right:4px;"></i>Active</span>
+                        {% elif payment.status == 'EXPIRED' %}
+                        <span class="badge badge-danger"><i class="fas fa-times"
+                                style="margin-right:4px;"></i>Expired</span>
+                        {% else %}
+                        <span class="badge" style="background:#555;color:#ccc;">{{ payment.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size:13px;color:#aaa;">{{ payment.created_dt }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align:center;padding:60px 20px;color:#888;">
+            <i class="fas fa-credit-card"
+                style="font-size:48px;margin-bottom:16px;display:block;color:#f5821f;opacity:0.4;"></i>
+            <p style="font-size:16px;">No payment orders found.</p>
+            <p style="font-size:13px;">Orders will appear here once customers start checking out using Cashfree.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

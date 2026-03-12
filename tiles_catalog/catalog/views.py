@@ -3,8 +3,22 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Count
 from django.contrib import messages
 from django.http import JsonResponse
+from django.conf import settings
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+import uuid
+from cashfree_pg.models.create_order_request import CreateOrderRequest
+from cashfree_pg.models.customer_details import CustomerDetails
+from cashfree_pg.models.order_meta import OrderMeta
+from cashfree_pg.api_client import Cashfree
 from .models import Category, Product, ProductImage, MaterialType, Finish, Color, Contact
 from .forms import ContactForm, ProductSearchForm
+
+# --- Cashfree SDK Setup ---
+Cashfree.XClientId     = settings.CASHFREE_APP_ID
+Cashfree.XClientSecret = settings.CASHFREE_SECRET_KEY
+Cashfree.XEnvironment  = Cashfree.SANDBOX if settings.CASHFREE_ENV == 'sandbox' else Cashfree.PRODUCTION
+Cashfree.XApiVersion   = '2023-08-01'
 
 
 def categories_context(request):
@@ -230,3 +244,72 @@ def api_search(request):
     ).values('name', 'slug', 'category__name')[:10]
     
     return JsonResponse({'results': list(products)})
+
+
+# --- Cashfree Payment Integration ---
+def create_checkout_session(request, product_id):
+    """Create a Cashfree order and redirect user to Cashfree payment page."""
+    product = get_object_or_404(Product, id=product_id, is_available=True)
+
+    if request.method == 'POST':
+        try:
+            domain_url = request.build_absolute_uri('/')[:-1]
+            amount = float(product.price) if product.price else 100.0
+            order_id = f"order_{uuid.uuid4().hex[:12]}"
+
+            customer = CustomerDetails(
+                customer_id=f"cust_{request.user.id if request.user.is_authenticated else 'guest'}_{uuid.uuid4().hex[:6]}",
+                customer_phone='9999999999',  # You can collect this from user
+                customer_email=request.user.email if request.user.is_authenticated else 'guest@example.com',
+                customer_name=request.user.get_full_name() or 'Guest' if request.user.is_authenticated else 'Guest',
+            )
+
+            order_meta = OrderMeta(
+                return_url=domain_url + reverse('catalog:payment_success') + f'?order_id={order_id}',
+            )
+
+            order_request = CreateOrderRequest(
+                order_id=order_id,
+                order_amount=amount,
+                order_currency='INR',
+                customer_details=customer,
+                order_meta=order_meta,
+            )
+
+            response, http_status, _ = Cashfree().PGCreateOrder(
+                x_api_version='2023-08-01',
+                create_order_request=order_request
+            )
+
+            if http_status == 200:
+                payment_session_id = response.payment_session_id
+                # Render the Cashfree JS checkout page
+                return render(request, 'catalog/cashfree_checkout.html', {
+                    'payment_session_id': payment_session_id,
+                    'order_id': order_id,
+                    'product': product,
+                    'cashfree_env': settings.CASHFREE_ENV,
+                })
+            else:
+                messages.error(request, 'Order creation failed. Please try again.')
+                return redirect('catalog:product_detail', slug=product.slug)
+
+        except Exception as e:
+            messages.error(request, f'Payment error: {str(e)}')
+            return redirect('catalog:product_detail', slug=product.slug)
+
+    return redirect('catalog:product_detail', slug=product.slug)
+
+
+def payment_success(request):
+    order_id = request.GET.get('order_id', '')
+    messages.success(request, 'Your payment was successful! Thank you for your order.')
+    return render(request, 'catalog/payment_success.html', {
+        'page_title': 'Payment Successful',
+        'order_id': order_id,
+    })
+
+
+def payment_cancel(request):
+    messages.warning(request, 'Your payment was cancelled.')
+    return render(request, 'catalog/payment_cancel.html', {'page_title': 'Payment Cancelled'})

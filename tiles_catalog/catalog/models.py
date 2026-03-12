@@ -29,7 +29,7 @@ class Category(models.Model):
         return reverse('catalog:category_detail', kwargs={'slug': self.slug})
 
     @property
-    def product_count(self):
+    def get_product_count(self):
         return self.products.filter(is_available=True).count()
 
 

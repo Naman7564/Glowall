@@ -16,7 +16,7 @@
             <span>/</span>
             <span>{{ product.name }}</span>
         </nav>
-        
+
         <div class="product-detail-grid">
             <!-- Product Images -->
             <div class="product-gallery">
@@ -32,30 +32,31 @@
                 {% if images.count > 1 %}
                 <div class="gallery-thumbs">
                     {% for image in images %}
-                    <button class="thumb-btn {% if forloop.first %}active{% endif %}" onclick="changeImage('{{ image.image.url }}')">
+                    <button class="thumb-btn {% if forloop.first %}active{% endif %}"
+                        onclick="changeImage('{{ image.image.url }}')">
                         <img src="{{ image.image.url }}" alt="{{ product.name }} - Image {{ forloop.counter }}">
                     </button>
                     {% endfor %}
                 </div>
                 {% endif %}
             </div>
-            
+
             <!-- Product Info -->
             <div class="product-info-detail">
                 <span class="product-category-badge">{{ product.category.name }}</span>
                 <h1 class="product-title">{{ product.name }}</h1>
-                
+
                 {% if product.sku %}
                 <p class="product-sku">SKU: {{ product.sku }}</p>
                 {% endif %}
-                
+
                 {% if product.price %}
                 <div class="product-price-large">
                     <span class="price">${{ product.price }}</span>
                     <span class="price-note">per unit</span>
                 </div>
                 {% endif %}
-                
+
                 <div class="product-status">
                     {% if product.is_available %}
                     <span class="status available"><i class="fas fa-check-circle"></i> In Stock</span>
@@ -63,12 +64,12 @@
                     <span class="status unavailable"><i class="fas fa-times-circle"></i> Out of Stock</span>
                     {% endif %}
                 </div>
-                
+
                 <div class="product-description">
                     <h3>Description</h3>
                     <p>{{ product.description|linebreaks }}</p>
                 </div>
-                
+
                 <!-- Specifications -->
                 <div class="product-specs">
                     <h3>Specifications</h3>
@@ -107,19 +108,27 @@
                         {% endif %}
                     </table>
                 </div>
-                
+
                 <!-- Actions -->
                 <div class="product-actions">
-                    <a href="{% url 'catalog:contact' %}?subject=Inquiry about {{ product.name }}" class="btn btn-primary btn-lg">
+                    <a href="{% url 'catalog:contact' %}?subject=Inquiry about {{ product.name }}"
+                        class="btn btn-primary btn-lg">
                         <i class="fas fa-envelope"></i> Request Quote
                     </a>
-                    <a href="tel:+15551234567" class="btn btn-outline btn-lg">
-                        <i class="fas fa-phone"></i> Call Now
-                    </a>
+                    {% if product.price and product.is_available %}
+                    <form action="{% url 'catalog:create_checkout_session' product.id %}" method="POST"
+                        style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-lg"
+                            style="background-color:#f5821f; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-size:16px;">
+                            <i class="fas fa-credit-card"></i> Pay with Cashfree
+                        </button>
+                    </form>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        
+
         <!-- Related Products -->
         {% if related_products %}
         <section class="related-products">
@@ -160,10 +169,10 @@
 
 {% block extra_js %}
 <script>
-function changeImage(src) {
-    document.getElementById('mainImage').src = src;
-    document.querySelectorAll('.thumb-btn').forEach(btn => btn.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-}
+    function changeImage(src) {
+        document.getElementById('mainImage').src = src;
+        document.querySelectorAll('.thumb-btn').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
 </script>
 {% endblock %}

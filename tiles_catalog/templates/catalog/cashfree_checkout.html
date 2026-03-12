@@ -1,0 +1,50 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Cashfree Checkout - Glowall{% endblock %}
+
+{% block content %}
+<section style="text-align:center; padding: 80px 20px;">
+    <div class="container">
+        <i class="fas fa-lock" style="font-size:48px;color:#f5821f;margin-bottom:16px;display:block;"></i>
+        <h1 style="margin-bottom:8px;">Secure Checkout</h1>
+        <p style="color:#888;margin-bottom:4px;">Product: <strong>{{ product.name }}</strong></p>
+        <p style="color:#888;margin-bottom:24px;">Amount: <strong>₹{{ product.price }}</strong></p>
+        <p style="color:#aaa;font-size:14px;" id="cf-status">Preparing payment gateway...</p>
+
+        <button id="pay-btn" onclick="startCashfreePay()"
+            style="display:none;background:#f5821f;color:white;border:none;padding:14px 32px;border-radius:8px;font-size:16px;cursor:pointer;margin-top:16px;">
+            <i class="fas fa-credit-card" style="margin-right:8px;"></i> Pay Now with Cashfree
+        </button>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{% if cashfree_env == 'sandbox' %}
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+{% else %}
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+{% endif %}
+
+<script>
+    const cashfree = Cashfree({ mode: "{{ cashfree_env }}" });
+    const paymentSessionId = "{{ payment_session_id }}";
+
+    // Auto-start after a short delay
+    window.onload = function () {
+        document.getElementById('cf-status').textContent = 'Click the button below to complete payment.';
+        document.getElementById('pay-btn').style.display = 'inline-block';
+        // Auto-open after 1 second
+        setTimeout(startCashfreePay, 1000);
+    };
+
+    function startCashfreePay() {
+        document.getElementById('cf-status').textContent = 'Opening payment window...';
+        cashfree.checkout({
+            paymentSessionId: paymentSessionId,
+            redirectTarget: "_self",   // Redirect in same tab after payment
+        });
+    }
+</script>
+{% endblock %}

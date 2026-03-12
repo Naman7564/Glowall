@@ -159,3 +159,9 @@ if not DEBUG:
     X_FRAME_OPTIONS = 'DENY'
     CSRF_COOKIE_SECURE = SECURE_COOKIES
     SESSION_COOKIE_SECURE = SECURE_COOKIES
+
+# Cashfree Payment Gateway Configuration
+CASHFREE_APP_ID     = os.environ.get('CASHFREE_APP_ID', 'your_app_id_here')
+CASHFREE_SECRET_KEY = os.environ.get('CASHFREE_SECRET_KEY', 'your_secret_key_here')
+# 'sandbox' for testing, 'production' for live
+CASHFREE_ENV        = os.environ.get('CASHFREE_ENV', 'sandbox')

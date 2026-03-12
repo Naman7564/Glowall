@@ -11,6 +11,9 @@ urlpatterns = [
     # Dashboard
     path('', views.dashboard, name='dashboard'),
     path('dashboard/', views.dashboard, name='dashboard'),
+
+    # Payments (Stripe)
+    path('payments/', views.payments_list, name='payments_list'),
     
     # Products
     path('products/', views.product_list, name='product_list'),

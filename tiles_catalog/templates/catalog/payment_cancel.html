@@ -1,0 +1,15 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Glowall{% endblock %}
+
+{% block content %}
+<section class="payment-result" style="text-align:center; padding: 100px 20px;">
+    <div class="container">
+        <i class="fas fa-times-circle" style="font-size: 80px; color: #f44336; margin-bottom: 20px;"></i>
+        <h1>Payment Cancelled</h1>
+        <p>Your payment attempt was cancelled or failed. Your card was not charged.</p>
+        <a href="{% url 'catalog:home' %}" class="btn btn-primary" style="margin-top: 20px;">Return to Home</a>
+    </div>
+</section>
+{% endblock %}

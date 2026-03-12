@@ -2,9 +2,13 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login, logout
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+import json
+import datetime
+from django.conf import settings
+from cashfree_pg.api_client import Cashfree
 
 from catalog.models import Product, Category, ProductImage, MaterialType, Finish, Color, Contact
 from .forms import (
@@ -56,25 +60,94 @@ def dashboard(request):
     total_products = Product.objects.count()
     total_categories = Category.objects.count()
     available_products = Product.objects.filter(is_available=True).count()
+    unavailable_products = Product.objects.filter(is_available=False).count()
     featured_products = Product.objects.filter(is_featured=True).count()
     recent_products = Product.objects.select_related('category')[:5]
     unread_messages = Contact.objects.filter(is_read=False).count()
-    
-    # Products by category
+
+    # Products by category (for bar chart)
     categories_with_count = Category.objects.annotate(
         product_count=Count('products')
-    ).order_by('-product_count')[:5]
-    
+    ).order_by('-product_count')[:8]
+
+    # Data for Chart.js - Category labels and counts
+    chart_labels = json.dumps([c.name for c in categories_with_count])
+    chart_data   = json.dumps([c.product_count for c in categories_with_count])
+
+    # Available vs Unavailable (for pie/doughnut chart)
+    avail_chart_data   = json.dumps([available_products, unavailable_products])
+    avail_chart_labels = json.dumps(['Available', 'Unavailable'])
+
     context = {
         'total_products': total_products,
         'total_categories': total_categories,
         'available_products': available_products,
+        'unavailable_products': unavailable_products,
         'featured_products': featured_products,
         'recent_products': recent_products,
         'categories_with_count': categories_with_count,
         'unread_messages': unread_messages,
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
+        'avail_chart_data': avail_chart_data,
+        'avail_chart_labels': avail_chart_labels,
     }
     return render(request, 'admin_panel/dashboard.html', context)
+
+
+@login_required
+@user_passes_test(is_staff)
+def payments_list(request):
+    """Fetch and display Cashfree orders from the Cashfree API."""
+    Cashfree.XClientId     = settings.CASHFREE_APP_ID
+    Cashfree.XClientSecret = settings.CASHFREE_SECRET_KEY
+    Cashfree.XEnvironment  = Cashfree.SANDBOX if settings.CASHFREE_ENV == 'sandbox' else Cashfree.PRODUCTION
+
+    payments   = []
+    error_msg  = None
+
+    try:
+        response, http_status, _ = Cashfree().PGFetchOrders(
+            x_api_version='2023-08-01',
+            x_client_id=settings.CASHFREE_APP_ID,
+            x_client_secret=settings.CASHFREE_SECRET_KEY,
+        )
+        if http_status == 200 and response:
+            for order in (response if isinstance(response, list) else [response]):
+                created_ts = getattr(order, 'created_at', None)
+                created_dt = ''
+                if created_ts:
+                    try:
+                        created_dt = datetime.datetime.strptime(
+                            str(created_ts)[:19], '%Y-%m-%dT%H:%M:%S'
+                        ).strftime('%d %b %Y, %I:%M %p')
+                    except Exception:
+                        created_dt = str(created_ts)
+
+                payments.append({
+                    'id':             getattr(order, 'order_id', 'N/A'),
+                    'status':         getattr(order, 'order_status', 'UNKNOWN'),
+                    'amount':         float(getattr(order, 'order_amount', 0)),
+                    'currency':       getattr(order, 'order_currency', 'INR'),
+                    'customer_email': getattr(getattr(order, 'customer_details', None), 'customer_email', 'N/A'),
+                    'created_dt':     created_dt,
+                })
+    except Exception as e:
+        error_msg = (
+            f'Could not fetch Cashfree payments: {str(e)}. '
+            'Please check your CASHFREE_APP_ID and CASHFREE_SECRET_KEY in settings/.env'
+        )
+
+    total_revenue = sum(p['amount'] for p in payments if p['status'] in ('PAID', 'SUCCESS'))
+    paid_count    = sum(1 for p in payments if p['status'] in ('PAID', 'SUCCESS'))
+
+    context = {
+        'payments':      payments,
+        'total_revenue': total_revenue,
+        'paid_count':    paid_count,
+        'error_msg':     error_msg,
+    }
+    return render(request, 'admin_panel/payments_list.html', context)
 
 
 # Product Management
