@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, MaterialType, Finish, Color, Product, ProductImage, Contact
+from .models import Category, MaterialType, Finish, Product, ProductImage, Contact
 
 
 class ProductImageInline(admin.TabularInline):
@@ -29,16 +29,11 @@ class FinishAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
-@admin.register(Color)
-class ColorAdmin(admin.ModelAdmin):
-    list_display = ['name', 'hex_code']
-
-
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['name', 'category', 'material_type', 'size_display', 'is_available', 'is_featured', 'created_at']
     list_filter = ['category', 'material_type', 'finish', 'is_available', 'is_featured']
-    search_fields = ['name', 'description', 'sku']
+    search_fields = ['name', 'description', 'sku', 'color']
     prepopulated_fields = {'slug': ('name',)}
     inlines = [ProductImageInline]
     list_editable = ['is_available', 'is_featured']

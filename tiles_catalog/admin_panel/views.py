@@ -6,10 +6,10 @@ from django.db.models import Count
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
-from catalog.models import Product, Category, ProductImage, MaterialType, Finish, Color, Contact
+from catalog.models import Product, Category, ProductImage, MaterialType, Finish, Contact
 from .forms import (
     AdminLoginForm, ProductForm, CategoryForm, ProductImageFormSet,
-    MaterialTypeForm, FinishForm, ColorForm
+    MaterialTypeForm, FinishForm
 )
 
 
@@ -408,71 +408,6 @@ def finish_delete(request, pk):
     
     context = {'finish': finish}
     return render(request, 'admin_panel/finish_confirm_delete.html', context)
-
-
-# Color Management
-@login_required
-@user_passes_test(is_staff)
-def color_list(request):
-    """Color list view."""
-    colors = Color.objects.annotate(
-        product_count=Count('products')
-    ).all()
-    context = {'colors': colors}
-    return render(request, 'admin_panel/color_list.html', context)
-
-
-@login_required
-@user_passes_test(is_staff)
-def color_add(request):
-    """Add new color."""
-    if request.method == 'POST':
-        form = ColorForm(request.POST)
-        if form.is_valid():
-            color = form.save()
-            messages.success(request, f'Color "{color.name}" has been created.')
-            return redirect('admin_panel:color_list')
-    else:
-        form = ColorForm()
-    
-    context = {'form': form, 'title': 'Add New Color'}
-    return render(request, 'admin_panel/color_form.html', context)
-
-
-@login_required
-@user_passes_test(is_staff)
-def color_edit(request, pk):
-    """Edit color."""
-    color = get_object_or_404(Color, pk=pk)
-    
-    if request.method == 'POST':
-        form = ColorForm(request.POST, instance=color)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'Color "{color.name}" has been updated.')
-            return redirect('admin_panel:color_list')
-    else:
-        form = ColorForm(instance=color)
-    
-    context = {'form': form, 'color': color, 'title': f'Edit Color: {color.name}'}
-    return render(request, 'admin_panel/color_form.html', context)
-
-
-@login_required
-@user_passes_test(is_staff)
-def color_delete(request, pk):
-    """Delete color."""
-    color = get_object_or_404(Color, pk=pk)
-    
-    if request.method == 'POST':
-        name = color.name
-        color.delete()
-        messages.success(request, f'Color "{name}" has been deleted.')
-        return redirect('admin_panel:color_list')
-    
-    context = {'color': color}
-    return render(request, 'admin_panel/color_confirm_delete.html', context)
-
 
 # Contact Messages
 @login_required

@@ -38,12 +38,6 @@ urlpatterns = [
     path('finishes/<int:pk>/edit/', views.finish_edit, name='finish_edit'),
     path('finishes/<int:pk>/delete/', views.finish_delete, name='finish_delete'),
     
-    # Colors
-    path('colors/', views.color_list, name='color_list'),
-    path('colors/add/', views.color_add, name='color_add'),
-    path('colors/<int:pk>/edit/', views.color_edit, name='color_edit'),
-    path('colors/<int:pk>/delete/', views.color_delete, name='color_delete'),
-    
     # Messages
     path('messages/', views.message_list, name='message_list'),
     path('messages/<int:pk>/', views.message_detail, name='message_detail'),

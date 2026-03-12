@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from catalog.models import Category, MaterialType, Finish, Color
+from catalog.models import Category, MaterialType, Finish
 
 
 class Command(BaseCommand):
@@ -21,24 +21,6 @@ class Command(BaseCommand):
             finish, created = Finish.objects.get_or_create(name=name)
             if created:
                 self.stdout.write(self.style.SUCCESS(f'Created finish: {name}'))
-        
-        # Create Colors
-        colors = [
-            ('White', '#FFFFFF'),
-            ('Black', '#000000'),
-            ('Grey', '#808080'),
-            ('Beige', '#F5F5DC'),
-            ('Brown', '#8B4513'),
-            ('Cream', '#FFFDD0'),
-            ('Blue', '#0000FF'),
-            ('Green', '#008000'),
-            ('Red', '#FF0000'),
-            ('Gold', '#FFD700'),
-        ]
-        for name, hex_code in colors:
-            color, created = Color.objects.get_or_create(name=name, defaults={'hex_code': hex_code})
-            if created:
-                self.stdout.write(self.style.SUCCESS(f'Created color: {name}'))
         
         # Create Categories
         categories_data = {

@@ -138,40 +138,120 @@
         
         <!-- Product Images -->
         <div class="form-section images-section">
-            <h3>Product Images</h3>
+            <div class="images-section-header">
+                <div>
+                    <h3>Product Images</h3>
+                    <p class="images-section-subtitle">Drag to reorder, set a primary image, and add alt text for each upload.</p>
+                </div>
+            </div>
             
             {{ formset.management_form }}
             
-            <div id="images-container">
+            <div id="images-container" class="product-images-grid">
                 {% for image_form in formset %}
-                <div class="image-form-row">
-                    <div class="image-upload">
-                        {{ image_form.image }}
-                        <div class="image-preview"></div>
+                {% if image_form.instance.pk or image_form.image.value or image_form.alt_text.value or image_form.is_primary.value or image_form.errors %}
+                <article class="product-image-card{% if image_form.is_primary.value %} is-primary{% endif %}" data-form-prefix="{{ image_form.prefix }}" draggable="true">
+                    <div class="image-card-toolbar">
+                        <span class="image-card-drag" title="Drag to reorder">
+                            <i class="fas fa-grip-vertical"></i>
+                        </span>
+                        <button type="button" class="image-card-delete" aria-label="Delete image">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>
-                    <div class="image-fields">
-                        {{ image_form.alt_text }}
-                        <label class="checkbox-inline">
-                            {{ image_form.is_primary }} Primary
+
+                    <div class="image-card-preview-shell">
+                        <label class="image-card-preview image-drop-zone">
+                            {{ image_form.image }}
+                            <span class="image-card-placeholder{% if image_form.instance.image %} is-hidden{% endif %}">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <strong>Drop image here</strong>
+                                <span>or click to browse</span>
+                            </span>
+                            <img
+                                class="image-card-preview-image{% if not image_form.instance.image %} is-hidden{% endif %}"
+                                src="{% if image_form.instance.image %}{{ image_form.instance.image.url }}{% endif %}"
+                                alt="">
                         </label>
+                        <span class="image-primary-badge">Primary</span>
+                    </div>
+
+                    <div class="image-card-body">
+                        <div class="form-group">
+                            <label for="{{ image_form.alt_text.id_for_label }}">Alt text</label>
+                            {{ image_form.alt_text }}
+                        </div>
+                        <label class="image-primary-toggle">
+                            {{ image_form.is_primary }}
+                            <span>Primary image</span>
+                        </label>
+                    </div>
+
+                    <div class="image-form-meta">
                         {{ image_form.order }}
-                        {% if image_form.id.value %}
-                        <input type="hidden" name="{{ image_form.prefix }}-id" value="{{ image_form.id.value }}">
+                        {{ image_form.id }}
+                        {% if formset.can_delete %}
+                        {{ image_form.DELETE }}
                         {% endif %}
                     </div>
-                    {% if formset.can_delete %}
-                    <label class="delete-checkbox">
-                        {{ image_form.DELETE }} Delete
+                </article>
+                {% endif %}
+                {% endfor %}
+
+                <button type="button" class="image-upload-card" id="image-upload-card">
+                    <span class="image-upload-card-icon">
+                        <i class="fas fa-images"></i>
+                    </span>
+                    <strong>Upload product images</strong>
+                    <span>Drag and drop files here or click to browse</span>
+                </button>
+            </div>
+        </div>
+
+        <template id="image-card-template">
+            <article class="product-image-card" data-form-prefix="__prefix__" draggable="true">
+                <div class="image-card-toolbar">
+                    <span class="image-card-drag" title="Drag to reorder">
+                        <i class="fas fa-grip-vertical"></i>
+                    </span>
+                    <button type="button" class="image-card-delete" aria-label="Delete image">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+
+                <div class="image-card-preview-shell">
+                    <label class="image-card-preview image-drop-zone">
+                        {{ formset.empty_form.image }}
+                        <span class="image-card-placeholder">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <strong>Drop image here</strong>
+                            <span>or click to browse</span>
+                        </span>
+                        <img class="image-card-preview-image is-hidden" src="" alt="">
                     </label>
+                    <span class="image-primary-badge">Primary</span>
+                </div>
+
+                <div class="image-card-body">
+                    <div class="form-group">
+                        <label for="{{ formset.empty_form.alt_text.id_for_label }}">Alt text</label>
+                        {{ formset.empty_form.alt_text }}
+                    </div>
+                    <label class="image-primary-toggle">
+                        {{ formset.empty_form.is_primary }}
+                        <span>Primary image</span>
+                    </label>
+                </div>
+
+                <div class="image-form-meta">
+                    {{ formset.empty_form.order }}
+                    {{ formset.empty_form.id }}
+                    {% if formset.can_delete %}
+                    {{ formset.empty_form.DELETE }}
                     {% endif %}
                 </div>
-                {% endfor %}
-            </div>
-            
-            <button type="button" class="btn btn-outline add-image-btn">
-                <i class="fas fa-plus"></i> Add Another Image
-            </button>
-        </div>
+            </article>
+        </template>
         
         <div class="form-actions">
             <button type="submit" class="btn btn-primary btn-lg">
@@ -185,38 +265,248 @@
 
 {% block extra_js %}
 <script>
-// Image preview on file select
-document.querySelectorAll('input[type="file"]').forEach(input => {
-    input.addEventListener('change', function(e) {
-        const preview = this.parentElement.querySelector('.image-preview');
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                preview.innerHTML = '<img src="' + e.target.result + '">';
-            };
-            reader.readAsDataURL(this.files[0]);
+document.addEventListener('DOMContentLoaded', () => {
+    const imageContainer = document.getElementById('images-container');
+    const uploadCard = document.getElementById('image-upload-card');
+    const template = document.getElementById('image-card-template');
+    const totalFormsInput = document.querySelector('[name="images-TOTAL_FORMS"]');
+    let draggedCard = null;
+
+    function visibleCards() {
+        return Array.from(imageContainer.querySelectorAll('.product-image-card')).filter(card => !card.classList.contains('is-deleted'));
+    }
+
+    function syncOrders() {
+        visibleCards().forEach((card, index) => {
+            const orderInput = card.querySelector('input[name$="-order"]');
+            if (orderInput) {
+                orderInput.value = index;
+            }
+        });
+    }
+
+    function ensurePrimaryCard() {
+        const cards = visibleCards();
+        const checkedCards = cards.filter(card => card.querySelector('input[name$="-is_primary"]')?.checked);
+
+        if (!checkedCards.length && cards.length) {
+            const firstPrimary = cards[0].querySelector('input[name$="-is_primary"]');
+            if (firstPrimary) {
+                firstPrimary.checked = true;
+            }
+        }
+
+        cards.forEach(card => {
+            const primaryInput = card.querySelector('input[name$="-is_primary"]');
+            card.classList.toggle('is-primary', Boolean(primaryInput?.checked));
+        });
+    }
+
+    function setCardPreview(card, file) {
+        const image = card.querySelector('.image-card-preview-image');
+        const placeholder = card.querySelector('.image-card-placeholder');
+
+        if (!file || !file.type.startsWith('image/')) {
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = event => {
+            image.src = event.target.result;
+            image.classList.remove('is-hidden');
+            placeholder.classList.add('is-hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function assignFileToInput(input, file) {
+        const transfer = new DataTransfer();
+        transfer.items.add(file);
+        input.files = transfer.files;
+    }
+
+    function markCardDeleted(card) {
+        const deleteInput = card.querySelector('input[name$="-DELETE"]');
+        const primaryInput = card.querySelector('input[name$="-is_primary"]');
+
+        if (deleteInput) {
+            deleteInput.checked = true;
+        }
+        if (primaryInput) {
+            primaryInput.checked = false;
+        }
+
+        card.classList.add('is-deleted');
+        card.hidden = true;
+        syncOrders();
+        ensurePrimaryCard();
+    }
+
+    function bindDropZone(zone, fileInput, card) {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            zone.addEventListener(eventName, event => {
+                event.preventDefault();
+                event.stopPropagation();
+            });
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            zone.addEventListener(eventName, () => zone.classList.add('is-dragover'));
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            zone.addEventListener(eventName, () => zone.classList.remove('is-dragover'));
+        });
+
+        zone.addEventListener('drop', event => {
+            const file = event.dataTransfer.files[0];
+            if (!file) {
+                return;
+            }
+            assignFileToInput(fileInput, file);
+            setCardPreview(card, file);
+            ensurePrimaryCard();
+        });
+    }
+
+    function initImageCard(card) {
+        const fileInput = card.querySelector('input[type="file"]');
+        const primaryInput = card.querySelector('input[name$="-is_primary"]');
+        const deleteButton = card.querySelector('.image-card-delete');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files?.[0];
+                if (file) {
+                    setCardPreview(card, file);
+                    ensurePrimaryCard();
+                }
+            });
+
+            bindDropZone(card.querySelector('.image-drop-zone'), fileInput, card);
+        }
+
+        if (primaryInput) {
+            primaryInput.addEventListener('change', () => {
+                if (primaryInput.checked) {
+                    visibleCards().forEach(otherCard => {
+                        if (otherCard !== card) {
+                            const otherPrimary = otherCard.querySelector('input[name$="-is_primary"]');
+                            if (otherPrimary) {
+                                otherPrimary.checked = false;
+                            }
+                        }
+                    });
+                }
+                ensurePrimaryCard();
+            });
+        }
+
+        deleteButton?.addEventListener('click', () => markCardDeleted(card));
+
+        card.addEventListener('dragstart', event => {
+            if (event.target.closest('input, textarea, button, label')) {
+                event.preventDefault();
+                return;
+            }
+            draggedCard = card;
+            card.classList.add('is-dragging');
+        });
+
+        card.addEventListener('dragend', () => {
+            draggedCard?.classList.remove('is-dragging');
+            draggedCard = null;
+            syncOrders();
+        });
+
+        card.addEventListener('dragover', event => {
+            event.preventDefault();
+            if (!draggedCard || draggedCard === card || card.classList.contains('is-deleted')) {
+                return;
+            }
+
+            const cardRect = card.getBoundingClientRect();
+            const insertAfter = event.clientY > cardRect.top + (cardRect.height / 2);
+            if (insertAfter) {
+                imageContainer.insertBefore(draggedCard, card.nextElementSibling === uploadCard ? uploadCard : card.nextElementSibling);
+            } else {
+                imageContainer.insertBefore(draggedCard, card);
+            }
+        });
+    }
+
+    function createImageCard(file = null) {
+        const index = Number(totalFormsInput.value);
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = template.innerHTML.replaceAll('__prefix__', index);
+        const card = wrapper.firstElementChild;
+
+        imageContainer.insertBefore(card, uploadCard);
+        totalFormsInput.value = index + 1;
+        initImageCard(card);
+
+        if (file) {
+            const fileInput = card.querySelector('input[type="file"]');
+            assignFileToInput(fileInput, file);
+            setCardPreview(card, file);
+        }
+
+        syncOrders();
+        ensurePrimaryCard();
+        return card;
+    }
+
+    function addFiles(files) {
+        Array.from(files)
+            .filter(file => file.type.startsWith('image/'))
+            .forEach(file => createImageCard(file));
+    }
+
+    const uploadInput = document.createElement('input');
+    uploadInput.type = 'file';
+    uploadInput.accept = 'image/*';
+    uploadInput.multiple = true;
+    uploadInput.hidden = true;
+    uploadCard.appendChild(uploadInput);
+
+    uploadCard.addEventListener('click', event => {
+        if (event.target === uploadInput) {
+            return;
+        }
+        uploadInput.click();
+    });
+
+    uploadInput.addEventListener('change', () => {
+        if (uploadInput.files?.length) {
+            addFiles(uploadInput.files);
+            uploadInput.value = '';
         }
     });
-});
 
-// Add more image forms
-let imageFormCount = {{ formset.total_form_count }};
-const imageContainer = document.getElementById('images-container');
-const addImageBtn = document.querySelector('.add-image-btn');
-
-addImageBtn.addEventListener('click', function() {
-    const newForm = document.querySelector('.image-form-row').cloneNode(true);
-    newForm.innerHTML = newForm.innerHTML.replace(/__prefix__/g, imageFormCount);
-    imageContainer.appendChild(newForm);
-    imageFormCount++;
-    document.querySelector('[name="images-TOTAL_FORMS"]').value = imageFormCount;
-});
-
-// Collapsible sections
-document.querySelectorAll('.section-toggle').forEach(toggle => {
-    toggle.addEventListener('click', function() {
-        this.parentElement.classList.toggle('collapsed');
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadCard.addEventListener(eventName, event => {
+            event.preventDefault();
+            event.stopPropagation();
+        });
     });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadCard.addEventListener(eventName, () => uploadCard.classList.add('is-dragover'));
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadCard.addEventListener(eventName, () => uploadCard.classList.remove('is-dragover'));
+    });
+
+    uploadCard.addEventListener('drop', event => {
+        if (event.dataTransfer.files?.length) {
+            addFiles(event.dataTransfer.files);
+        }
+    });
+
+    imageContainer.querySelectorAll('.product-image-card').forEach(initImageCard);
+    syncOrders();
+    ensurePrimaryCard();
 });
 </script>
 {% endblock %}

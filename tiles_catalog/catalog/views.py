@@ -3,20 +3,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Count
 from django.contrib import messages
 from django.http import JsonResponse
-from .models import Category, Product, ProductImage, MaterialType, Finish, Color, Contact
+from .models import Category, Product, ProductImage, MaterialType, Finish, Contact
 from .forms import ContactForm, ProductSearchForm
-
-
-def categories_context(request):
-    """Context processor to add categories to all templates."""
-    return {
-        'all_categories': Category.objects.filter(is_active=True).annotate(
-            available_product_count=Count('products', filter=Q(products__is_available=True))
-        ),
-        'all_materials': MaterialType.objects.all(),
-        'all_finishes': Finish.objects.all(),
-        'all_colors': Color.objects.all(),
-    }
 
 
 def home(request):
@@ -42,7 +30,7 @@ def home(request):
 
 def product_list(request):
     """Product listing with filters and search."""
-    products = Product.objects.filter(is_available=True).select_related('category', 'material_type', 'finish', 'color')
+    products = Product.objects.filter(is_available=True).select_related('category', 'material_type', 'finish')
     
     # Search
     search_query = request.GET.get('q', '')
@@ -72,7 +60,7 @@ def product_list(request):
     # Filter by color
     color_name = request.GET.get('color', '')
     if color_name:
-        products = products.filter(color__name__icontains=color_name)
+        products = products.filter(color__icontains=color_name)
     
     # Filter by availability
     availability = request.GET.get('availability', '')
@@ -105,7 +93,6 @@ def product_list(request):
         'current_category': current_category,
         'current_material': material_slug,
         'current_finish': finish_slug,
-        'current_color': color_name,
         'current_sort': sort,
         'page_title': 'Product Catalog',
     }
@@ -150,7 +137,7 @@ def category_detail(request, slug):
 def product_detail(request, slug):
     """Product detail view."""
     product = get_object_or_404(
-        Product.objects.select_related('category', 'material_type', 'finish', 'color'),
+        Product.objects.select_related('category', 'material_type', 'finish'),
         slug=slug, 
         is_available=True
     )

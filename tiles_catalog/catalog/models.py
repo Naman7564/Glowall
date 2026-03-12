@@ -68,18 +68,6 @@ class Finish(models.Model):
         return self.name
 
 
-class Color(models.Model):
-    """Color options for products."""
-    name = models.CharField(max_length=50, unique=True)
-    hex_code = models.CharField(max_length=7, blank=True, help_text='Hex color code, e.g., #FFFFFF')
-
-    class Meta:
-        ordering = ['name']
-
-    def __str__(self):
-        return self.name
-
-
 class Product(models.Model):
     """Main product model for tiles and marble."""
     name = models.CharField(max_length=200)
@@ -87,7 +75,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     material_type = models.ForeignKey(MaterialType, on_delete=models.SET_NULL, null=True, related_name='products')
     finish = models.ForeignKey(Finish, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
-    color = models.ForeignKey(Color, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
+    color = models.CharField(max_length=100, blank=True, help_text='Enter a color name manually')
     
     # Size specifications
     length_mm = models.PositiveIntegerField(help_text='Length in millimeters')

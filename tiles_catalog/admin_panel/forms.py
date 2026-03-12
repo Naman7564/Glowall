@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
-from .models import Product, Category, ProductImage, MaterialType, Finish, Color
+from .models import Product, Category, ProductImage, MaterialType, Finish
 
 
 class AdminLoginForm(AuthenticationForm):
@@ -71,8 +71,9 @@ class ProductForm(forms.ModelForm):
             'finish': forms.Select(attrs={
                 'class': 'form-control'
             }),
-            'color': forms.Select(attrs={
-                'class': 'form-control'
+            'color': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g. White, Beige Marble, Dark Grey'
             }),
             'length_mm': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -153,27 +154,6 @@ class FinishForm(forms.ModelForm):
                 'placeholder': 'Finish Name'
             }),
         }
-
-
-class ColorForm(forms.ModelForm):
-    """Form for adding/editing colors."""
-    
-    class Meta:
-        model = Color
-        fields = ['name', 'hex_code']
-        widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Color Name'
-            }),
-            'hex_code': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': '#FFFFFF',
-                'type': 'color'
-            }),
-        }
-
-
 # Formset for multiple images
 ProductImageFormSet = forms.inlineformset_factory(
     Product,
