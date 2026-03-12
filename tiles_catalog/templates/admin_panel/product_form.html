@@ -10,130 +10,262 @@
     </a>
 </div>
 
-<div class="form-card">
-    <form method="post" enctype="multipart/form-data" class="product-form">
+<div class="form-card product-form-shell">
+    <form method="post" enctype="multipart/form-data" class="product-form product-dashboard-form" novalidate>
         {% csrf_token %}
-        
-        <div class="form-grid">
-            <!-- Basic Info -->
-            <div class="form-section">
-                <h3>Basic Information</h3>
-                
-                <div class="form-group">
-                    <label for="id_name">Product Name *</label>
-                    {{ form.name }}
-                    {% if form.name.errors %}
-                    <span class="error">{{ form.name.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <div class="form-group">
-                    <label for="id_slug">Slug (leave blank for auto-generation)</label>
-                    {{ form.slug }}
-                    {% if form.slug.errors %}
-                    <span class="error">{{ form.slug.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <div class="form-group">
-                    <label for="id_category">Category *</label>
-                    {{ form.category }}
-                    {% if form.category.errors %}
-                    <span class="error">{{ form.category.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                
-                <div class="form-group">
-                    <label for="id_material_type">Material Type</label>
-                    {{ form.material_type }}
-                </div>
-                
-                <div class="form-group">
-                    <label for="id_description">Description *</label>
-                    {{ form.description }}
-                    {% if form.description.errors %}
-                    <span class="error">{{ form.description.errors.0 }}</span>
-                    {% endif %}
-                </div>
+
+        {% if form.non_field_errors %}
+        <div class="form-errors-banner" role="alert">
+            <i class="fas fa-circle-exclamation"></i>
+            <div>
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
             </div>
-            
-            <!-- Specifications -->
-            <div class="form-section">
-                <h3>Specifications</h3>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="id_length_mm">Length (mm) *</label>
-                        {{ form.length_mm }}
-                        {% if form.length_mm.errors %}
-                        <span class="error">{{ form.length_mm.errors.0 }}</span>
-                        {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="product-layout-grid">
+            <div class="product-layout-main">
+                <section class="admin-form-card form-section">
+                    <div class="admin-form-card-header">
+                        <div class="section-heading">
+                            <span class="section-icon product">
+                                <i class="fas fa-box-open"></i>
+                            </span>
+                            <div>
+                                <h3>Product Information</h3>
+                                <p>Core details customers and staff use to identify this product.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="id_width_mm">Width (mm) *</label>
-                        {{ form.width_mm }}
-                        {% if form.width_mm.errors %}
-                        <span class="error">{{ form.width_mm.errors.0 }}</span>
-                        {% endif %}
+
+                    <div class="admin-form-card-body">
+                        <div class="form-group">
+                            <label for="id_name">Product Name <span class="required-indicator">*</span></label>
+                            <div class="field-shell">
+                                <span class="field-icon"><i class="fas fa-tag"></i></span>
+                                {{ form.name }}
+                            </div>
+                            {% if form.name.errors %}
+                            <span class="error">{{ form.name.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_slug">Slug</label>
+                            <div class="field-shell">
+                                <span class="field-icon"><i class="fas fa-link"></i></span>
+                                {{ form.slug }}
+                            </div>
+                            <span class="field-hint">Leave blank to generate the URL slug automatically.</span>
+                            {% if form.slug.errors %}
+                            <span class="error">{{ form.slug.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_category">Category <span class="required-indicator">*</span></label>
+                            <div class="field-shell">
+                                <span class="field-icon"><i class="fas fa-folder-open"></i></span>
+                                {{ form.category }}
+                            </div>
+                            {% if form.category.errors %}
+                            <span class="error">{{ form.category.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_material_type">Material Type</label>
+                            <div class="field-shell">
+                                <span class="field-icon"><i class="fas fa-cubes"></i></span>
+                                {{ form.material_type }}
+                            </div>
+                            {% if form.material_type.errors %}
+                            <span class="error">{{ form.material_type.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_description">Description <span class="required-indicator">*</span></label>
+                            <div class="field-shell field-shell-textarea">
+                                <span class="field-icon"><i class="fas fa-align-left"></i></span>
+                                {{ form.description }}
+                            </div>
+                            {% if form.description.errors %}
+                            <span class="error">{{ form.description.errors.0 }}</span>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="id_thickness_mm">Thickness (mm)</label>
-                    {{ form.thickness_mm }}
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="id_finish">Finish</label>
-                        {{ form.finish }}
+                </section>
+
+                <section class="admin-form-card form-section">
+                    <div class="admin-form-card-header">
+                        <div class="section-heading">
+                            <span class="section-icon specs">
+                                <i class="fas fa-ruler-combined"></i>
+                            </span>
+                            <div>
+                                <h3>Specifications</h3>
+                                <p>Technical product attributes used in the catalog and filters.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="id_color">Color</label>
-                        {{ form.color }}
+
+                    <div class="admin-form-card-body">
+                        <div class="form-row form-row-compact">
+                            <div class="form-group">
+                                <label for="id_length_mm">Length (mm) <span class="required-indicator">*</span></label>
+                                <div class="field-shell">
+                                    <span class="field-icon"><i class="fas fa-arrows-left-right"></i></span>
+                                    {{ form.length_mm }}
+                                </div>
+                                {% if form.length_mm.errors %}
+                                <span class="error">{{ form.length_mm.errors.0 }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_width_mm">Width (mm) <span class="required-indicator">*</span></label>
+                                <div class="field-shell">
+                                    <span class="field-icon"><i class="fas fa-arrows-up-down"></i></span>
+                                    {{ form.width_mm }}
+                                </div>
+                                {% if form.width_mm.errors %}
+                                <span class="error">{{ form.width_mm.errors.0 }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-row form-row-compact">
+                            <div class="form-group">
+                                <label for="id_thickness_mm">Thickness (mm)</label>
+                                <div class="field-shell">
+                                    <span class="field-icon"><i class="fas fa-layer-group"></i></span>
+                                    {{ form.thickness_mm }}
+                                </div>
+                                {% if form.thickness_mm.errors %}
+                                <span class="error">{{ form.thickness_mm.errors.0 }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_finish">Finish</label>
+                                <div class="field-shell">
+                                    <span class="field-icon"><i class="fas fa-brush"></i></span>
+                                    {{ form.finish }}
+                                </div>
+                                {% if form.finish.errors %}
+                                <span class="error">{{ form.finish.errors.0 }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_color">Color</label>
+                            <div class="field-shell">
+                                <span class="field-icon"><i class="fas fa-palette"></i></span>
+                                {{ form.color }}
+                            </div>
+                            {% if form.color.errors %}
+                            <span class="error">{{ form.color.errors.0 }}</span>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
+                </section>
             </div>
-            
-            <!-- Pricing & Status -->
-            <div class="form-section">
-                <h3>Pricing & Status</h3>
-                
-                <div class="form-group">
-                    <label for="id_price">Price</label>
-                    {{ form.price }}
-                </div>
-                
-                <div class="form-group checkbox-group">
-                    <label class="checkbox-label">
-                        {{ form.is_available }} Available for sale
-                    </label>
-                </div>
-                
-                <div class="form-group checkbox-group">
-                    <label class="checkbox-label">
-                        {{ form.is_featured }} Featured product
-                    </label>
-                </div>
-            </div>
-            
-            <!-- SEO -->
-            <div class="form-section collapsible">
-                <h3 class="section-toggle">
-                    <span>SEO Settings</span>
-                    <i class="fas fa-chevron-down"></i>
-                </h3>
-                <div class="section-content">
-                    <div class="form-group">
-                        <label for="id_meta_title">Meta Title</label>
-                        {{ form.meta_title }}
+
+            <aside class="product-layout-sidebar">
+                <section class="admin-form-card form-section">
+                    <div class="admin-form-card-header">
+                        <div class="section-heading">
+                            <span class="section-icon pricing">
+                                <i class="fas fa-dollar-sign"></i>
+                            </span>
+                            <div>
+                                <h3>Pricing &amp; Status</h3>
+                                <p>Control visibility and merchandising settings for this listing.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="id_meta_description">Meta Description</label>
-                        {{ form.meta_description }}
+
+                    <div class="admin-form-card-body">
+                        <div class="form-group">
+                            <label for="id_price">Price</label>
+                            <div class="field-shell">
+                                <span class="field-icon"><i class="fas fa-wallet"></i></span>
+                                {{ form.price }}
+                            </div>
+                            {% if form.price.errors %}
+                            <span class="error">{{ form.price.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="toggle-list">
+                            <div class="toggle-row">
+                                <div>
+                                    <label for="id_is_available" class="toggle-title">Available for sale</label>
+                                    <p class="toggle-description">Show this product as active and purchasable in the catalog.</p>
+                                </div>
+                                <label class="toggle-switch" for="id_is_available">
+                                    {{ form.is_available }}
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="toggle-row">
+                                <div>
+                                    <label for="id_is_featured" class="toggle-title">Featured product</label>
+                                    <p class="toggle-description">Promote this product in featured placements across the site.</p>
+                                </div>
+                                <label class="toggle-switch" for="id_is_featured">
+                                    {{ form.is_featured }}
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </section>
+
+                <section class="admin-form-card form-section collapsible-card is-open">
+                    <button type="button" class="admin-form-card-header collapsible-trigger section-toggle" aria-expanded="true">
+                        <span class="section-heading">
+                            <span class="section-icon seo">
+                                <i class="fas fa-magnifying-glass"></i>
+                            </span>
+                            <span>
+                                <span class="section-title-text">SEO Settings</span>
+                                <span class="section-subtitle-text">These fields help search engines understand your product page.</span>
+                            </span>
+                        </span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+
+                    <div class="admin-form-card-body section-content">
+                        <div class="form-group">
+                            <label for="id_meta_title">Meta Title</label>
+                            <div class="field-shell">
+                                <span class="field-icon"><i class="fas fa-heading"></i></span>
+                                {{ form.meta_title }}
+                            </div>
+                            {% if form.meta_title.errors %}
+                            <span class="error">{{ form.meta_title.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_meta_description">Meta Description</label>
+                            <div class="field-shell field-shell-textarea">
+                                <span class="field-icon"><i class="fas fa-file-lines"></i></span>
+                                {{ form.meta_description }}
+                            </div>
+                            {% if form.meta_description.errors %}
+                            <span class="error">{{ form.meta_description.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </section>
+            </aside>
         </div>
         
         <!-- Product Images -->
@@ -253,11 +385,11 @@
             </article>
         </template>
         
-        <div class="form-actions">
+        <div class="form-actions sticky-form-actions">
+            <a href="{% url 'admin_panel:product_list' %}" class="btn btn-outline btn-lg">Cancel</a>
             <button type="submit" class="btn btn-primary btn-lg">
                 <i class="fas fa-save"></i> Save Product
             </button>
-            <a href="{% url 'admin_panel:product_list' %}" class="btn btn-outline btn-lg">Cancel</a>
         </div>
     </form>
 </div>
@@ -266,11 +398,19 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const seoToggle = document.querySelector('.collapsible-trigger');
+    const seoCard = document.querySelector('.collapsible-card');
     const imageContainer = document.getElementById('images-container');
     const uploadCard = document.getElementById('image-upload-card');
     const template = document.getElementById('image-card-template');
     const totalFormsInput = document.querySelector('[name="images-TOTAL_FORMS"]');
     let draggedCard = null;
+
+    seoToggle?.addEventListener('click', () => {
+        const isExpanded = seoToggle.getAttribute('aria-expanded') === 'true';
+        seoToggle.setAttribute('aria-expanded', String(!isExpanded));
+        seoCard?.classList.toggle('is-open', !isExpanded);
+    });
 
     function visibleCards() {
         return Array.from(imageContainer.querySelectorAll('.product-image-card')).filter(card => !card.classList.contains('is-deleted'));
