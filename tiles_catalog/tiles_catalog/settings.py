@@ -39,7 +39,7 @@ CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get(
         'DJANGO_CSRF_TRUSTED_ORIGINS',
-        'http://glowall.in,http://www.glowall.in,http://80.225.237.255,http://80.225.237.255:3000,http://localhost:3000,http://127.0.0.1:3000'
+        'https://glowall.in,https://www.glowall.in,http://glowall.in,http://www.glowall.in,http://80.225.237.255,http://80.225.237.255:3000,http://localhost:3000,http://127.0.0.1:3000'
     ).split(',')
     if origin.strip()
 ]
