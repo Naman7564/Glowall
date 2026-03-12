@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function initNavigation() {
     const navToggle = document.querySelector('.nav-toggle');
     const navMenu = document.querySelector('.nav-menu');
-    const dropdowns = document.querySelectorAll('.dropdown');
     
     // Mobile menu toggle
     if (navToggle && navMenu) {
@@ -27,17 +26,6 @@ function initNavigation() {
             this.classList.toggle('active');
         });
     }
-    
-    // Mobile dropdown handling
-    dropdowns.forEach(dropdown => {
-        const link = dropdown.querySelector('.nav-link');
-        link.addEventListener('click', function(e) {
-            if (window.innerWidth <= 768) {
-                e.preventDefault();
-                dropdown.classList.toggle('open');
-            }
-        });
-    });
     
     // Close menu on click outside
     document.addEventListener('click', function(e) {

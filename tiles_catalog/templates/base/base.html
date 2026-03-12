@@ -39,16 +39,8 @@
                     <li class="nav-item">
                         <a href="{% url 'catalog:home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a href="{% url 'catalog:product_list' %}" class="nav-link {% if 'product' in request.resolver_match.url_name %}active{% endif %}">
-                            Products <i class="fas fa-chevron-down"></i>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="{% url 'catalog:product_list' %}">All Products</a></li>
-                            {% for category in all_categories %}
-                            <li><a href="{% url 'catalog:category_detail' category.slug %}">{{ category.name }}</a></li>
-                            {% endfor %}
-                        </ul>
+                    <li class="nav-item">
+                        <a href="{% url 'catalog:product_list' %}" class="nav-link {% if 'product' in request.resolver_match.url_name %}active{% endif %}">Products</a>
                     </li>
                     <li class="nav-item">
                         <a href="{% url 'catalog:gallery' %}" class="nav-link {% if request.resolver_match.url_name == 'gallery' %}active{% endif %}">Gallery</a>
