@@ -861,14 +861,23 @@ h1, h2, h3, h4, h5, h6 {
 
 .footer-contact li {
     display: flex;
+    align-items: flex-start;
     gap: 15px;
     margin-bottom: 15px;
     font-size: 14px;
+    line-height: 1.7;
 }
 
 .footer-contact i {
     color: var(--secondary-color);
     width: 20px;
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+.footer-contact span {
+    display: block;
+    opacity: 0.85;
 }
 
 .footer-bottom {
@@ -1746,6 +1755,14 @@ h1, h2, h3, h4, h5, h6 {
     
     .social-links {
         justify-content: center;
+    }
+
+    .footer-contact li {
+        justify-content: center;
+    }
+
+    .footer-contact span {
+        max-width: 320px;
     }
     
     .contact-grid {

@@ -97,7 +97,7 @@
                 <div class="footer-grid">
                     <div class="footer-col">
                         <h3 class="footer-title">Glowall</h3>
-                        <p class="footer-desc">Your premier destination for premium tiles, marble, granite, and natural stone. Transform your spaces with our exquisite collection.</p>
+                        <p class="footer-desc">Glowall Building Solution Private Limited is a trusted provider of premium tiles, marble, granite, and natural stone solutions. We help transform residential and commercial spaces with high-quality materials and elegant designs.</p>
                         <div class="social-links">
                             <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                             <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
@@ -112,7 +112,7 @@
                             <li><a href="{% url 'catalog:home' %}">Home</a></li>
                             <li><a href="{% url 'catalog:product_list' %}">Products</a></li>
                             <li><a href="{% url 'catalog:gallery' %}">Gallery</a></li>
-                            <li><a href="{% url 'catalog:about' %}">About Us</a></li>
+                            <li><a href="{% url 'catalog:about' %}">About</a></li>
                             <li><a href="{% url 'catalog:contact' %}">Contact</a></li>
                         </ul>
                     </div>
@@ -120,9 +120,11 @@
                     <div class="footer-col">
                         <h4 class="footer-subtitle">Categories</h4>
                         <ul class="footer-links">
-                            {% for category in all_categories|slice:":5" %}
-                            <li><a href="{% url 'catalog:category_detail' category.slug %}">{{ category.name }}</a></li>
-                            {% endfor %}
+                            <li><a href="{% url 'catalog:product_list' %}?category=floor-tiles">Floor Tiles</a></li>
+                            <li><a href="{% url 'catalog:product_list' %}?category=wall-tiles">Wall Tiles</a></li>
+                            <li><a href="{% url 'catalog:product_list' %}?category=marble">Marble</a></li>
+                            <li><a href="{% url 'catalog:product_list' %}?category=granite">Granite</a></li>
+                            <li><a href="{% url 'catalog:product_list' %}?category=natural-stone">Natural Stone</a></li>
                         </ul>
                     </div>
                     
@@ -131,15 +133,21 @@
                         <ul class="footer-contact">
                             <li>
                                 <i class="fas fa-map-marker-alt"></i>
-                                <span>123 Tile Street, Design District<br>New York, NY 10001</span>
+                                <span>
+                                    Behind New Galla Mandi,<br>
+                                    Bamori Renuguan, Gadoli,<br>
+                                    Sagar Gallamandi,<br>
+                                    Sagar, Madhya Pradesh - 470002<br>
+                                    India
+                                </span>
                             </li>
                             <li>
                                 <i class="fas fa-phone"></i>
-                                <span>+1 (555) 123-4567</span>
+                                <span><a href="tel:+918085348904">+91 80853 48904</a></span>
                             </li>
                             <li>
                                 <i class="fas fa-envelope"></i>
-                                <span>info@glowall.com</span>
+                                <span><a href="mailto:gbs.pvt.ltd123@gmail.com">gbs.pvt.ltd123@gmail.com</a></span>
                             </li>
                             <li>
                                 <i class="fas fa-clock"></i>
@@ -153,7 +161,7 @@
         
         <div class="footer-bottom">
             <div class="container">
-                <p>&copy; {% now "Y" %} Glowall. All rights reserved.</p>
+                <p>&copy; 2026 Glowall Building Solution Private Limited. All rights reserved.</p>
             </div>
         </div>
     </footer>
