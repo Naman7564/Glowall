@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import inlineformset_factory
 from django.contrib.auth.forms import AuthenticationForm
 from .models import Product, Category, ProductImage, MaterialType, Finish
 
@@ -112,6 +113,12 @@ class ProductForm(forms.ModelForm):
 
 class ProductImageForm(forms.ModelForm):
     """Form for adding product images."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['image'].widget.attrs.update({
+            'accept': 'image/*'
+        })
     
     class Meta:
         model = ProductImage
@@ -155,10 +162,12 @@ class FinishForm(forms.ModelForm):
             }),
         }
 # Formset for multiple images
-ProductImageFormSet = forms.inlineformset_factory(
+ProductImageFormSet = inlineformset_factory(
     Product,
     ProductImage,
     form=ProductImageForm,
-    extra=3,
+    extra=0,
+    max_num=12,
+    validate_max=True,
     can_delete=True
 )

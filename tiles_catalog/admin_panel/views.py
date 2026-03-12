@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login, logout
+from django.db import transaction
 from django.db.models import Count
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -118,18 +119,20 @@ def product_list(request):
 def product_add(request):
     """Add new product view."""
     if request.method == 'POST':
-        form = ProductForm(request.POST)
-        formset = ProductImageFormSet(request.POST, request.FILES)
-        if form.is_valid():
-            product = form.save()
-            formset = ProductImageFormSet(request.POST, request.FILES, instance=product)
-            if formset.is_valid():
+        product = Product()
+        form = ProductForm(request.POST, instance=product)
+        formset = ProductImageFormSet(request.POST, request.FILES, instance=product)
+        if form.is_valid() and formset.is_valid():
+            with transaction.atomic():
+                product = form.save()
+                formset.instance = product
                 formset.save()
             messages.success(request, f'Product "{product.name}" has been created.')
             return redirect('admin_panel:product_list')
     else:
-        form = ProductForm()
-        formset = ProductImageFormSet()
+        product = Product()
+        form = ProductForm(instance=product)
+        formset = ProductImageFormSet(instance=product)
     
     context = {
         'form': form,
@@ -149,8 +152,10 @@ def product_edit(request, pk):
         form = ProductForm(request.POST, instance=product)
         formset = ProductImageFormSet(request.POST, request.FILES, instance=product)
         if form.is_valid() and formset.is_valid():
-            form.save()
-            formset.save()
+            with transaction.atomic():
+                product = form.save()
+                formset.instance = product
+                formset.save()
             messages.success(request, f'Product "{product.name}" has been updated.')
             return redirect('admin_panel:product_list')
     else:
