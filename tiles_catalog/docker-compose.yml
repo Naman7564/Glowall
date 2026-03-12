@@ -11,8 +11,8 @@ services:
     environment:
       - DJANGO_DEBUG=False
       - DJANGO_SECURE_COOKIES=False
-      - DJANGO_ALLOWED_HOSTS=80.225.237.255,localhost,127.0.0.1
-      - DJANGO_CSRF_TRUSTED_ORIGINS=http://80.225.237.255:3000,http://localhost:3000,http://127.0.0.1:3000
+      - DJANGO_ALLOWED_HOSTS=glowall.in,www.glowall.in,80.225.237.255,localhost,127.0.0.1
+      - DJANGO_CSRF_TRUSTED_ORIGINS=http://glowall.in,http://www.glowall.in,http://80.225.237.255,http://80.225.237.255:3000,http://localhost:3000,http://127.0.0.1:3000
       - DJANGO_DB_PATH=/app/data/db.sqlite3
     volumes:
       - static_volume:/app/static_root
@@ -30,6 +30,7 @@ services:
     container_name: glowall_nginx
     restart: unless-stopped
     ports:
+      - "80:80"
       - "3000:80"
     volumes:
       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro

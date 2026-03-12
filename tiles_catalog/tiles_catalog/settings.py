@@ -30,7 +30,7 @@ ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get(
         'DJANGO_ALLOWED_HOSTS',
-        '80.225.237.255,localhost,127.0.0.1'
+        'glowall.in,www.glowall.in,80.225.237.255,localhost,127.0.0.1'
     ).split(',')
     if host.strip()
 ]
@@ -39,7 +39,7 @@ CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get(
         'DJANGO_CSRF_TRUSTED_ORIGINS',
-        'http://80.225.237.255:3000,http://localhost:3000,http://127.0.0.1:3000'
+        'http://glowall.in,http://www.glowall.in,http://80.225.237.255,http://80.225.237.255:3000,http://localhost:3000,http://127.0.0.1:3000'
     ).split(',')
     if origin.strip()
 ]
