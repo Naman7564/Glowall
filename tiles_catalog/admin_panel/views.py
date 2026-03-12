@@ -62,8 +62,8 @@ def dashboard(request):
     
     # Products by category
     categories_with_count = Category.objects.annotate(
-        product_count=Count('products')
-    ).order_by('-product_count')[:5]
+        total_product_count=Count('products')
+    ).order_by('-total_product_count')[:5]
     
     context = {
         'total_products': total_products,
@@ -216,7 +216,7 @@ def product_toggle_available(request, pk):
 def category_list(request):
     """Admin category list view."""
     categories = Category.objects.annotate(
-        product_count=Count('products')
+        total_product_count=Count('products')
     ).all()
     
     context = {'categories': categories}

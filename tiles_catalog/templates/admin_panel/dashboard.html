@@ -128,10 +128,10 @@
                 <div class="category-item">
                     <div class="category-info">
                         <span class="category-name">{{ category.name }}</span>
-                        <span class="category-count">{{ category.product_count }} products</span>
+                        <span class="category-count">{{ category.total_product_count }} products</span>
                     </div>
                     <div class="category-bar">
-                        <div class="bar-fill" data-width="{% widthratio category.product_count total_products 100 %}"></div>
+                        <div class="bar-fill" data-width="{% widthratio category.total_product_count total_products 100 %}"></div>
                     </div>
                 </div>
                 {% empty %}

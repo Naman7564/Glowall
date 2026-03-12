@@ -11,7 +11,7 @@ def categories_context(request):
     """Context processor to add categories to all templates."""
     return {
         'all_categories': Category.objects.filter(is_active=True).annotate(
-            product_count=Count('products', filter=Q(products__is_available=True))
+            available_product_count=Count('products', filter=Q(products__is_available=True))
         ),
         'all_materials': MaterialType.objects.all(),
         'all_finishes': Finish.objects.all(),
@@ -29,7 +29,7 @@ def home(request):
     featured_categories = Category.objects.filter(
         is_active=True
     ).annotate(
-        product_count=Count('products', filter=Q(products__is_available=True))
+        available_product_count=Count('products', filter=Q(products__is_available=True))
     )[:6]
     
     context = {
