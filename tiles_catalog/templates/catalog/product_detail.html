@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-{% load static %}
+{% load static currency_tags %}
 
 {% block title %}{{ product.name }} - Glowall{% endblock %}
 {% block meta_description %}{{ product.description|truncatewords:30 }}{% endblock %}
@@ -51,7 +51,7 @@
                 
                 {% if product.price %}
                 <div class="product-price-large">
-                    <span class="price">${{ product.price }}</span>
+                    <span class="price">{{ product.price|inr }}</span>
                     <span class="price-note">per unit</span>
                 </div>
                 {% endif %}
@@ -145,7 +145,7 @@
                             <h3 class="product-name">{{ related.name }}</h3>
                             <p class="product-size">{{ related.size_display }}</p>
                             {% if related.price %}
-                            <p class="product-price">${{ related.price }}</p>
+                            <p class="product-price">{{ related.price|inr }}</p>
                             {% endif %}
                         </div>
                     </a>

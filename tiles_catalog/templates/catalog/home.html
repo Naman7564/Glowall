@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-{% load static %}
+{% load static currency_tags %}
 
 {% block title %}Glowall - Premium Tiles & Marble Showroom{% endblock %}
 
@@ -53,7 +53,7 @@
                         <h3 class="product-name">{{ product.name }}</h3>
                         <p class="product-size">{{ product.size_display }}</p>
                         {% if product.price %}
-                        <p class="product-price">${{ product.price }}</p>
+                        <p class="product-price">{{ product.price|inr }}</p>
                         {% endif %}
                     </div>
                 </a>

@@ -1,4 +1,5 @@
 {% extends 'admin_panel/base_admin.html' %}
+{% load currency_tags %}
 
 {% block title %}Products - Admin{% endblock %}
 
@@ -69,7 +70,7 @@
                     </td>
                     <td>{{ product.category.name }}</td>
                     <td>{{ product.size_display }}</td>
-                    <td>{% if product.price %}${{ product.price }}{% else %}-{% endif %}</td>
+                    <td>{% if product.price %}{{ product.price|inr }}{% else %}-{% endif %}</td>
                     <td>
                         <button class="badge badge-toggle {% if product.is_available %}badge-success{% else %}badge-danger{% endif %}" 
                                 onclick="toggleAvailable({{ product.id }})">

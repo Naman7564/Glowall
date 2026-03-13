@@ -96,7 +96,7 @@ class ProductForm(forms.ModelForm):
             }),
             'price': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Price (optional)',
+                'placeholder': 'Price in INR (optional)',
                 'step': '0.01'
             }),
             'meta_title': forms.TextInput(attrs={
