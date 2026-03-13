@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, MaterialType, Finish, Product, ProductImage, Contact
+from .models import Category, MaterialType, Finish, Product, ProductImage, Contact, CustomerReview
 
 
 class ProductImageInline(admin.TabularInline):
@@ -75,3 +75,11 @@ class ContactAdmin(admin.ModelAdmin):
     list_filter = ['is_read']
     search_fields = ['name', 'email', 'subject', 'message']
     readonly_fields = ['name', 'email', 'phone', 'subject', 'message', 'created_at']
+
+
+@admin.register(CustomerReview)
+class CustomerReviewAdmin(admin.ModelAdmin):
+    list_display = ['customer_name', 'customer_location', 'is_active', 'created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['customer_name', 'customer_location', 'review_text']
+    list_editable = ['is_active']

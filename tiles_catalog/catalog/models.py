@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
+from PIL import Image, ImageOps
 
 
 class Category(models.Model):
@@ -178,3 +179,64 @@ class Contact(models.Model):
 
     def __str__(self):
         return f'{self.name} - {self.subject}'
+
+
+class CustomerReview(models.Model):
+    """Customer review images and optional attribution for the homepage."""
+
+    customer_name = models.CharField(max_length=120, blank=True)
+    customer_location = models.CharField(max_length=120, blank=True)
+    review_text = models.TextField(blank=True)
+    review_image = models.ImageField(upload_to='reviews/')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        if self.customer_name:
+            return self.customer_name
+        return f'Review #{self.pk or "new"}'
+
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get('update_fields')
+        should_optimize = update_fields is None or 'review_image' in update_fields
+        super().save(*args, **kwargs)
+        if should_optimize:
+            self._optimize_review_image()
+
+    def _optimize_review_image(self):
+        if not self.review_image:
+            return
+
+        image_path = getattr(self.review_image, 'path', None)
+        if not image_path:
+            return
+
+        with Image.open(image_path) as img:
+            img = ImageOps.exif_transpose(img)
+            img.thumbnail((1600, 1600))
+
+            image_format = (img.format or '').upper()
+            save_kwargs = {'optimize': True}
+
+            if image_format in {'JPEG', 'JPG'}:
+                if img.mode not in ('RGB', 'L'):
+                    img = img.convert('RGB')
+                save_kwargs['quality'] = 85
+                save_format = 'JPEG'
+            elif image_format == 'WEBP':
+                if img.mode not in ('RGB', 'RGBA', 'L'):
+                    img = img.convert('RGB')
+                save_kwargs['quality'] = 85
+                save_format = 'WEBP'
+            elif image_format == 'PNG':
+                save_format = 'PNG'
+            else:
+                if img.mode not in ('RGB', 'L'):
+                    img = img.convert('RGB')
+                save_kwargs['quality'] = 85
+                save_format = 'JPEG'
+
+            img.save(image_path, format=save_format, **save_kwargs)

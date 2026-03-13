@@ -1,0 +1,27 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Delete Customer Review - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Delete Customer Review</h1>
+</div>
+
+<div class="confirm-card">
+    <div class="confirm-icon"><i class="fas fa-exclamation-triangle"></i></div>
+    <h2>Are you sure you want to delete this review?</h2>
+    <p class="confirm-text">This removes the image and testimonial from the homepage carousel.</p>
+    <div class="confirm-item">
+        <img src="{{ review.review_image.url }}" alt="{{ review.customer_name|default:'Customer review' }}" class="confirm-thumb">
+        <div class="confirm-details">
+            <strong>{{ review.customer_name|default:'Anonymous customer' }}</strong>
+            <span>{{ review.customer_location|default:'Location not provided' }}</span>
+        </div>
+    </div>
+    <form method="post" class="confirm-form">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'admin_panel:review_list' %}" class="btn btn-outline">Cancel</a>
+    </form>
+</div>
+{% endblock %}

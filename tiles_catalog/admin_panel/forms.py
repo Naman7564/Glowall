@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import inlineformset_factory
 from django.contrib.auth.forms import AuthenticationForm
-from .models import Product, Category, ProductImage, MaterialType, Finish
+from .models import Product, Category, ProductImage, MaterialType, Finish, CustomerReview
 
 
 class AdminLoginForm(AuthenticationForm):
@@ -159,6 +159,39 @@ class FinishForm(forms.ModelForm):
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Finish Name'
+            }),
+        }
+
+
+class CustomerReviewForm(forms.ModelForm):
+    """Form for adding/editing customer reviews."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['review_image'].widget.attrs.update({
+            'accept': 'image/*',
+            'class': 'file-upload-input',
+        })
+
+    class Meta:
+        model = CustomerReview
+        fields = [
+            'customer_name', 'customer_location', 'review_text',
+            'review_image', 'is_active'
+        ]
+        widgets = {
+            'customer_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Customer name'
+            }),
+            'customer_location': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'City, State or Country'
+            }),
+            'review_text': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Short review text (optional)'
             }),
         }
 # Formset for multiple images

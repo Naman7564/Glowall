@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initAlerts();
     initLazyLoading();
     initScrollEffects();
+    initReviewCarousel();
 });
 
 /**
@@ -172,6 +173,125 @@ function initScrollEffects() {
         
         animateElements.forEach(el => animateObserver.observe(el));
     }
+}
+
+/**
+ * Customer Review Carousel
+ */
+function initReviewCarousel() {
+    const carousels = document.querySelectorAll('[data-review-carousel]');
+
+    carousels.forEach((carousel) => {
+        const track = carousel.querySelector('[data-carousel-track]');
+        const slides = Array.from(carousel.querySelectorAll('[data-carousel-slide]'));
+        const prevBtn = carousel.querySelector('[data-carousel-prev]');
+        const nextBtn = carousel.querySelector('[data-carousel-next]');
+        const dotsWrap = carousel.querySelector('[data-carousel-dots]');
+        const autoplayDelay = Number(carousel.dataset.autoplayDelay || 4500);
+
+        if (!track || slides.length === 0) {
+            return;
+        }
+
+        let currentIndex = 0;
+        let slidesPerView = window.innerWidth <= 768 ? 1 : 3;
+        let autoplayId = null;
+
+        const getMaxIndex = () => Math.max(slides.length - slidesPerView, 0);
+
+        const renderDots = () => {
+            if (!dotsWrap) {
+                return;
+            }
+
+            const dotCount = getMaxIndex() + 1;
+            dotsWrap.innerHTML = '';
+
+            for (let index = 0; index < dotCount; index += 1) {
+                const dot = document.createElement('button');
+                dot.type = 'button';
+                dot.className = `reviews-dot${index === currentIndex ? ' active' : ''}`;
+                dot.setAttribute('aria-label', `Go to review group ${index + 1}`);
+                dot.addEventListener('click', () => {
+                    currentIndex = index;
+                    updateCarousel();
+                    restartAutoplay();
+                });
+                dotsWrap.appendChild(dot);
+            }
+        };
+
+        const updateButtons = () => {
+            const disabled = getMaxIndex() === 0;
+            if (prevBtn) {
+                prevBtn.disabled = disabled;
+            }
+            if (nextBtn) {
+                nextBtn.disabled = disabled;
+            }
+        };
+
+        const updateCarousel = () => {
+            slidesPerView = window.innerWidth <= 768 ? 1 : 3;
+            currentIndex = Math.min(currentIndex, getMaxIndex());
+
+            const firstSlide = slides[0];
+            const gap = Number.parseFloat(window.getComputedStyle(track).gap || '0');
+            const offset = (firstSlide.offsetWidth + gap) * currentIndex;
+            track.style.transform = `translateX(-${offset}px)`;
+
+            updateButtons();
+            renderDots();
+        };
+
+        const goToNext = () => {
+            const maxIndex = getMaxIndex();
+            currentIndex = currentIndex >= maxIndex ? 0 : currentIndex + 1;
+            updateCarousel();
+        };
+
+        const goToPrev = () => {
+            const maxIndex = getMaxIndex();
+            currentIndex = currentIndex <= 0 ? maxIndex : currentIndex - 1;
+            updateCarousel();
+        };
+
+        const stopAutoplay = () => {
+            if (autoplayId) {
+                window.clearInterval(autoplayId);
+                autoplayId = null;
+            }
+        };
+
+        const startAutoplay = () => {
+            stopAutoplay();
+            if (slides.length <= slidesPerView) {
+                return;
+            }
+            autoplayId = window.setInterval(goToNext, autoplayDelay);
+        };
+
+        const restartAutoplay = () => {
+            startAutoplay();
+        };
+
+        prevBtn?.addEventListener('click', () => {
+            goToPrev();
+            restartAutoplay();
+        });
+
+        nextBtn?.addEventListener('click', () => {
+            goToNext();
+            restartAutoplay();
+        });
+
+        carousel.addEventListener('mouseenter', stopAutoplay);
+        carousel.addEventListener('mouseleave', startAutoplay);
+        window.addEventListener('resize', debounce(updateCarousel, 150));
+
+        updateCarousel();
+        startAutoplay();
+    });
 }
 
 /**

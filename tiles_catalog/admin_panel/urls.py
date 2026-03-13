@@ -42,4 +42,11 @@ urlpatterns = [
     path('messages/', views.message_list, name='message_list'),
     path('messages/<int:pk>/', views.message_detail, name='message_detail'),
     path('messages/<int:pk>/delete/', views.message_delete, name='message_delete'),
+
+    # Customer Reviews
+    path('reviews/', views.review_list, name='review_list'),
+    path('reviews/add/', views.review_add, name='review_add'),
+    path('reviews/<int:pk>/edit/', views.review_edit, name='review_edit'),
+    path('reviews/<int:pk>/delete/', views.review_delete, name='review_delete'),
+    path('reviews/<int:pk>/toggle-active/', views.review_toggle_active, name='review_toggle_active'),
 ]

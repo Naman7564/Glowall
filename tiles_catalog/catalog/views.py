@@ -3,7 +3,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Count
 from django.contrib import messages
 from django.http import JsonResponse
-from .models import Category, Product, ProductImage, MaterialType, Finish, Contact
+from .models import Category, Product, ProductImage, MaterialType, Finish, Contact, CustomerReview
 from .forms import ContactForm, ProductSearchForm
 
 
@@ -19,10 +19,15 @@ def home(request):
     ).annotate(
         available_product_count=Count('products', filter=Q(products__is_available=True))
     )[:6]
-    
+
+    customer_reviews = CustomerReview.objects.filter(
+        is_active=True
+    )[:12]
+
     context = {
         'featured_products': featured_products,
         'featured_categories': featured_categories,
+        'customer_reviews': customer_reviews,
         'page_title': 'Premium Tiles & Marble Showroom',
     }
     return render(request, 'catalog/home.html', context)

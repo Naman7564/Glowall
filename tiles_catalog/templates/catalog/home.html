@@ -100,6 +100,65 @@
     </div>
 </section>
 
+{% if customer_reviews %}
+<section class="section reviews-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">Social Proof</span>
+            <h2 class="section-title">Customer Reviews</h2>
+            <p class="section-desc">Real project feedback from homeowners, designers, and contractors who chose Glowall.</p>
+        </div>
+
+        <div class="reviews-carousel" data-review-carousel data-autoplay-delay="4500">
+            <div class="reviews-carousel-header">
+                <div class="reviews-carousel-copy">
+                    <span class="reviews-eyebrow">Trusted by customers across premium interior projects</span>
+                </div>
+                <div class="reviews-controls">
+                    <button type="button" class="reviews-nav reviews-nav-prev" data-carousel-prev aria-label="Previous reviews">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <button type="button" class="reviews-nav reviews-nav-next" data-carousel-next aria-label="Next reviews">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="reviews-viewport">
+                <div class="reviews-track" data-carousel-track>
+                    {% for review in customer_reviews %}
+                    <article class="review-card" data-carousel-slide>
+                        <div class="review-image-shell">
+                            <img src="{{ review.review_image.url }}" alt="{{ review.customer_name|default:'Customer review image' }}" loading="lazy">
+                        </div>
+                        {% if review.customer_name or review.customer_location or review.review_text %}
+                        <div class="review-content">
+                            {% if review.review_text %}
+                            <p class="review-text">{{ review.review_text }}</p>
+                            {% endif %}
+                            {% if review.customer_name or review.customer_location %}
+                            <div class="review-meta">
+                                {% if review.customer_name %}
+                                <h3 class="review-name">{{ review.customer_name }}</h3>
+                                {% endif %}
+                                {% if review.customer_location %}
+                                <span class="review-location">{{ review.customer_location }}</span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="reviews-pagination" data-carousel-dots aria-label="Review carousel pagination"></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- Features Section -->
 <section class="section features-section">
     <div class="container">

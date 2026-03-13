@@ -1,0 +1,122 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Customer Reviews - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Customer Reviews</h1>
+    <a href="{% url 'admin_panel:review_add' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Review
+    </a>
+</div>
+
+<div class="filters-bar">
+    <form method="get" class="filters-form">
+        <div class="filter-group">
+            <input type="text" name="q" placeholder="Search reviews..." value="{{ search_query }}" class="form-control">
+        </div>
+        <div class="filter-group">
+            <select name="status" class="form-control">
+                <option value="">All Status</option>
+                <option value="active" {% if current_status == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if current_status == 'inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-secondary"><i class="fas fa-filter"></i> Filter</button>
+        <a href="{% url 'admin_panel:review_list' %}" class="btn btn-outline">Clear</a>
+    </form>
+</div>
+
+<div class="data-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Customer</th>
+                    <th>Review</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for review in reviews %}
+                <tr>
+                    <td>
+                        <img src="{{ review.review_image.url }}" alt="{{ review.customer_name|default:'Customer review' }}" class="table-thumb">
+                    </td>
+                    <td>
+                        <strong>{{ review.customer_name|default:'Anonymous customer' }}</strong>
+                        <br><small class="text-muted">{{ review.customer_location|default:'Location not provided' }}</small>
+                    </td>
+                    <td class="review-table-text">{{ review.review_text|default:'No review text provided.'|truncatechars:100 }}</td>
+                    <td>
+                        <button class="badge badge-toggle {% if review.is_active %}badge-success{% else %}badge-secondary{% endif %}"
+                                onclick="toggleReviewActive({{ review.id }})">
+                            {% if review.is_active %}Active{% else %}Inactive{% endif %}
+                        </button>
+                    </td>
+                    <td>{{ review.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'admin_panel:review_edit' review.pk %}" class="btn btn-sm btn-outline" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:review_delete' review.pk %}" class="btn btn-sm btn-danger" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <div class="empty-state">
+                            <i class="fas fa-comments"></i>
+                            <h3>No customer reviews found</h3>
+                            <p>Add the first review image to populate the homepage carousel.</p>
+                            <a href="{% url 'admin_panel:review_add' %}" class="btn btn-primary">Add Review</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleReviewActive(reviewId) {
+    fetch(`/admin/reviews/${reviewId}/toggle-active/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}
