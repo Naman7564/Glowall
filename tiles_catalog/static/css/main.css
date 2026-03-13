@@ -163,13 +163,17 @@ h1, h2, h3, h4, h5, h6 {
 
 .navbar {
     height: 80px;
+    display: flex;
+    align-items: center;
 }
 
 .nav-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 24px;
     height: 100%;
+    width: 100%;
     max-width: 1280px;
     margin: 0 auto;
     padding: 0 20px;
@@ -178,16 +182,20 @@ h1, h2, h3, h4, h5, h6 {
 .logo {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    min-width: 0;
     height: 100%;
     padding-left: 4px;
-    margin-right: 20px;
+    margin-right: 12px;
     flex-shrink: 0;
+    overflow: hidden;
 }
 
 .logo-image {
-    height: 50px;
+    display: block;
+    height: 55px;
     width: auto;
+    max-height: 100%;
     max-width: min(44vw, 260px);
     object-fit: contain;
     object-position: left center;
@@ -196,7 +204,16 @@ h1, h2, h3, h4, h5, h6 {
 .nav-menu {
     display: flex;
     align-items: center;
+    flex: 1;
+    justify-content: center;
     gap: 40px;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
 }
 
 .nav-link {
@@ -1821,7 +1838,7 @@ h1, h2, h3, h4, h5, h6 {
     }
 
     .logo-image {
-        height: 46px;
+        height: 50px;
         max-width: min(46vw, 230px);
     }
 
@@ -1854,6 +1871,7 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 768px) {
     .nav-container {
         padding: 0 16px;
+        gap: 12px;
     }
 
     .logo {
@@ -1863,7 +1881,7 @@ h1, h2, h3, h4, h5, h6 {
 
     .logo-image {
         height: 38px;
-        max-width: min(52vw, 190px);
+        max-width: min(50vw, 180px);
     }
 
     .nav-menu {
@@ -1880,6 +1898,10 @@ h1, h2, h3, h4, h5, h6 {
         opacity: 0;
         visibility: hidden;
         transition: var(--transition);
+    }
+
+    .nav-actions {
+        margin-left: auto;
     }
     
     .nav-menu.active {
