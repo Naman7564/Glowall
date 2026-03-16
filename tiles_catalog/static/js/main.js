@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initLazyLoading();
     initScrollEffects();
     initReviewCarousel();
+    initUserMenu();
 });
 
 /**
@@ -365,3 +366,31 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+/**
+ * User Menu Dropdown
+ */
+function initUserMenu() {
+    const toggle = document.getElementById('user-menu-toggle');
+    const dropdown = document.getElementById('user-dropdown');
+
+    if (!toggle || !dropdown) return;
+
+    toggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdown.classList.toggle('active');
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#user-menu')) {
+            dropdown.classList.remove('active');
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            dropdown.classList.remove('active');
+        }
+    });
+}
+

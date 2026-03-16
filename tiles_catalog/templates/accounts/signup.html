@@ -1,0 +1,1006 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Create your Glowall account - Premium Tiles & Marble Showroom">
+    <title>Sign Up - Glowall Premium Tiles & Marble</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* ==========================================
+           Auth Page Styles - Stitch Generated Design
+           ========================================== */
+        :root {
+            --auth-primary: #1a1a2e;
+            --auth-gold: #c9a962;
+            --auth-gold-hover: #b8964d;
+            --auth-cream: #faf9f6;
+            --auth-white: #ffffff;
+            --auth-text: #1a1a2e;
+            --auth-text-light: #6b7280;
+            --auth-text-muted: #9ca3af;
+            --auth-border: #e5e7eb;
+            --auth-error: #ef4444;
+            --auth-success: #10b981;
+            --auth-warning: #f59e0b;
+            --font-display: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--auth-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Split Layout */
+        .auth-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Left Panel - Marble Branding */
+        .auth-brand-panel {
+            flex: 0 0 42%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: var(--auth-primary);
+        }
+
+        .auth-brand-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(160deg, rgba(26, 26, 46, 0.9) 0%, rgba(26, 26, 46, 0.6) 50%, rgba(26, 26, 46, 0.85) 100%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cg fill='none' stroke='%23c9a962' stroke-width='0.5' stroke-opacity='0.12'%3E%3Cpath d='M0 50 Q100 30 200 60 Q300 90 400 40'/%3E%3Cpath d='M0 100 Q120 70 200 110 Q280 150 400 90'/%3E%3Cpath d='M0 150 Q80 130 200 160 Q320 190 400 140'/%3E%3Cpath d='M0 200 Q100 170 200 210 Q300 250 400 190'/%3E%3Cpath d='M0 250 Q140 220 200 260 Q260 300 400 240'/%3E%3Cpath d='M0 300 Q100 280 200 310 Q300 340 400 290'/%3E%3Cpath d='M0 350 Q80 330 200 360 Q320 390 400 340'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: cover;
+        }
+
+        .auth-brand-pattern {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 30% 30%, rgba(201, 169, 98, 0.18) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 70%, rgba(201, 169, 98, 0.1) 0%, transparent 50%);
+        }
+
+        .auth-brand-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 40px;
+            animation: authFadeInUp 0.8s ease-out;
+        }
+
+        .auth-brand-logo {
+            font-family: var(--font-display);
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--auth-white);
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+        }
+
+        .auth-brand-accent {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--auth-gold), transparent);
+            margin: 20px auto;
+        }
+
+        .auth-brand-tagline {
+            font-family: var(--font-body);
+            font-size: 18px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.8);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+
+        .auth-brand-desc {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.6);
+            max-width: 360px;
+            line-height: 1.7;
+        }
+
+        /* Features List */
+        .auth-features {
+            margin-top: 40px;
+            text-align: left;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .auth-feature-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+            animation: authFadeInUp 0.8s ease-out;
+        }
+
+        .auth-feature-item:nth-child(1) { animation-delay: 0.3s; }
+        .auth-feature-item:nth-child(2) { animation-delay: 0.4s; }
+        .auth-feature-item:nth-child(3) { animation-delay: 0.5s; }
+
+        .auth-feature-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(201, 169, 98, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--auth-gold);
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .auth-feature-text {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.5;
+        }
+
+        /* Decorative Elements */
+        .auth-brand-corner {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border: 1px solid rgba(201, 169, 98, 0.2);
+        }
+
+        .auth-brand-corner--tl {
+            top: 30px;
+            left: 30px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .auth-brand-corner--br {
+            bottom: 30px;
+            right: 30px;
+            border-left: none;
+            border-top: none;
+        }
+
+        /* Right Panel - Form */
+        .auth-form-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--auth-cream);
+            padding: 40px;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .auth-form-panel::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(201, 169, 98, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Glassmorphism Card */
+        .auth-card {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            padding: 40px 36px;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.06),
+                0 1px 3px rgba(0, 0, 0, 0.04);
+            animation: authFadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        .auth-card-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-card-logo {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--auth-primary);
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            display: none;
+        }
+
+        .auth-card-title {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--auth-text);
+            margin-bottom: 8px;
+        }
+
+        .auth-card-subtitle {
+            font-size: 14px;
+            color: var(--auth-text-light);
+        }
+
+        /* Form Fields */
+        .auth-field {
+            margin-bottom: 18px;
+        }
+
+        .auth-field-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--auth-text);
+            margin-bottom: 6px;
+        }
+
+        .auth-input-wrapper {
+            position: relative;
+        }
+
+        .auth-input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--auth-text-muted);
+            font-size: 15px;
+            transition: color 0.3s ease;
+            pointer-events: none;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 13px 16px 13px 46px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--auth-text);
+            background: var(--auth-white);
+            border: 1.5px solid var(--auth-border);
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .auth-input:focus {
+            border-color: var(--auth-gold);
+            box-shadow: 0 0 0 4px rgba(201, 169, 98, 0.1);
+        }
+
+        .auth-input:focus ~ .auth-input-icon {
+            color: var(--auth-gold);
+        }
+
+        .auth-input::placeholder {
+            color: var(--auth-text-muted);
+        }
+
+        .auth-password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--auth-text-muted);
+            cursor: pointer;
+            font-size: 15px;
+            padding: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .auth-password-toggle:hover {
+            color: var(--auth-text);
+        }
+
+        /* Password Strength */
+        .password-strength {
+            margin-top: 8px;
+        }
+
+        .password-strength-bar {
+            height: 4px;
+            background: var(--auth-border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .password-strength-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 2px;
+            transition: all 0.4s ease;
+        }
+
+        .password-strength-text {
+            font-size: 11px;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .strength-weak .password-strength-fill { width: 25%; background: var(--auth-error); }
+        .strength-weak .password-strength-text { color: var(--auth-error); }
+        .strength-fair .password-strength-fill { width: 50%; background: var(--auth-warning); }
+        .strength-fair .password-strength-text { color: var(--auth-warning); }
+        .strength-good .password-strength-fill { width: 75%; background: #34d399; }
+        .strength-good .password-strength-text { color: #34d399; }
+        .strength-strong .password-strength-fill { width: 100%; background: var(--auth-success); }
+        .strength-strong .password-strength-text { color: var(--auth-success); }
+
+        /* Form Rows */
+        .auth-form-row {
+            display: flex;
+            gap: 14px;
+        }
+
+        .auth-form-row .auth-field {
+            flex: 1;
+        }
+
+        /* Terms Checkbox */
+        .auth-terms {
+            margin-top: 4px;
+            margin-bottom: 24px;
+        }
+
+        .auth-checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--auth-text-light);
+            cursor: pointer;
+            line-height: 1.5;
+        }
+
+        .auth-checkbox {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--auth-gold);
+            cursor: pointer;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .auth-checkbox-label a {
+            color: var(--auth-gold);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-checkbox-label a:hover {
+            text-decoration: underline;
+        }
+
+        /* Submit Button */
+        .auth-submit-btn {
+            width: 100%;
+            padding: 14px 24px;
+            font-family: var(--font-body);
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--auth-white);
+            background: linear-gradient(135deg, var(--auth-gold), var(--auth-gold-hover));
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .auth-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(201, 169, 98, 0.35);
+        }
+
+        .auth-submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .auth-submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Divider */
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .auth-divider-line {
+            flex: 1;
+            height: 1px;
+            background: var(--auth-border);
+        }
+
+        .auth-divider-text {
+            font-size: 12px;
+            color: var(--auth-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        /* Social Buttons */
+        .auth-social-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 24px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--auth-text);
+            background: var(--auth-white);
+            border: 1.5px solid var(--auth-border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-social-btn:hover {
+            border-color: var(--auth-text-muted);
+            background: var(--auth-cream);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .auth-social-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Footer Link */
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--auth-text-light);
+        }
+
+        .auth-footer a {
+            color: var(--auth-gold);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .auth-footer a:hover {
+            color: var(--auth-gold-hover);
+        }
+
+        /* Error Messages */
+        .auth-errors {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 18px;
+            animation: authShake 0.4s ease;
+        }
+
+        .auth-errors ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .auth-errors li {
+            font-size: 13px;
+            color: var(--auth-error);
+            padding: 2px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .auth-errors li::before {
+            content: '\f06a';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 12px;
+        }
+
+        .auth-field-error {
+            margin-top: 6px;
+            margin-bottom: 0;
+        }
+
+        /* Django Messages */
+        .auth-messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .auth-message {
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: authSlideIn 0.4s ease-out;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-message-success {
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+        }
+
+        .auth-message-error {
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+        }
+
+        .auth-message-info {
+            background: rgba(59, 130, 246, 0.9);
+            color: white;
+        }
+
+        .auth-message-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: auto;
+            opacity: 0.8;
+        }
+
+        .auth-message-close:hover {
+            opacity: 1;
+        }
+
+        /* Back to Home */
+        .auth-back-home {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .auth-back-home:hover {
+            color: var(--auth-white);
+        }
+
+        /* Animations */
+        @keyframes authFadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes authShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        @keyframes authSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .auth-brand-panel {
+                flex: 0 0 38%;
+            }
+            .auth-brand-logo {
+                font-size: 36px;
+            }
+            .auth-features {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+            }
+            .auth-brand-panel {
+                flex: none;
+                min-height: 180px;
+                padding: 40px 20px;
+            }
+            .auth-brand-corner {
+                width: 60px;
+                height: 60px;
+            }
+            .auth-brand-logo {
+                font-size: 30px;
+            }
+            .auth-brand-tagline {
+                font-size: 12px;
+                margin-bottom: 12px;
+            }
+            .auth-brand-desc,
+            .auth-features {
+                display: none;
+            }
+            .auth-form-panel {
+                padding: 24px 16px;
+            }
+            .auth-card {
+                padding: 28px 22px;
+                border-radius: 16px;
+            }
+            .auth-card-logo {
+                display: block;
+            }
+            .auth-form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 24px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Messages -->
+    {% if messages %}
+    <div class="auth-messages">
+        {% for message in messages %}
+        <div class="auth-message auth-message-{{ message.tags }}" role="alert">
+            <span>{{ message }}</span>
+            <button class="auth-message-close" onclick="this.parentElement.remove()" aria-label="Close">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="auth-container">
+        <!-- Left Brand Panel -->
+        <div class="auth-brand-panel">
+            <a href="{% url 'catalog:home' %}" class="auth-back-home">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+            <div class="auth-brand-bg"></div>
+            <div class="auth-brand-pattern"></div>
+            <div class="auth-brand-corner auth-brand-corner--tl"></div>
+            <div class="auth-brand-corner auth-brand-corner--br"></div>
+            <div class="auth-brand-content">
+                <h1 class="auth-brand-logo">Glowall</h1>
+                <div class="auth-brand-accent"></div>
+                <p class="auth-brand-tagline">Create Your Account</p>
+                <p class="auth-brand-desc">Join the Glowall community and explore premium building solutions.</p>
+
+                <div class="auth-features">
+                    <div class="auth-feature-item">
+                        <div class="auth-feature-icon">
+                            <i class="fas fa-gem"></i>
+                        </div>
+                        <span class="auth-feature-text">Access exclusive premium collections</span>
+                    </div>
+                    <div class="auth-feature-item">
+                        <div class="auth-feature-icon">
+                            <i class="fas fa-bookmark"></i>
+                        </div>
+                        <span class="auth-feature-text">Save your favorite products & designs</span>
+                    </div>
+                    <div class="auth-feature-item">
+                        <div class="auth-feature-icon">
+                            <i class="fas fa-tag"></i>
+                        </div>
+                        <span class="auth-feature-text">Get personalized quotes & offers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Form Panel -->
+        <div class="auth-form-panel">
+            <div class="auth-card">
+                <div class="auth-card-header">
+                    <p class="auth-card-logo">Glowall</p>
+                    <h2 class="auth-card-title">Create Account</h2>
+                    <p class="auth-card-subtitle">Fill in your details to get started.</p>
+                </div>
+
+                <!-- Error Messages -->
+                {% if form.non_field_errors %}
+                <div class="auth-errors">
+                    <ul>
+                        {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'accounts:signup' %}" id="signup-form" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Full Name -->
+                    <div class="auth-field">
+                        <label class="auth-field-label" for="signup-name">Full Name</label>
+                        <div class="auth-input-wrapper">
+                            {{ form.first_name }}
+                            <i class="fas fa-user auth-input-icon"></i>
+                        </div>
+                        {% if form.first_name.errors %}
+                        <div class="auth-errors auth-field-error">
+                            <ul>{% for error in form.first_name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Email & Phone Row -->
+                    <div class="auth-form-row">
+                        <div class="auth-field">
+                            <label class="auth-field-label" for="signup-email">Email Address</label>
+                            <div class="auth-input-wrapper">
+                                {{ form.email }}
+                                <i class="fas fa-envelope auth-input-icon"></i>
+                            </div>
+                            {% if form.email.errors %}
+                            <div class="auth-errors auth-field-error">
+                                <ul>{% for error in form.email.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="auth-field">
+                            <label class="auth-field-label" for="signup-phone">Phone (Optional)</label>
+                            <div class="auth-input-wrapper">
+                                {{ form.phone }}
+                                <i class="fas fa-phone auth-input-icon"></i>
+                            </div>
+                            {% if form.phone.errors %}
+                            <div class="auth-errors auth-field-error">
+                                <ul>{% for error in form.phone.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="auth-field">
+                        <label class="auth-field-label" for="signup-password1">Password</label>
+                        <div class="auth-input-wrapper">
+                            {{ form.password1 }}
+                            <i class="fas fa-lock auth-input-icon"></i>
+                            <button type="button" class="auth-password-toggle" onclick="togglePassword('signup-password1', this)" aria-label="Toggle password visibility">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <!-- Password Strength Indicator -->
+                        <div class="password-strength" id="password-strength">
+                            <div class="password-strength-bar">
+                                <div class="password-strength-fill"></div>
+                            </div>
+                            <span class="password-strength-text"></span>
+                        </div>
+                        {% if form.password1.errors %}
+                        <div class="auth-errors auth-field-error">
+                            <ul>{% for error in form.password1.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="auth-field">
+                        <label class="auth-field-label" for="signup-password2">Confirm Password</label>
+                        <div class="auth-input-wrapper">
+                            {{ form.password2 }}
+                            <i class="fas fa-shield-halved auth-input-icon"></i>
+                            <button type="button" class="auth-password-toggle" onclick="togglePassword('signup-password2', this)" aria-label="Toggle password visibility">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        {% if form.password2.errors %}
+                        <div class="auth-errors auth-field-error">
+                            <ul>{% for error in form.password2.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Terms & Conditions -->
+                    <div class="auth-terms">
+                        <label class="auth-checkbox-label" for="agree-terms">
+                            {{ form.agree_terms }}
+                            <span>I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a></span>
+                        </label>
+                        {% if form.agree_terms.errors %}
+                        <div class="auth-errors auth-field-error">
+                            <ul>{% for error in form.agree_terms.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="auth-submit-btn" id="signup-submit-btn">
+                        Create Account
+                    </button>
+                </form>
+
+                <!-- Divider -->
+                <div class="auth-divider">
+                    <span class="auth-divider-line"></span>
+                    <span class="auth-divider-text">or sign up with</span>
+                    <span class="auth-divider-line"></span>
+                </div>
+
+                <!-- Social Login -->
+                <button class="auth-social-btn" type="button" id="google-signup-btn">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Continue with Google
+                </button>
+
+                <!-- Footer -->
+                <div class="auth-footer">
+                    Already have an account? <a href="{% url 'accounts:login' %}">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle password visibility
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // Password strength checker
+        const passwordInput = document.getElementById('signup-password1');
+        const strengthContainer = document.getElementById('password-strength');
+        const strengthText = strengthContainer.querySelector('.password-strength-text');
+
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            let label = '';
+
+            // Remove all strength classes
+            strengthContainer.className = 'password-strength';
+
+            if (password.length === 0) {
+                strengthText.textContent = '';
+                return;
+            }
+
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+
+            if (strength <= 1) {
+                strengthContainer.classList.add('strength-weak');
+                label = 'Weak';
+            } else if (strength <= 2) {
+                strengthContainer.classList.add('strength-fair');
+                label = 'Fair';
+            } else if (strength <= 3) {
+                strengthContainer.classList.add('strength-good');
+                label = 'Good';
+            } else {
+                strengthContainer.classList.add('strength-strong');
+                label = 'Strong';
+            }
+
+            strengthText.textContent = label;
+        });
+
+        // Auto-dismiss messages
+        document.querySelectorAll('.auth-message').forEach(msg => {
+            setTimeout(() => {
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateX(100px)';
+                msg.style.transition = 'all 0.4s ease';
+                setTimeout(() => msg.remove(), 400);
+            }, 5000);
+        });
+
+        // Add focus animations
+        document.querySelectorAll('.auth-input').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.closest('.auth-input-wrapper').style.transform = 'scale(1.01)';
+                input.closest('.auth-input-wrapper').style.transition = 'transform 0.2s ease';
+            });
+            input.addEventListener('blur', () => {
+                input.closest('.auth-input-wrapper').style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

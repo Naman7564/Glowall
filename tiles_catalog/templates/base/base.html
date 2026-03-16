@@ -59,6 +59,29 @@
                     <button class="search-toggle" aria-label="Search">
                         <i class="fas fa-search"></i>
                     </button>
+                    {% if user.is_authenticated %}
+                    <div class="user-menu" id="user-menu">
+                        <button class="user-menu-toggle" id="user-menu-toggle" aria-label="User menu">
+                            <span class="user-avatar">{{ user.first_name|first|default:user.username|first }}</span>
+                        </button>
+                        <div class="user-dropdown" id="user-dropdown">
+                            <div class="user-dropdown-header">
+                                <span class="user-dropdown-name">{{ user.first_name|default:user.username }}</span>
+                                <span class="user-dropdown-email">{{ user.email }}</span>
+                            </div>
+                            <div class="user-dropdown-divider"></div>
+                            <form method="post" action="{% url 'accounts:logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="user-dropdown-item user-dropdown-logout">
+                                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'accounts:login' %}" class="nav-auth-btn nav-auth-login">Sign In</a>
+                    <a href="{% url 'accounts:signup' %}" class="nav-auth-btn nav-auth-signup">Sign Up</a>
+                    {% endif %}
                 </div>
             </div>
         </nav>

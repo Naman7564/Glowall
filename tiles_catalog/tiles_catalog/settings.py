@@ -148,8 +148,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Login settings
-LOGIN_URL = 'admin_panel:login'
-LOGIN_REDIRECT_URL = 'admin_panel:dashboard'
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'catalog:home'
 LOGOUT_REDIRECT_URL = 'catalog:home'
 
 # Security settings for production
