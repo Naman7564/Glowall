@@ -39,7 +39,10 @@
                         <a href="{% url 'catalog:home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'catalog:product_list' %}" class="nav-link {% if 'product' in request.resolver_match.url_name %}active{% endif %}">Products</a>
+                        <a href="{% url 'catalog:product_list' %}" class="nav-link {% if 'product' in request.resolver_match.url_name and request.GET.category != 'marble-texture' %}active{% endif %}">All Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'catalog:product_list' %}?category=marble-texture" class="nav-link {% if request.GET.category == 'marble-texture' %}active{% endif %}">Marble Texture</a>
                     </li>
                     <li class="nav-item">
                         <a href="{% url 'catalog:gallery' %}" class="nav-link {% if request.resolver_match.url_name == 'gallery' %}active{% endif %}">Gallery</a>
@@ -109,7 +112,8 @@
                         <h4 class="footer-subtitle">Quick Links</h4>
                         <ul class="footer-links">
                             <li><a href="{% url 'catalog:home' %}">Home</a></li>
-                            <li><a href="{% url 'catalog:product_list' %}">Products</a></li>
+                            <li><a href="{% url 'catalog:product_list' %}">All Products</a></li>
+                            <li><a href="{% url 'catalog:product_list' %}?category=marble-texture">Marble Texture</a></li>
                             <li><a href="{% url 'catalog:gallery' %}">Gallery</a></li>
                             <li><a href="{% url 'catalog:about' %}">About</a></li>
                             <li><a href="{% url 'catalog:contact' %}">Contact</a></li>

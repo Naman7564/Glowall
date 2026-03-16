@@ -23,6 +23,52 @@
     </div>
 </section>
 
+<!-- Marble Texture Section -->
+<section class="section featured-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">Top Selection</span>
+            <h2 class="section-title">Marble Texture</h2>
+            <p class="section-desc">Explore our exclusive Marble Texture collection</p>
+        </div>
+        
+        <div class="products-grid">
+            {% for product in marble_textures %}
+            <article class="product-card">
+                <a href="{% url 'catalog:product_detail' product.slug %}" class="product-link">
+                    <div class="product-image">
+                        {% if product.primary_image %}
+                        <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" loading="lazy">
+                        {% else %}
+                        <div class="product-placeholder">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        {% endif %}
+                        <div class="product-overlay">
+                            <span class="view-btn">View Details</span>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <span class="product-category">{{ product.category.name }}</span>
+                        <h3 class="product-name">{{ product.name }}</h3>
+                        <p class="product-size">{{ product.size_display }}</p>
+                        {% if product.price %}
+                        <p class="product-price">{{ product.price|inr }}</p>
+                        {% endif %}
+                    </div>
+                </a>
+            </article>
+            {% empty %}
+            <p class="no-products">No marble texture products available.</p>
+            {% endfor %}
+        </div>
+        
+        <div class="section-footer">
+            <a href="{% url 'catalog:product_list' %}?category=marble-texture" class="btn btn-secondary">View All Marble Textures</a>
+        </div>
+    </div>
+</section>
+
 <!-- Featured Products -->
 <section class="section featured-section">
     <div class="container">

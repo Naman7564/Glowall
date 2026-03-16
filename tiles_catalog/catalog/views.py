@@ -14,6 +14,11 @@ def home(request):
         is_featured=True
     ).select_related('category', 'material_type')[:8]
     
+    marble_textures = Product.objects.filter(
+        is_available=True,
+        category__slug='marble-texture'
+    ).select_related('category', 'material_type')[:4]
+    
     featured_categories = Category.objects.filter(
         is_active=True
     ).annotate(
@@ -26,6 +31,7 @@ def home(request):
 
     context = {
         'featured_products': featured_products,
+        'marble_textures': marble_textures,
         'featured_categories': featured_categories,
         'customer_reviews': customer_reviews,
         'page_title': 'Premium Tiles & Marble Showroom',
