@@ -898,15 +898,28 @@ h1, h2, h3, h4, h5, h6 {
     position: relative;
 }
 
-.about-placeholder {
+.about-showroom-img {
+    width: 100%;
+    height: auto;
     aspect-ratio: 4/3;
-    background: linear-gradient(135deg, var(--bg-light), var(--border-color));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 80px;
-    color: var(--text-muted);
-    border-radius: 8px;
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: var(--shadow-xl);
+    display: block;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.about-img-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: 20px;
+    bottom: 20px;
+    border: 2px solid var(--accent-color);
+    border-radius: 20px;
+    z-index: -1;
+    opacity: 0.5;
 }
 
 .about-content .section-label {
