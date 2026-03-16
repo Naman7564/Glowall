@@ -24,17 +24,13 @@
 <body class="{% block body_class %}{% endblock %}">
     <!-- Header -->
     <header class="header">
-        <nav class="navbar">
+        <nav class="navbar" aria-label="Primary navigation">
             <div class="nav-container">
                 <a href="/" class="logo" aria-label="Glowall Building Solution home">
                     <img src="{% static 'images/brand/glowall-gbs-logo.png' %}" alt="Glowall Building Solution Pvt. Ltd." class="logo-image" width="230" height="52" decoding="async" fetchpriority="high">
                 </a>
-                
-                <button class="nav-toggle" aria-label="Toggle navigation">
-                    <span class="hamburger"></span>
-                </button>
-                
-                <ul class="nav-menu">
+
+                <ul class="nav-menu" id="primary-nav">
                     <li class="nav-item">
                         <a href="{% url 'catalog:home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
                     </li>
@@ -45,23 +41,20 @@
                         <a href="https://glowall.in/products/category/marbels/" class="nav-link {% if request.GET.category == 'marble-texture' %}active{% endif %}">Marble Texture</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'catalog:gallery' %}" class="nav-link {% if request.resolver_match.url_name == 'gallery' %}active{% endif %}">Gallery</a>
-                    </li>
-                    <li class="nav-item">
                         <a href="{% url 'catalog:about' %}" class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
                     </li>
                     <li class="nav-item">
                         <a href="{% url 'catalog:contact' %}" class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
                     </li>
                 </ul>
-                
+
                 <div class="nav-actions">
-                    <button class="search-toggle" aria-label="Search">
+                    <button class="search-toggle" type="button" aria-label="Search">
                         <i class="fas fa-search"></i>
                     </button>
                     {% if user.is_authenticated %}
                     <div class="user-menu" id="user-menu">
-                        <button class="user-menu-toggle" id="user-menu-toggle" aria-label="User menu">
+                        <button class="user-menu-toggle" id="user-menu-toggle" type="button" aria-label="User menu">
                             <span class="user-avatar">{{ user.first_name|first|default:user.username|first }}</span>
                         </button>
                         <div class="user-dropdown" id="user-dropdown">
@@ -82,6 +75,10 @@
                     <a href="{% url 'accounts:login' %}" class="nav-auth-btn nav-auth-login">Login</a>
                     {% endif %}
                 </div>
+
+                <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+                    <span class="hamburger" aria-hidden="true"></span>
+                </button>
             </div>
         </nav>
         
@@ -92,7 +89,7 @@
                     <input type="text" name="q" placeholder="Search products..." class="search-input" value="{{ request.GET.q }}">
                     <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
                 </form>
-                <button class="search-close"><i class="fas fa-times"></i></button>
+                <button class="search-close" type="button"><i class="fas fa-times"></i></button>
             </div>
         </div>
     </header>
@@ -136,7 +133,6 @@
                             <li><a href="{% url 'catalog:home' %}">Home</a></li>
                             <li><a href="{% url 'catalog:product_list' %}">All Products</a></li>
                             <li><a href="https://glowall.in/products/category/marbels/">Marble Texture</a></li>
-                            <li><a href="{% url 'catalog:gallery' %}">Gallery</a></li>
                             <li><a href="{% url 'catalog:about' %}">About</a></li>
                             <li><a href="{% url 'catalog:contact' %}">Contact</a></li>
                         </ul>

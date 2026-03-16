@@ -3,8 +3,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Count
 from django.contrib import messages
 from django.http import JsonResponse
-from .models import Category, Product, ProductImage, MaterialType, Finish, Contact, CustomerReview
-from .forms import ContactForm, ProductSearchForm
+from .models import Category, Product, CustomerReview
+from .forms import ContactForm
 
 
 def home(request):
@@ -168,17 +168,6 @@ def product_detail(request, slug):
         'meta_description': product.meta_description or product.description[:160],
     }
     return render(request, 'catalog/product_detail.html', context)
-
-
-def gallery(request):
-    """Gallery view showing all product images."""
-    products = Product.objects.filter(is_available=True).prefetch_related('images')
-    
-    context = {
-        'products': products,
-        'page_title': 'Product Gallery',
-    }
-    return render(request, 'catalog/gallery.html', context)
 
 
 def about(request):
