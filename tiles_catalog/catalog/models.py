@@ -167,9 +167,9 @@ class ProductImage(models.Model):
 class Contact(models.Model):
     """Contact form submissions."""
     name = models.CharField(max_length=100)
-    email = models.EmailField()
+    email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True)
-    subject = models.CharField(max_length=200)
+    subject = models.CharField(max_length=200, blank=True)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
