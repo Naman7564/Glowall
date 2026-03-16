@@ -4,148 +4,290 @@
 {% block title %}{{ product.name }} - Glowall{% endblock %}
 {% block meta_description %}{{ product.description|truncatewords:30 }}{% endblock %}
 
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-<section class="product-detail">
+<section class="pd-section">
     <div class="container">
-        <nav class="breadcrumb">
+        <!-- Breadcrumb -->
+        <nav class="pd-breadcrumb" aria-label="Breadcrumb">
             <a href="{% url 'catalog:home' %}">Home</a>
-            <span>/</span>
+            <span class="pd-breadcrumb-sep">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </span>
             <a href="{% url 'catalog:product_list' %}">Products</a>
-            <span>/</span>
+            <span class="pd-breadcrumb-sep">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </span>
             <a href="{% url 'catalog:category_detail' product.category.slug %}">{{ product.category.name }}</a>
-            <span>/</span>
-            <span>{{ product.name }}</span>
+            <span class="pd-breadcrumb-sep">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </span>
+            <span class="pd-breadcrumb-current">{{ product.name }}</span>
         </nav>
-        
-        <div class="product-detail-grid">
-            <!-- Product Images -->
-            <div class="product-gallery">
-                <div class="gallery-main">
-                    {% if product.primary_image %}
-                    <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" id="mainImage">
-                    {% else %}
-                    <div class="product-placeholder large">
-                        <i class="fas fa-image"></i>
+
+        <!-- Product Detail Card -->
+        <div class="pd-card">
+            <div class="pd-grid">
+                <!-- Product Gallery -->
+                <div class="pd-gallery">
+                    <div class="pd-gallery-main" id="pdGalleryMain">
+                        {% if product.primary_image %}
+                        <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" id="mainImage" class="pd-main-image">
+                        {% else %}
+                        <div class="pd-placeholder">
+                            <span class="material-symbols-outlined">image</span>
+                        </div>
+                        {% endif %}
+                        <button class="pd-gallery-zoom" type="button" aria-label="Zoom image" id="zoomBtn">
+                            <span class="material-symbols-outlined">zoom_in</span>
+                        </button>
+                    </div>
+                    {% if images.count > 1 %}
+                    <div class="pd-gallery-thumbs">
+                        {% for image in images %}
+                        <button class="pd-thumb {% if forloop.first %}active{% endif %}" 
+                                onclick="changeImage('{{ image.image.url }}', this)" 
+                                type="button"
+                                aria-label="View image {{ forloop.counter }}">
+                            <img src="{{ image.image.url }}" alt="{{ product.name }} - Image {{ forloop.counter }}">
+                        </button>
+                        {% endfor %}
                     </div>
                     {% endif %}
                 </div>
-                {% if images.count > 1 %}
-                <div class="gallery-thumbs">
-                    {% for image in images %}
-                    <button class="thumb-btn {% if forloop.first %}active{% endif %}" onclick="changeImage('{{ image.image.url }}')">
-                        <img src="{{ image.image.url }}" alt="{{ product.name }} - Image {{ forloop.counter }}">
-                    </button>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-            
-            <!-- Product Info -->
-            <div class="product-info-detail">
-                <span class="product-category-badge">{{ product.category.name }}</span>
-                <h1 class="product-title">{{ product.name }}</h1>
-                
-                {% if product.sku %}
-                <p class="product-sku">SKU: {{ product.sku }}</p>
-                {% endif %}
-                
-                {% if product.price %}
-                <div class="product-price-large">
-                    <span class="price">{{ product.price|inr }}</span>
-                    <span class="price-note">per unit</span>
-                </div>
-                {% endif %}
-                
-                <div class="product-status">
-                    {% if product.is_available %}
-                    <span class="status available"><i class="fas fa-check-circle"></i> In Stock</span>
-                    {% else %}
-                    <span class="status unavailable"><i class="fas fa-times-circle"></i> Out of Stock</span>
+
+                <!-- Product Info -->
+                <div class="pd-info">
+                    <!-- Category Badge -->
+                    <span class="pd-badge">{{ product.category.name }}</span>
+
+                    <!-- Product Title -->
+                    <h1 class="pd-title">{{ product.name }}</h1>
+
+                    <!-- SKU -->
+                    {% if product.sku %}
+                    <p class="pd-sku">SKU: {{ product.sku }}</p>
                     {% endif %}
-                </div>
-                
-                <div class="product-description">
-                    <h3>Description</h3>
-                    <p>{{ product.description|linebreaks }}</p>
-                </div>
-                
-                <!-- Specifications -->
-                <div class="product-specs">
-                    <h3>Specifications</h3>
-                    <table class="specs-table">
-                        <tr>
-                            <th>Category</th>
-                            <td>{{ product.category.name }}</td>
-                        </tr>
-                        {% if product.material_type %}
-                        <tr>
-                            <th>Material Type</th>
-                            <td>{{ product.material_type.name }}</td>
-                        </tr>
+
+                    <!-- Price -->
+                    {% if product.price %}
+                    <div class="pd-price-block">
+                        <span class="pd-price">{{ product.price|inr }}</span>
+                        <span class="pd-price-unit">/per unit</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Stock Status -->
+                    <div class="pd-stock">
+                        {% if product.is_available %}
+                        <span class="pd-stock-badge pd-in-stock">
+                            <span class="material-symbols-outlined">check_circle</span>
+                            In Stock
+                        </span>
+                        <span class="pd-stock-note">Ready to ship</span>
+                        {% else %}
+                        <span class="pd-stock-badge pd-out-stock">
+                            <span class="material-symbols-outlined">cancel</span>
+                            Out of Stock
+                        </span>
                         {% endif %}
-                        <tr>
-                            <th>Size</th>
-                            <td>{{ product.size_display }}</td>
-                        </tr>
-                        {% if product.thickness_mm %}
-                        <tr>
-                            <th>Thickness</th>
-                            <td>{{ product.thickness_mm }} mm</td>
-                        </tr>
-                        {% endif %}
-                        {% if product.finish %}
-                        <tr>
-                            <th>Finish</th>
-                            <td>{{ product.finish.name }}</td>
-                        </tr>
-                        {% endif %}
-                        {% if product.color %}
-                        <tr>
-                            <th>Color</th>
-                            <td>{{ product.color }}</td>
-                        </tr>
-                        {% endif %}
-                    </table>
-                </div>
-                
-                <!-- Actions -->
-                <div class="product-actions">
-                    <a href="{% url 'catalog:contact' %}?subject=Inquiry about {{ product.name }}" class="btn btn-primary btn-lg">
-                        <i class="fas fa-envelope"></i> Request Quote
-                    </a>
-                    <a href="tel:+15551234567" class="btn btn-outline btn-lg">
-                        <i class="fas fa-phone"></i> Call Now
-                    </a>
+                    </div>
+
+                    <!-- Short Description -->
+                    <p class="pd-short-desc">
+                        {{ product.description|truncatewords:30 }}
+                    </p>
+
+                    <!-- Quantity Selector -->
+                    <div class="pd-quantity-wrapper">
+                        <label class="pd-quantity-label">Quantity (sq ft)</label>
+                        <div class="pd-quantity">
+                            <button class="pd-qty-btn" type="button" onclick="updateQty(-1)" aria-label="Decrease quantity">
+                                <span class="material-symbols-outlined">remove</span>
+                            </button>
+                            <input type="number" class="pd-qty-input" value="100" min="1" id="qtyInput">
+                            <button class="pd-qty-btn" type="button" onclick="updateQty(1)" aria-label="Increase quantity">
+                                <span class="material-symbols-outlined">add</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pd-actions">
+                        <a href="{% url 'catalog:contact' %}?subject=Buy Now: {{ product.name }}" class="pd-btn pd-btn-primary" id="buyNowBtn">
+                            <span class="material-symbols-outlined">shopping_bag</span>
+                            Buy Now
+                        </a>
+                        <a href="{% url 'catalog:contact' %}?subject=Inquiry about {{ product.name }}" class="pd-btn pd-btn-outline" id="addToCartBtn">
+                            <span class="material-symbols-outlined">add_shopping_cart</span>
+                            Add to Cart
+                        </a>
+                    </div>
+
+                    <!-- Secondary Actions -->
+                    <div class="pd-secondary-actions">
+                        <button class="pd-icon-btn" type="button" id="addWishlistBtn">
+                            <span class="material-symbols-outlined">favorite_border</span>
+                            Add to Wishlist
+                        </button>
+                        <button class="pd-icon-btn" type="button" id="shareBtn">
+                            <span class="material-symbols-outlined">share</span>
+                            Share
+                        </button>
+                        <a href="{% url 'catalog:contact' %}?subject=Request a Quote for {{ product.name }}" class="pd-icon-btn" id="requestQuoteBtn">
+                            <span class="material-symbols-outlined">request_quote</span>
+                            Get a Quote
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-        
+
+        <!-- Tabs Section -->
+        <div class="pd-tabs-card">
+            <div class="pd-tabs-nav" role="tablist">
+                <button class="pd-tab active" role="tab" aria-selected="true" data-tab="description" id="tabDescription">
+                    Description
+                </button>
+                <button class="pd-tab" role="tab" aria-selected="false" data-tab="specifications" id="tabSpecifications">
+                    Specifications
+                </button>
+                <button class="pd-tab" role="tab" aria-selected="false" data-tab="shipping" id="tabShipping">
+                    Shipping & Returns
+                </button>
+            </div>
+
+            <!-- Description Tab -->
+            <div class="pd-tab-panel active" id="panel-description" role="tabpanel">
+                <div class="pd-tab-content">
+                    <h3 class="pd-tab-title">About This Product</h3>
+                    <div class="pd-description-text">
+                        {{ product.description|linebreaks }}
+                    </div>
+                    <div class="pd-features-list">
+                        <div class="pd-feature-item">
+                            <span class="material-symbols-outlined">verified</span>
+                            <span>100% Authentic Quality Material</span>
+                        </div>
+                        <div class="pd-feature-item">
+                            <span class="material-symbols-outlined">local_shipping</span>
+                            <span>Professional Delivery Available</span>
+                        </div>
+                        <div class="pd-feature-item">
+                            <span class="material-symbols-outlined">support_agent</span>
+                            <span>Expert Installation Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Specifications Tab -->
+            <div class="pd-tab-panel" id="panel-specifications" role="tabpanel">
+                <div class="pd-tab-content">
+                    <h3 class="pd-tab-title">Product Specifications</h3>
+                    <div class="pd-specs-grid">
+                        <div class="pd-spec-row">
+                            <span class="pd-spec-label">Category</span>
+                            <span class="pd-spec-value">{{ product.category.name }}</span>
+                        </div>
+                        {% if product.material_type %}
+                        <div class="pd-spec-row">
+                            <span class="pd-spec-label">Material Type</span>
+                            <span class="pd-spec-value">{{ product.material_type.name }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="pd-spec-row">
+                            <span class="pd-spec-label">Size</span>
+                            <span class="pd-spec-value">{{ product.size_display }}</span>
+                        </div>
+                        {% if product.thickness_mm %}
+                        <div class="pd-spec-row">
+                            <span class="pd-spec-label">Thickness</span>
+                            <span class="pd-spec-value">{{ product.thickness_mm }} mm</span>
+                        </div>
+                        {% endif %}
+                        {% if product.finish %}
+                        <div class="pd-spec-row">
+                            <span class="pd-spec-label">Finish</span>
+                            <span class="pd-spec-value">{{ product.finish.name }}</span>
+                        </div>
+                        {% endif %}
+                        {% if product.color %}
+                        <div class="pd-spec-row">
+                            <span class="pd-spec-label">Color</span>
+                            <span class="pd-spec-value">{{ product.color }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Tab -->
+            <div class="pd-tab-panel" id="panel-shipping" role="tabpanel">
+                <div class="pd-tab-content">
+                    <h3 class="pd-tab-title">Shipping & Returns</h3>
+                    <div class="pd-shipping-info">
+                        <div class="pd-shipping-item">
+                            <span class="material-symbols-outlined">local_shipping</span>
+                            <div>
+                                <strong>Professional Delivery</strong>
+                                <p>We offer professional delivery services for all tile and marble orders. Delivery timelines vary based on quantity and location. Contact us for a delivery estimate.</p>
+                            </div>
+                        </div>
+                        <div class="pd-shipping-item">
+                            <span class="material-symbols-outlined">inventory_2</span>
+                            <div>
+                                <strong>Careful Packaging</strong>
+                                <p>All products are carefully packaged with premium protection materials to ensure they arrive in perfect condition.</p>
+                            </div>
+                        </div>
+                        <div class="pd-shipping-item">
+                            <span class="material-symbols-outlined">swap_horiz</span>
+                            <div>
+                                <strong>Returns & Exchanges</strong>
+                                <p>We accept returns for damaged or defective products within 48 hours of delivery. Please inspect your order upon arrival and contact us immediately if there are any issues.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Related Products -->
         {% if related_products %}
-        <section class="related-products">
-            <h2 class="section-title">Related Products</h2>
-            <div class="products-grid">
+        <section class="pd-related">
+            <div class="pd-related-header">
+                <h2 class="pd-related-title">Complete The Look</h2>
+                <a href="{% url 'catalog:product_list' %}" class="pd-view-all">
+                    View All
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </a>
+            </div>
+            <div class="pd-related-grid">
                 {% for related in related_products %}
-                <article class="product-card">
-                    <a href="{% url 'catalog:product_detail' related.slug %}" class="product-link">
-                        <div class="product-image">
+                <article class="pd-related-card">
+                    <a href="{% url 'catalog:product_detail' related.slug %}" class="pd-related-link">
+                        <div class="pd-related-image">
                             {% if related.primary_image %}
                             <img src="{{ related.primary_image.image.url }}" alt="{{ related.name }}" loading="lazy">
                             {% else %}
-                            <div class="product-placeholder">
-                                <i class="fas fa-image"></i>
+                            <div class="pd-related-placeholder">
+                                <span class="material-symbols-outlined">image</span>
                             </div>
                             {% endif %}
-                            <div class="product-overlay">
-                                <span class="view-btn">View Details</span>
-                            </div>
+                            <button class="pd-wishlist-mini" type="button" aria-label="Add to wishlist">
+                                <span class="material-symbols-outlined">favorite_border</span>
+                            </button>
                         </div>
-                        <div class="product-info">
-                            <span class="product-category">{{ related.category.name }}</span>
-                            <h3 class="product-name">{{ related.name }}</h3>
-                            <p class="product-size">{{ related.size_display }}</p>
+                        <div class="pd-related-info">
+                            <span class="pd-related-category">{{ related.category.name }}</span>
+                            <h3 class="pd-related-name">{{ related.name }}</h3>
+                            <p class="pd-related-size">{{ related.size_display }}</p>
                             {% if related.price %}
-                            <p class="product-price">{{ related.price|inr }}</p>
+                            <p class="pd-related-price">{{ related.price|inr }} <span>/unit</span></p>
                             {% endif %}
                         </div>
                     </a>
@@ -160,10 +302,71 @@
 
 {% block extra_js %}
 <script>
-function changeImage(src) {
-    document.getElementById('mainImage').src = src;
-    document.querySelectorAll('.thumb-btn').forEach(btn => btn.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+// Image Gallery
+function changeImage(src, thumbBtn) {
+    const mainImage = document.getElementById('mainImage');
+    if (mainImage) {
+        mainImage.style.opacity = '0';
+        setTimeout(() => {
+            mainImage.src = src;
+            mainImage.style.opacity = '1';
+        }, 200);
+    }
+    document.querySelectorAll('.pd-thumb').forEach(btn => btn.classList.remove('active'));
+    if (thumbBtn) thumbBtn.classList.add('active');
 }
+
+// Quantity Selector
+function updateQty(change) {
+    const input = document.getElementById('qtyInput');
+    let val = parseInt(input.value) || 1;
+    val = Math.max(1, val + change);
+    input.value = val;
+}
+
+// Tabs
+document.querySelectorAll('.pd-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        const tabId = this.dataset.tab;
+        
+        // Update tabs
+        document.querySelectorAll('.pd-tab').forEach(t => {
+            t.classList.remove('active');
+            t.setAttribute('aria-selected', 'false');
+        });
+        this.classList.add('active');
+        this.setAttribute('aria-selected', 'true');
+        
+        // Update panels
+        document.querySelectorAll('.pd-tab-panel').forEach(panel => {
+            panel.classList.remove('active');
+        });
+        document.getElementById('panel-' + tabId).classList.add('active');
+    });
+});
+
+// Zoom functionality
+const zoomBtn = document.getElementById('zoomBtn');
+const galleryMain = document.getElementById('pdGalleryMain');
+if (zoomBtn && galleryMain) {
+    zoomBtn.addEventListener('click', function() {
+        galleryMain.classList.toggle('zoomed');
+        const icon = this.querySelector('.material-symbols-outlined');
+        icon.textContent = galleryMain.classList.contains('zoomed') ? 'zoom_out' : 'zoom_in';
+    });
+}
+
+// Animate on scroll
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('pd-visible');
+        }
+    });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.pd-card, .pd-tabs-card, .pd-related-card').forEach(el => {
+    observer.observe(el);
+});
 </script>
 {% endblock %}
