@@ -42,7 +42,7 @@
                         <a href="{% url 'catalog:product_list' %}" class="nav-link {% if 'product' in request.resolver_match.url_name and request.GET.category != 'marble-texture' %}active{% endif %}">All Products</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'catalog:product_list' %}?category=marble-texture" class="nav-link {% if request.GET.category == 'marble-texture' %}active{% endif %}">Marble Texture</a>
+                        <a href="https://glowall.in/products/category/marbels/" class="nav-link {% if request.GET.category == 'marble-texture' %}active{% endif %}">Marble Texture</a>
                     </li>
                     <li class="nav-item">
                         <a href="{% url 'catalog:gallery' %}" class="nav-link {% if request.resolver_match.url_name == 'gallery' %}active{% endif %}">Gallery</a>
@@ -113,7 +113,7 @@
                         <ul class="footer-links">
                             <li><a href="{% url 'catalog:home' %}">Home</a></li>
                             <li><a href="{% url 'catalog:product_list' %}">All Products</a></li>
-                            <li><a href="{% url 'catalog:product_list' %}?category=marble-texture">Marble Texture</a></li>
+                            <li><a href="https://glowall.in/products/category/marbels/">Marble Texture</a></li>
                             <li><a href="{% url 'catalog:gallery' %}">Gallery</a></li>
                             <li><a href="{% url 'catalog:about' %}">About</a></li>
                             <li><a href="{% url 'catalog:contact' %}">Contact</a></li>
