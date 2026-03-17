@@ -81,6 +81,7 @@ class ContactAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
         'id',
+        'user',
         'product',
         'full_name',
         'phone_number',
@@ -91,7 +92,16 @@ class OrderAdmin(admin.ModelAdmin):
         'created_at',
     ]
     list_filter = ['payment_status', 'status', 'created_at', 'product__category']
-    search_fields = ['full_name', 'phone_number', 'email', 'product__name', 'cashfree_order_id', 'cashfree_payment_id']
+    search_fields = [
+        'full_name',
+        'phone_number',
+        'email',
+        'user__email',
+        'user__username',
+        'product__name',
+        'cashfree_order_id',
+        'cashfree_payment_id',
+    ]
     readonly_fields = [
         'product',
         'quantity',

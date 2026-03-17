@@ -690,6 +690,9 @@
 
                 <form method="post" action="{% url 'accounts:login' %}" id="login-form" novalidate>
                     {% csrf_token %}
+                    {% if request.GET.next or request.POST.next %}
+                    <input type="hidden" name="next" value="{{ request.GET.next|default:request.POST.next }}">
+                    {% endif %}
 
                     <!-- Username / Email -->
                     <div class="auth-field">

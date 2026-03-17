@@ -1,0 +1,74 @@
+{% extends 'base/base.html' %}
+
+{% block title %}My Profile - Glowall{% endblock %}
+{% block body_class %}account-page profile-page{% endblock %}
+
+{% block content %}
+<section class="account-section">
+    <div class="container">
+        <div class="account-hero">
+            <div class="account-copy">
+                <span class="checkout-kicker">Customer Account</span>
+                <h1 class="checkout-title">Profile</h1>
+                <p class="checkout-intro">Review your account details and the latest delivery information we have saved from your orders.</p>
+            </div>
+            <div class="account-summary">
+                <span class="account-summary-label">Orders Placed</span>
+                <span class="account-summary-value">{{ order_count }}</span>
+                <p class="account-summary-meta">
+                    {% if profile_data.latest_order %}
+                    Latest order on {{ profile_data.latest_order.created_at|date:"M d, Y" }}
+                    {% else %}
+                    Your account is ready for your first order.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="account-shell">
+            <div class="profile-grid">
+                <div class="profile-item">
+                    <span class="profile-item-label"><i class="fas fa-user"></i> Name</span>
+                    <p class="profile-item-value">{{ profile_data.name }}</p>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label"><i class="fas fa-envelope"></i> Email</span>
+                    <p class="profile-item-value">
+                        {% if profile_data.email %}
+                        {{ profile_data.email }}
+                        {% else %}
+                        <span class="profile-item-muted">No email available</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label"><i class="fas fa-phone"></i> Phone</span>
+                    <p class="profile-item-value">
+                        {% if profile_data.phone %}
+                        {{ profile_data.phone }}
+                        {% else %}
+                        <span class="profile-item-muted">No phone number saved yet</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label"><i class="fas fa-location-dot"></i> Address</span>
+                    <p class="profile-item-value">
+                        {% if profile_data.address_lines %}
+                        {% for line in profile_data.address_lines %}
+                        {{ line }}{% if not forloop.last %}<br>{% endif %}
+                        {% endfor %}
+                        {% else %}
+                        <span class="profile-item-muted">No saved address yet</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="account-note">
+                These contact details come from your Glowall account and your latest saved order information. Place a new order to update your delivery address and phone number.
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

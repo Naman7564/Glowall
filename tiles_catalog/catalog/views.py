@@ -3,6 +3,7 @@ import traceback
 import uuid
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Count
 from django.http import JsonResponse
@@ -107,7 +108,59 @@ def _get_checkout_form_initial(request):
             initial['full_name'] = full_name
         if request.user.email:
             initial['email'] = request.user.email
+        recent_order = (
+            Order.objects.filter(user=request.user)
+            .only('phone_number', 'address', 'city', 'state', 'pincode')
+            .order_by('-created_at')
+            .first()
+        )
+        if recent_order:
+            initial.setdefault('phone_number', recent_order.phone_number)
+            initial.setdefault('address', recent_order.address)
+            initial.setdefault('city', recent_order.city)
+            initial.setdefault('state', recent_order.state)
+            initial.setdefault('pincode', recent_order.pincode)
     return initial
+
+
+def _get_profile_snapshot(user):
+    latest_order = (
+        Order.objects.filter(user=user)
+        .only(
+            'full_name',
+            'email',
+            'phone_number',
+            'address',
+            'city',
+            'state',
+            'pincode',
+            'created_at',
+        )
+        .order_by('-created_at')
+        .first()
+    )
+
+    address_lines = []
+    if latest_order:
+        if latest_order.address:
+            address_lines.append(latest_order.address)
+        location_line = ', '.join(part for part in [latest_order.city, latest_order.state] if part)
+        if latest_order.pincode:
+            location_line = f'{location_line} - {latest_order.pincode}' if location_line else latest_order.pincode
+        if location_line:
+            address_lines.append(location_line)
+
+    name = user.get_full_name() or (latest_order.full_name if latest_order else '') or user.username
+    email = user.email or (latest_order.email if latest_order else '')
+    phone = latest_order.phone_number if latest_order else ''
+
+    return {
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'address_lines': address_lines,
+        'latest_order': latest_order,
+    }
 
 
 def _render_checkout(request, form, checkout_item, status=200):
@@ -368,6 +421,33 @@ def contact(request):
     return render(request, 'catalog/contact.html', context)
 
 
+@login_required
+def profile(request):
+    """Profile page for authenticated customers."""
+    user_orders = Order.objects.filter(user=request.user)
+    context = {
+        'profile_data': _get_profile_snapshot(request.user),
+        'order_count': user_orders.count(),
+        'page_title': 'My Profile',
+    }
+    return render(request, 'catalog/profile.html', context)
+
+
+@login_required
+def orders(request):
+    """Order history for the authenticated customer."""
+    user_orders = (
+        Order.objects.filter(user=request.user)
+        .select_related('product', 'product__category')
+        .order_by('-created_at')
+    )
+    context = {
+        'orders': user_orders,
+        'page_title': 'My Orders',
+    }
+    return render(request, 'catalog/orders.html', context)
+
+
 def checkout_view(request):
     """Checkout page for direct product purchases."""
     if request.method == 'POST':
@@ -444,6 +524,8 @@ def place_order_view(request):
 
     try:
         order = form.save(commit=False)
+        if request.user.is_authenticated:
+            order.user = request.user
         order.product = checkout_item['product']
         order.quantity = checkout_item['quantity']
         order.unit_price = checkout_item['unit_price']

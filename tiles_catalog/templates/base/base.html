@@ -58,15 +58,17 @@
                             <span class="user-avatar">{{ user.first_name|first|default:user.username|first }}</span>
                         </button>
                         <div class="user-dropdown" id="user-dropdown">
-                            <div class="user-dropdown-header">
-                                <span class="user-dropdown-name">{{ user.first_name|default:user.username }}</span>
-                                <span class="user-dropdown-email">{{ user.email }}</span>
-                            </div>
+                            <a href="{% url 'catalog:profile' %}" class="user-dropdown-item">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <a href="{% url 'catalog:orders' %}" class="user-dropdown-item">
+                                <i class="fas fa-box-open"></i> My Orders
+                            </a>
                             <div class="user-dropdown-divider"></div>
                             <form method="post" action="{% url 'accounts:logout' %}">
                                 {% csrf_token %}
                                 <button type="submit" class="user-dropdown-item user-dropdown-logout">
-                                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                                    <i class="fas fa-sign-out-alt"></i> Logout
                                 </button>
                             </form>
                         </div>

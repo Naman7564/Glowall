@@ -1,0 +1,76 @@
+{% extends 'base/base.html' %}
+{% load currency_tags %}
+
+{% block title %}My Orders - Glowall{% endblock %}
+{% block body_class %}account-page orders-page{% endblock %}
+
+{% block content %}
+<section class="account-section">
+    <div class="container">
+        <div class="account-hero">
+            <div class="account-copy">
+                <span class="checkout-kicker">Customer Account</span>
+                <h1 class="checkout-title">My Orders</h1>
+                <p class="checkout-intro">Track product purchases, payment updates, and order dates in one place.</p>
+            </div>
+            <div class="account-summary">
+                <span class="account-summary-label">Total Orders</span>
+                <span class="account-summary-value">{{ orders|length }}</span>
+                <p class="account-summary-meta">
+                    {% if orders %}
+                    Most recent order on {{ orders.0.created_at|date:"M d, Y" }}
+                    {% else %}
+                    No orders have been placed on this account yet.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        {% if orders %}
+        <div class="orders-grid">
+            {% for order in orders %}
+            <article class="order-card">
+                <div class="order-card-top">
+                    <div>
+                        <span class="order-reference">Order ID</span>
+                        <h3>#{{ order.id }}</h3>
+                    </div>
+                    <div class="order-status-summary">
+                        <span class="order-reference">Payment Status</span>
+                        <span class="status-pill {% if order.payment_status == 'SUCCESS' %}status-pill-success{% elif order.payment_status == 'FAILED' %}status-pill-failed{% else %}status-pill-pending{% endif %}">
+                            {{ order.get_payment_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="order-meta-grid">
+                    <div class="order-meta-item">
+                        <span class="order-meta-item-label">Product Name</span>
+                        <span class="order-meta-item-value">{{ order.product.name }}</span>
+                    </div>
+                    <div class="order-meta-item">
+                        <span class="order-meta-item-label">Quantity</span>
+                        <span class="order-meta-item-value">{{ order.quantity }}</span>
+                    </div>
+                    <div class="order-meta-item">
+                        <span class="order-meta-item-label">Total Price</span>
+                        <span class="order-meta-item-value">{{ order.total_price|inr }}</span>
+                    </div>
+                    <div class="order-meta-item">
+                        <span class="order-meta-item-label">Order Date</span>
+                        <span class="order-meta-item-value">{{ order.created_at|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="account-empty">
+            <span class="checkout-kicker">No Orders Yet</span>
+            <h2>Your order history will appear here.</h2>
+            <p>Browse the catalog and place your first order to start tracking quantities, payment status, and delivery details from your account.</p>
+            <a href="{% url 'catalog:product_list' %}" class="btn btn-primary">Explore Products</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
@@ -204,6 +205,13 @@ class Order(models.Model):
         (PAYMENT_FAILED, 'Failed'),
     ]
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='orders',
+        null=True,
+        blank=True,
+    )
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='orders')
     full_name = models.CharField(max_length=120)
     phone_number = models.CharField(max_length=20)
