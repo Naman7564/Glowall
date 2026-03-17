@@ -4,21 +4,101 @@
 {% block title %}Glowall - Premium Tiles & Marble Showroom{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="hero">
+<!-- Hero Section — Marble Texture Showcase -->
+<section class="hero hero-marble" id="hero-marble">
     <div class="hero-bg">
+        <div class="hero-marble-veins"></div>
         <div class="hero-overlay"></div>
-    </div>
-    <div class="hero-content">
-        <h1 class="hero-title">Premium Tiles & Marble</h1>
-        <p class="hero-subtitle">Transform your spaces with our exquisite collection of tiles, marble, granite, and natural stone</p>
-        <div class="hero-buttons">
-            <a href="{% url 'catalog:product_list' %}" class="btn hero-btn hero-btn-primary">Explore Collection</a>
-            <a href="{% url 'catalog:contact' %}" class="btn hero-btn hero-btn-accent">Get Quote</a>
+        <!-- Floating gold accent particles -->
+        <div class="hero-particles">
+            <span class="particle particle-1"></span>
+            <span class="particle particle-2"></span>
+            <span class="particle particle-3"></span>
+            <span class="particle particle-4"></span>
+            <span class="particle particle-5"></span>
         </div>
     </div>
+
+    <div class="hero-split container">
+        <!-- Left: Text Content -->
+        <div class="hero-text-col">
+            <span class="hero-badge">
+                <span class="hero-badge-line"></span>
+                BESTSELLER COLLECTION
+            </span>
+
+            <h1 class="hero-title hero-title-serif">
+                Discover<br>
+                Premium<br>
+                Marble<br>
+                Textures
+            </h1>
+
+            <p class="hero-subtitle">
+                Discover our exclusive range of luxury marble and tile textures designed to elevate your next architectural project to unprecedented heights of elegance.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="https://glowall.in/products/category/marbels/" class="btn hero-btn hero-btn-gold" id="hero-explore-marble">
+                    Explore Collection
+                </a>
+                <a href="{% url 'catalog:contact' %}" class="btn hero-btn hero-btn-outline-gold" id="hero-get-quote">
+                    Get Free Quote
+                </a>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-number">500+</span>
+                    <span class="hero-stat-label">TEXTURES</span>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">20+</span>
+                    <span class="hero-stat-label">YEARS EXP.</span>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">Premium</span>
+                    <span class="hero-stat-label">QUALITY ASSURED</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Marble Showcase -->
+        <div class="hero-showcase-col">
+            <div class="hero-showcase">
+                <!-- Dark marble card (background, tilted) -->
+                <div class="showcase-card showcase-card-dark">
+                    {% if marble_textures and marble_textures.0.primary_image %}
+                    <img src="{{ marble_textures.0.primary_image.image.url }}" alt="{{ marble_textures.0.name }}" loading="eager">
+                    {% else %}
+                    <div class="showcase-placeholder showcase-placeholder-dark"></div>
+                    {% endif %}
+                    <div class="showcase-card-shine"></div>
+                </div>
+                <!-- Light marble card (foreground, overlapping) -->
+                <div class="showcase-card showcase-card-light">
+                    {% if marble_textures and marble_textures.1.primary_image %}
+                    <img src="{{ marble_textures.1.primary_image.image.url }}" alt="{{ marble_textures.1.name }}" loading="eager">
+                    {% else %}
+                    <div class="showcase-placeholder showcase-placeholder-light"></div>
+                    {% endif %}
+                    <div class="showcase-card-badge">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <div class="showcase-card-shine"></div>
+                </div>
+                <!-- Decorative gold ring -->
+                <div class="showcase-ring"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll indicator -->
     <div class="hero-scroll">
-        <span>Scroll to discover</span>
+        <span>SCROLL TO EXPLORE</span>
         <i class="fas fa-chevron-down"></i>
     </div>
 </section>
