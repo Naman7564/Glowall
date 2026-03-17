@@ -99,35 +99,392 @@ function initNavigation() {
  * Search Overlay
  */
 function initSearch() {
+    const RECENT_SEARCHES_KEY = 'glowallRecentSearches';
+    const SEARCH_DEBOUNCE_MS = 220;
+    const MIN_QUERY_LENGTH = 2;
     const searchToggle = document.querySelector('.search-toggle');
     const searchOverlay = document.querySelector('.search-overlay');
     const searchClose = document.querySelector('.search-close');
-    const searchInput = document.querySelector('.search-input');
-    
+    const overlayInput = searchOverlay?.querySelector('.js-search-input');
+    const searchForms = document.querySelectorAll('.js-search-form');
+    const recentSearchRefreshers = [];
+
+    const readRecentSearches = () => {
+        try {
+            const storedSearches = window.localStorage.getItem(RECENT_SEARCHES_KEY);
+            const parsedSearches = JSON.parse(storedSearches || '[]');
+            return Array.isArray(parsedSearches) ? parsedSearches.filter(Boolean).slice(0, 5) : [];
+        } catch (error) {
+            return [];
+        }
+    };
+
+    const writeRecentSearches = (searches) => {
+        try {
+            window.localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(searches.slice(0, 5)));
+        } catch (error) {
+            // Ignore storage failures and keep search functional.
+        }
+    };
+
+    const saveRecentSearch = (query) => {
+        const normalizedQuery = query.trim();
+
+        if (!normalizedQuery) {
+            return;
+        }
+
+        const updatedSearches = [
+            normalizedQuery,
+            ...readRecentSearches().filter((item) => item.toLowerCase() !== normalizedQuery.toLowerCase()),
+        ].slice(0, 5);
+
+        writeRecentSearches(updatedSearches);
+        recentSearchRefreshers.forEach((refreshRecentSearches) => refreshRecentSearches());
+    };
+
+    const openOverlay = () => {
+        if (!searchOverlay) {
+            return;
+        }
+
+        searchOverlay.classList.add('active');
+        searchOverlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('search-open');
+
+        window.setTimeout(() => {
+            overlayInput?.focus();
+        }, 120);
+    };
+
+    const closeOverlay = () => {
+        searchOverlay?.classList.remove('active');
+        searchOverlay?.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('search-open');
+    };
+
+    const createResultItem = (result) => {
+        const resultLink = document.createElement('a');
+        const resultCopy = document.createElement('div');
+        const resultTitle = document.createElement('span');
+        const resultMeta = document.createElement('div');
+        const resultArrow = document.createElement('span');
+        const categoryTag = document.createElement('span');
+
+        resultLink.className = 'search-result';
+        resultLink.href = result.url || `/products/${result.slug}/`;
+
+        resultCopy.className = 'search-result-copy';
+        resultTitle.className = 'search-result-title';
+        resultMeta.className = 'search-result-meta';
+        resultArrow.className = 'search-result-arrow';
+
+        resultTitle.textContent = result.name || 'View product';
+        categoryTag.textContent = result.category || 'Collection';
+        resultMeta.appendChild(categoryTag);
+
+        if (result.material) {
+            const materialTag = document.createElement('span');
+            materialTag.textContent = result.material;
+            resultMeta.appendChild(materialTag);
+        }
+
+        resultArrow.innerHTML = '<i class="fas fa-arrow-right"></i>';
+
+        resultCopy.appendChild(resultTitle);
+        resultCopy.appendChild(resultMeta);
+        resultLink.appendChild(resultCopy);
+        resultLink.appendChild(resultArrow);
+        resultLink.addEventListener('click', function() {
+            saveRecentSearch(result.name || '');
+        });
+
+        return resultLink;
+    };
+
+    const initSearchForm = (form) => {
+        const input = form.querySelector('.js-search-input');
+        const clearButton = form.querySelector('.js-search-clear');
+        const panel = form.querySelector('.js-search-panel');
+        const recentSection = form.querySelector('.js-search-recent-section');
+        const recentList = form.querySelector('.js-search-recent-list');
+        const resultsSection = form.querySelector('.js-search-results-section');
+        const resultsList = form.querySelector('.js-search-results');
+        const status = form.querySelector('.js-search-status');
+        const persistentPanel = form.dataset.panelMode === 'persistent';
+        const searchUrl = form.dataset.searchUrl;
+        const emptyMessage = Object.prototype.hasOwnProperty.call(form.dataset, 'emptyMessage')
+            ? form.dataset.emptyMessage
+            : status?.textContent.trim() || '';
+        let debounceTimer = null;
+        let requestController = null;
+
+        if (!input) {
+            return;
+        }
+
+        const updateClearButton = () => {
+            clearButton?.classList.toggle('visible', input.value.trim().length > 0);
+        };
+
+        const setStatus = (message, state = 'idle') => {
+            if (!status) {
+                return;
+            }
+
+            status.textContent = message;
+            status.dataset.state = state;
+            status.hidden = !message;
+        };
+
+        const clearResults = () => {
+            if (resultsList) {
+                resultsList.innerHTML = '';
+            }
+
+            if (resultsSection) {
+                resultsSection.hidden = true;
+            }
+        };
+
+        const cancelPendingSearch = () => {
+            window.clearTimeout(debounceTimer);
+
+            if (requestController) {
+                requestController.abort();
+                requestController = null;
+            }
+        };
+
+        const syncPanelVisibility = () => {
+            if (!panel) {
+                return;
+            }
+
+            const hasRecentSearches = recentSection ? !recentSection.hidden : false;
+            const hasResults = resultsSection ? !resultsSection.hidden : false;
+            const hasStatus = status ? !status.hidden : false;
+            const shouldShowPanel = persistentPanel
+                ? hasRecentSearches || hasResults || hasStatus
+                : form.contains(document.activeElement) || hasResults;
+            panel.hidden = !shouldShowPanel;
+        };
+
+        const renderRecentSearches = () => {
+            if (!recentList || !recentSection) {
+                return;
+            }
+
+            const recentSearches = input.value.trim().length >= MIN_QUERY_LENGTH ? [] : readRecentSearches();
+            recentList.innerHTML = '';
+
+            recentSearches.forEach((query) => {
+                const recentButton = document.createElement('button');
+                recentButton.type = 'button';
+                recentButton.className = 'search-chip';
+                recentButton.textContent = query;
+                recentButton.addEventListener('click', function() {
+                    input.value = query;
+                    updateClearButton();
+                    renderRecentSearches();
+                    queueSuggestions(query);
+                    input.focus();
+                });
+                recentList.appendChild(recentButton);
+            });
+
+            recentSection.hidden = recentSearches.length === 0;
+            syncPanelVisibility();
+        };
+
+        const showIdleState = () => {
+            cancelPendingSearch();
+            clearResults();
+            renderRecentSearches();
+            setStatus(emptyMessage, 'idle');
+            syncPanelVisibility();
+        };
+
+        const renderResults = (results, query) => {
+            clearResults();
+
+            if (!resultsList || !resultsSection) {
+                return;
+            }
+
+            if (!results.length) {
+                setStatus(`No quick matches for "${query}". Press search to browse all results.`, 'idle');
+                syncPanelVisibility();
+                return;
+            }
+
+            results.forEach((result) => {
+                resultsList.appendChild(createResultItem(result));
+            });
+
+            resultsSection.hidden = false;
+            setStatus('Select a product or press search to see the full catalog results.', 'idle');
+            syncPanelVisibility();
+        };
+
+        const fetchSuggestions = async (query) => {
+            if (!searchUrl) {
+                return;
+            }
+
+            if (typeof AbortController === 'function') {
+                requestController = new AbortController();
+            } else {
+                requestController = null;
+            }
+
+            try {
+                const requestUrl = new URL(searchUrl, window.location.origin);
+                const requestOptions = {};
+
+                requestUrl.searchParams.set('q', query);
+
+                if (requestController) {
+                    requestOptions.signal = requestController.signal;
+                }
+
+                const response = await fetch(requestUrl.toString(), requestOptions);
+
+                if (!response.ok) {
+                    throw new Error(`Search request failed with status ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (input.value.trim() !== query) {
+                    return;
+                }
+
+                requestController = null;
+                renderResults(Array.isArray(data.results) ? data.results : [], query);
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    return;
+                }
+
+                requestController = null;
+                clearResults();
+                setStatus('Suggestions are unavailable right now.', 'error');
+                syncPanelVisibility();
+            }
+        };
+
+        function queueSuggestions(query) {
+            const normalizedQuery = query.trim();
+
+            cancelPendingSearch();
+            renderRecentSearches();
+
+            if (normalizedQuery.length < MIN_QUERY_LENGTH) {
+                clearResults();
+                setStatus(emptyMessage, 'idle');
+                syncPanelVisibility();
+                return;
+            }
+
+            setStatus('Searching the collection...', 'loading');
+            syncPanelVisibility();
+            debounceTimer = window.setTimeout(() => {
+                fetchSuggestions(normalizedQuery);
+            }, SEARCH_DEBOUNCE_MS);
+        }
+
+        clearButton?.addEventListener('click', function() {
+            input.value = '';
+            updateClearButton();
+            showIdleState();
+            input.focus();
+        });
+
+        input.addEventListener('focus', function() {
+            if (input.value.trim().length >= MIN_QUERY_LENGTH) {
+                queueSuggestions(input.value);
+            } else {
+                renderRecentSearches();
+                setStatus(emptyMessage, 'idle');
+                syncPanelVisibility();
+            }
+        });
+
+        input.addEventListener('input', function() {
+            updateClearButton();
+            queueSuggestions(input.value);
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && input.value.trim()) {
+                e.stopPropagation();
+                input.value = '';
+                updateClearButton();
+                showIdleState();
+            }
+        });
+
+        form.addEventListener('submit', function() {
+            saveRecentSearch(input.value);
+        });
+
+        form.addEventListener('focusout', function() {
+            window.setTimeout(() => {
+                if (persistentPanel || form.contains(document.activeElement)) {
+                    return;
+                }
+
+                cancelPendingSearch();
+                clearResults();
+                renderRecentSearches();
+
+                if (!input.value.trim() && !recentList?.children.length) {
+                    setStatus('', 'idle');
+                } else if (!input.value.trim()) {
+                    setStatus(emptyMessage, 'idle');
+                }
+
+                syncPanelVisibility();
+            }, 120);
+        });
+
+        updateClearButton();
+        renderRecentSearches();
+
+        if (persistentPanel) {
+            setStatus(emptyMessage, 'idle');
+            syncPanelVisibility();
+        }
+
+        recentSearchRefreshers.push(renderRecentSearches);
+    };
+
+    searchForms.forEach((form) => {
+        initSearchForm(form);
+    });
+
     if (searchToggle && searchOverlay) {
         searchToggle.addEventListener('click', function() {
-            searchOverlay.classList.add('active');
-            searchInput?.focus();
+            openOverlay();
         });
     }
-    
+
     if (searchClose) {
         searchClose.addEventListener('click', function() {
-            searchOverlay?.classList.remove('active');
+            closeOverlay();
         });
     }
-    
-    // Close on escape
+
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-            searchOverlay?.classList.remove('active');
+            closeOverlay();
         }
     });
-    
-    // Close on overlay click
+
     searchOverlay?.addEventListener('click', function(e) {
         if (e.target === searchOverlay) {
-            searchOverlay.classList.remove('active');
+            closeOverlay();
         }
     });
 }

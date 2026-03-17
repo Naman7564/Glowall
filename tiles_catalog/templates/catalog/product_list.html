@@ -22,10 +22,47 @@
             <aside class="catalog-sidebar">
                 <div class="filter-section">
                     <h3 class="filter-title">Search</h3>
-                    <form action="" method="get" class="filter-form">
+                    <form action="" method="get" class="filter-form search-form search-form-inline js-search-form" data-search-url="{% url 'catalog:api_search' %}">
+                        {% if request.GET.category %}<input type="hidden" name="category" value="{{ request.GET.category }}">{% endif %}
+                        {% if request.GET.material %}<input type="hidden" name="material" value="{{ request.GET.material }}">{% endif %}
+                        {% if request.GET.finish %}<input type="hidden" name="finish" value="{{ request.GET.finish }}">{% endif %}
+                        {% if request.GET.color %}<input type="hidden" name="color" value="{{ request.GET.color }}">{% endif %}
+                        {% if request.GET.availability %}<input type="hidden" name="availability" value="{{ request.GET.availability }}">{% endif %}
+                        {% if request.GET.sort %}<input type="hidden" name="sort" value="{{ request.GET.sort }}">{% endif %}
+
                         <div class="search-box">
-                            <input type="text" name="q" placeholder="Search products..." value="{{ search_query }}">
-                            <button type="submit"><i class="fas fa-search"></i></button>
+                            <div class="search-field">
+                                <span class="search-field-icon" aria-hidden="true">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <label class="sr-only" for="catalog-search-input">Search products</label>
+                                <input type="text" id="catalog-search-input" name="q" placeholder="Search products..." value="{{ search_query }}" class="search-input js-search-input" autocomplete="off">
+                                <button type="button" class="search-clear js-search-clear" aria-label="Clear search">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <button type="submit" class="search-btn">
+                                <i class="fas fa-search"></i>
+                                <span>Search</span>
+                            </button>
+                        </div>
+
+                        <div class="search-panel search-panel-inline js-search-panel" hidden>
+                            <div class="search-panel-section js-search-recent-section" hidden>
+                                <div class="search-panel-header">
+                                    <span class="search-panel-label">Recent</span>
+                                </div>
+                                <div class="search-chip-list js-search-recent-list"></div>
+                            </div>
+
+                            <div class="search-panel-section js-search-results-section" hidden>
+                                <div class="search-panel-header">
+                                    <span class="search-panel-label">Suggestions</span>
+                                </div>
+                                <div class="search-results js-search-results" role="listbox" aria-label="Search suggestions"></div>
+                            </div>
+
+                            <p class="search-status js-search-status" aria-live="polite">Search by product name, material, or category.</p>
                         </div>
                     </form>
                 </div>

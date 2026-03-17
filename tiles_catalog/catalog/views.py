@@ -3,6 +3,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Count
 from django.contrib import messages
 from django.http import JsonResponse
+from django.urls import reverse
 from .models import Category, Product, CustomerReview, Order
 from .forms import ContactForm, OrderForm
 
@@ -330,10 +331,25 @@ def api_search(request):
     query = request.GET.get('q', '')
     if len(query) < 2:
         return JsonResponse({'results': []})
-    
+
     products = Product.objects.filter(
-        is_available=True,
-        name__icontains=query
-    ).values('name', 'slug', 'category__name')[:10]
-    
-    return JsonResponse({'results': list(products)})
+        is_available=True
+    ).filter(
+        Q(name__icontains=query) |
+        Q(description__icontains=query) |
+        Q(category__name__icontains=query) |
+        Q(material_type__name__icontains=query)
+    ).select_related('category', 'material_type').distinct()[:8]
+
+    results = [
+        {
+            'name': product.name,
+            'slug': product.slug,
+            'category': product.category.name if product.category else '',
+            'material': product.material_type.name if product.material_type else '',
+            'url': reverse('catalog:product_detail', args=[product.slug]),
+        }
+        for product in products
+    ]
+
+    return JsonResponse({'results': results})
