@@ -181,6 +181,42 @@ class Contact(models.Model):
         return f'{self.name} - {self.subject}'
 
 
+class Order(models.Model):
+    """Direct checkout orders submitted from the storefront."""
+
+    STATUS_NEW = 'new'
+    STATUS_PROCESSING = 'processing'
+    STATUS_COMPLETED = 'completed'
+    STATUS_CANCELLED = 'cancelled'
+    STATUS_CHOICES = [
+        (STATUS_NEW, 'New'),
+        (STATUS_PROCESSING, 'Processing'),
+        (STATUS_COMPLETED, 'Completed'),
+        (STATUS_CANCELLED, 'Cancelled'),
+    ]
+
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='orders')
+    full_name = models.CharField(max_length=120)
+    phone_number = models.CharField(max_length=20)
+    email = models.EmailField()
+    address = models.TextField()
+    city = models.CharField(max_length=80)
+    state = models.CharField(max_length=80)
+    pincode = models.CharField(max_length=10)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_NEW)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Order #{self.pk or "new"} - {self.product.name}'
+
+
 class CustomerReview(models.Model):
     """Customer review images and optional attribution for the homepage."""
 

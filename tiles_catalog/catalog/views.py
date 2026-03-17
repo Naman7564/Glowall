@@ -3,8 +3,74 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Count
 from django.contrib import messages
 from django.http import JsonResponse
-from .models import Category, Product, CustomerReview
-from .forms import ContactForm
+from .models import Category, Product, CustomerReview, Order
+from .forms import ContactForm, OrderForm
+
+
+CHECKOUT_SESSION_KEY = 'checkout_item'
+
+
+def _normalize_quantity(value, default=1):
+    """Return a safe positive quantity for checkout."""
+    try:
+        quantity = int(value)
+    except (TypeError, ValueError):
+        return default
+    return max(1, quantity)
+
+
+def _load_checkout_item(request):
+    """Resolve the active checkout product and quantity from request/session."""
+    product_id = request.GET.get('product') or request.POST.get('product_id')
+    quantity_value = request.GET.get('quantity') or request.POST.get('quantity')
+    checkout_data = request.session.get(CHECKOUT_SESSION_KEY, {})
+
+    if product_id:
+        checkout_data = {
+            'product_id': product_id,
+            'quantity': _normalize_quantity(quantity_value, default=1),
+        }
+        request.session[CHECKOUT_SESSION_KEY] = checkout_data
+    elif checkout_data:
+        checkout_data['quantity'] = _normalize_quantity(checkout_data.get('quantity'), default=1)
+        request.session[CHECKOUT_SESSION_KEY] = checkout_data
+    else:
+        return None
+
+    product = Product.objects.filter(
+        pk=checkout_data.get('product_id'),
+        is_available=True,
+    ).select_related('category', 'material_type', 'finish').first()
+
+    if not product:
+        request.session.pop(CHECKOUT_SESSION_KEY, None)
+        return None
+
+    if product.price is None:
+        request.session.pop(CHECKOUT_SESSION_KEY, None)
+        return {
+            'product': product,
+            'quantity': checkout_data['quantity'],
+            'pricing_available': False,
+        }
+
+    quantity = checkout_data['quantity']
+    unit_price = product.price
+    total_price = unit_price * quantity
+
+    checkout_item = {
+        'product': product,
+        'quantity': quantity,
+        'unit_price': unit_price,
+        'total_price': total_price,
+        'pricing_available': True,
+    }
+
+    request.session[CHECKOUT_SESSION_KEY] = {
+        'product_id': product.pk,
+        'quantity': quantity,
+    }
+    return checkout_item
 
 
 def home(request):
@@ -194,6 +260,60 @@ def contact(request):
         'page_title': 'Contact Us',
     }
     return render(request, 'catalog/contact.html', context)
+
+
+def checkout_view(request):
+    """Checkout page for direct product purchases."""
+    checkout_item = _load_checkout_item(request)
+    if not checkout_item:
+        messages.error(request, 'Select a product before proceeding to checkout.')
+        return redirect('catalog:product_list')
+
+    if not checkout_item['pricing_available']:
+        messages.error(request, 'This product is not available for direct checkout yet.')
+        return redirect(checkout_item['product'].get_absolute_url())
+
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.product = checkout_item['product']
+            order.quantity = checkout_item['quantity']
+            order.unit_price = checkout_item['unit_price']
+            order.total_price = checkout_item['total_price']
+            order.save()
+            request.session.pop(CHECKOUT_SESSION_KEY, None)
+            messages.success(request, f'Order #{order.pk} placed successfully. Our team will contact you shortly.')
+            return redirect('catalog:checkout_success', order_id=order.pk)
+    else:
+        initial = {}
+        if request.user.is_authenticated:
+            full_name = ' '.join(part for part in [request.user.first_name, request.user.last_name] if part).strip()
+            if full_name:
+                initial['full_name'] = full_name
+            if request.user.email:
+                initial['email'] = request.user.email
+        form = OrderForm(initial=initial)
+
+    context = {
+        'form': form,
+        'checkout_item': checkout_item,
+        'page_title': 'Checkout',
+    }
+    return render(request, 'catalog/checkout.html', context)
+
+
+def checkout_success(request, order_id):
+    """Confirmation page for a completed order."""
+    order = get_object_or_404(
+        Order.objects.select_related('product', 'product__category', 'product__material_type'),
+        pk=order_id,
+    )
+    context = {
+        'order': order,
+        'page_title': 'Order Confirmed',
+    }
+    return render(request, 'catalog/checkout_success.html', context)
 
 
 def api_products(request):

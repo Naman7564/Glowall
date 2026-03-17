@@ -8,6 +8,8 @@ urlpatterns = [
     path('products/', views.product_list, name='product_list'),
     path('products/category/<slug:slug>/', views.category_detail, name='category_detail'),
     path('products/<slug:slug>/', views.product_detail, name='product_detail'),
+    path('checkout/', views.checkout_view, name='checkout'),
+    path('checkout/success/<int:order_id>/', views.checkout_success, name='checkout_success'),
     path('about/', views.about, name='about'),
     path('contact/', views.contact, name='contact'),
     # API endpoints

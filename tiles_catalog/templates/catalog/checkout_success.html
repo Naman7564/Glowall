@@ -1,0 +1,57 @@
+{% extends 'base/base.html' %}
+{% load currency_tags %}
+
+{% block title %}Order Confirmed - Glowall{% endblock %}
+{% block body_class %}checkout-page checkout-success-page{% endblock %}
+
+{% block content %}
+<section class="checkout-section">
+    <div class="container">
+        <div class="checkout-success-card">
+            <div class="checkout-success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <span class="checkout-kicker">Order Confirmed</span>
+            <h1 class="checkout-title">Thank you, {{ order.full_name }}</h1>
+            <p class="checkout-intro">
+                Your order request has been received. Our team will contact you shortly to confirm stock, delivery timing, and dispatch details.
+            </p>
+
+            <div class="checkout-success-grid">
+                <div class="checkout-success-panel">
+                    <p class="checkout-card-eyebrow">Order Reference</p>
+                    <h2>#{{ order.pk }}</h2>
+                    <p>Placed on {{ order.created_at|date:"M d, Y" }}</p>
+                </div>
+                <div class="checkout-success-panel">
+                    <p class="checkout-card-eyebrow">Order Total</p>
+                    <h2>{{ order.total_price|inr }}</h2>
+                    <p>{{ order.unit_price|inr }} x {{ order.quantity }}</p>
+                </div>
+            </div>
+
+            <div class="checkout-success-product">
+                <div class="checkout-product-media">
+                    {% if order.product.primary_image %}
+                    <img src="{{ order.product.primary_image.image.url }}" alt="{{ order.product.name }}">
+                    {% else %}
+                    <div class="checkout-product-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="checkout-product-copy">
+                    <p class="checkout-product-category">{{ order.product.category.name }}</p>
+                    <h3>{{ order.product.name }}</h3>
+                    <p class="checkout-product-meta">{{ order.product.size_display }}</p>
+                </div>
+            </div>
+
+            <div class="checkout-success-actions">
+                <a href="{{ order.product.get_absolute_url }}" class="btn btn-primary">Back to Product</a>
+                <a href="{% url 'catalog:product_list' %}" class="btn btn-outline">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

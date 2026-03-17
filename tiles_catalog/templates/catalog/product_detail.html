@@ -101,26 +101,38 @@
                         {{ product.description|truncatewords:30 }}
                     </p>
 
-                    <!-- Quantity Selector -->
-                    <div class="pd-quantity-wrapper">
-                        <label class="pd-quantity-label">Quantity (sq ft)</label>
-                        <div class="pd-quantity">
-                            <button class="pd-qty-btn" type="button" onclick="updateQty(-1)" aria-label="Decrease quantity">
-                                <span class="material-symbols-outlined">remove</span>
-                            </button>
-                            <input type="number" class="pd-qty-input" value="100" min="1" id="qtyInput">
-                            <button class="pd-qty-btn" type="button" onclick="updateQty(1)" aria-label="Increase quantity">
-                                <span class="material-symbols-outlined">add</span>
-                            </button>
-                        </div>
-                    </div>
+                    <form method="get" action="{% url 'catalog:checkout' %}" class="pd-purchase-form">
+                        <input type="hidden" name="product" value="{{ product.id }}">
 
-                    <!-- Action Buttons -->
-                    <div class="pd-actions">
-                        <a href="{% url 'catalog:contact' %}?subject=Buy Now: {{ product.name }}" class="pd-btn pd-btn-primary" id="buyNowBtn">
-                            <span class="material-symbols-outlined">shopping_bag</span>
-                            Buy Now
-                        </a>
+                        <!-- Quantity Selector -->
+                        <div class="pd-quantity-wrapper">
+                            <label class="pd-quantity-label" for="qtyInput">Quantity (sq ft)</label>
+                            <div class="pd-quantity">
+                                <button class="pd-qty-btn" type="button" onclick="updateQty(-1)" aria-label="Decrease quantity">
+                                    <span class="material-symbols-outlined">remove</span>
+                                </button>
+                                <input type="number" class="pd-qty-input" value="100" min="1" id="qtyInput" name="quantity">
+                                <button class="pd-qty-btn" type="button" onclick="updateQty(1)" aria-label="Increase quantity">
+                                    <span class="material-symbols-outlined">add</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="pd-actions">
+                            <button type="submit" class="pd-btn pd-btn-primary" id="buyNowBtn" {% if not product.price %}disabled{% endif %}>
+                                <span class="material-symbols-outlined">shopping_bag</span>
+                                Buy Now
+                            </button>
+                        {% if product.price %}
+                            <span class="pd-buy-hint">Secure checkout with quantity carried over automatically.</span>
+                        {% else %}
+                            <span class="pd-buy-hint">Direct checkout is enabled only for products with pricing.</span>
+                        {% endif %}
+                        </div>
+                    </form>
+
+                    <div class="pd-actions pd-actions-secondary">
                         <a href="{% url 'catalog:contact' %}?subject=Inquiry about {{ product.name }}" class="pd-btn pd-btn-outline" id="addToCartBtn">
                             <span class="material-symbols-outlined">add_shopping_cart</span>
                             Add to Cart

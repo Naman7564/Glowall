@@ -1,0 +1,183 @@
+{% extends 'base/base.html' %}
+{% load currency_tags %}
+
+{% block title %}Checkout - Glowall{% endblock %}
+{% block meta_description %}Secure checkout for {{ checkout_item.product.name }} at Glowall.{% endblock %}
+{% block body_class %}checkout-page{% endblock %}
+
+{% block content %}
+<section class="checkout-section">
+    <div class="container">
+        <div class="checkout-hero">
+            <div class="checkout-copy">
+                <span class="checkout-kicker">Secure Checkout</span>
+                <h1 class="checkout-title">Complete your Glowall order</h1>
+                <p class="checkout-intro">
+                    Confirm your billing details, review the product summary, and place the order in one step.
+                </p>
+            </div>
+            <div class="checkout-hero-card">
+                <span class="checkout-hero-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    Verified order request
+                </span>
+                <p>Our team reviews every order quickly and shares delivery confirmation after submission.</p>
+            </div>
+        </div>
+
+        <form method="post" class="checkout-layout" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="product_id" value="{{ checkout_item.product.id }}">
+            <input type="hidden" name="quantity" value="{{ checkout_item.quantity }}">
+
+            <section class="checkout-card checkout-form-card" aria-labelledby="checkout-details-heading">
+                <div class="checkout-card-header">
+                    <div>
+                        <p class="checkout-card-eyebrow">Billing Details</p>
+                        <h2 id="checkout-details-heading">Shipping & billing information</h2>
+                    </div>
+                    <p class="checkout-card-note">All fields are required for order processing.</p>
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="checkout-form-errors" role="alert">
+                    {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="checkout-form-grid">
+                    <div class="checkout-field">
+                        <label for="{{ form.full_name.id_for_label }}">Full Name</label>
+                        {{ form.full_name }}
+                        <p class="checkout-field-help">Used for order confirmation and delivery handoff.</p>
+                        {% if form.full_name.errors %}
+                        <span class="error">{{ form.full_name.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="checkout-field">
+                        <label for="{{ form.phone_number.id_for_label }}">Phone Number</label>
+                        {{ form.phone_number }}
+                        <p class="checkout-field-help">Share the best number for delivery coordination.</p>
+                        {% if form.phone_number.errors %}
+                        <span class="error">{{ form.phone_number.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="checkout-field checkout-field-full">
+                        <label for="{{ form.email.id_for_label }}">Email</label>
+                        {{ form.email }}
+                        <p class="checkout-field-help">We will send order acknowledgement to this address.</p>
+                        {% if form.email.errors %}
+                        <span class="error">{{ form.email.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="checkout-field checkout-field-full">
+                        <label for="{{ form.address.id_for_label }}">Address</label>
+                        {{ form.address }}
+                        <p class="checkout-field-help">Include house number, area, and nearby landmark.</p>
+                        {% if form.address.errors %}
+                        <span class="error">{{ form.address.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="checkout-field">
+                        <label for="{{ form.city.id_for_label }}">City</label>
+                        {{ form.city }}
+                        {% if form.city.errors %}
+                        <span class="error">{{ form.city.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="checkout-field">
+                        <label for="{{ form.state.id_for_label }}">State</label>
+                        {{ form.state }}
+                        {% if form.state.errors %}
+                        <span class="error">{{ form.state.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="checkout-field checkout-field-compact">
+                        <label for="{{ form.pincode.id_for_label }}">Pincode</label>
+                        {{ form.pincode }}
+                        {% if form.pincode.errors %}
+                        <span class="error">{{ form.pincode.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="checkout-inline-note">
+                        <span class="checkout-note-icon">
+                            <i class="fas fa-truck"></i>
+                        </span>
+                        <div>
+                            <strong>Estimated response in 1 business day</strong>
+                            <p>We verify stock, delivery slot, and final dispatch timeline after the order is placed.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="checkout-card checkout-summary-card" aria-labelledby="order-summary-heading">
+                <div class="checkout-summary-sticky">
+                    <div class="checkout-card-header checkout-summary-header">
+                        <div>
+                            <p class="checkout-card-eyebrow">Order Summary</p>
+                            <h2 id="order-summary-heading">Your selection</h2>
+                        </div>
+                        <span class="checkout-summary-qty">{{ checkout_item.quantity }} qty</span>
+                    </div>
+
+                    <div class="checkout-product">
+                        <div class="checkout-product-media">
+                            {% if checkout_item.product.primary_image %}
+                            <img src="{{ checkout_item.product.primary_image.image.url }}" alt="{{ checkout_item.product.name }}">
+                            {% else %}
+                            <div class="checkout-product-placeholder">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="checkout-product-copy">
+                            <p class="checkout-product-category">{{ checkout_item.product.category.name }}</p>
+                            <h3>{{ checkout_item.product.name }}</h3>
+                            <p class="checkout-product-meta">{{ checkout_item.product.size_display }}</p>
+                        </div>
+                    </div>
+
+                    <div class="checkout-summary-lines">
+                        <div class="checkout-summary-row">
+                            <span>Unit Price</span>
+                            <strong>{{ checkout_item.unit_price|inr }}</strong>
+                        </div>
+                        <div class="checkout-summary-row">
+                            <span>Quantity</span>
+                            <strong>{{ checkout_item.quantity }}</strong>
+                        </div>
+                        <div class="checkout-summary-row checkout-summary-row-muted">
+                            <span>Subtotal</span>
+                            <strong>{{ checkout_item.unit_price|inr }} x {{ checkout_item.quantity }} = {{ checkout_item.total_price|inr }}</strong>
+                        </div>
+                        <div class="checkout-summary-total">
+                            <span>Total</span>
+                            <strong>{{ checkout_item.total_price|inr }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="checkout-summary-footer">
+                        <div class="checkout-secure-line">
+                            <i class="fas fa-lock"></i>
+                            <span>Your details are used only for fulfillment.</span>
+                        </div>
+                        <button type="submit" class="checkout-submit-btn">
+                            Place Order
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </form>
+    </div>
+</section>
+{% endblock %}
