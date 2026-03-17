@@ -79,10 +79,32 @@ class ContactAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'product', 'full_name', 'phone_number', 'quantity', 'total_price', 'status', 'created_at']
-    list_filter = ['status', 'created_at', 'product__category']
-    search_fields = ['full_name', 'phone_number', 'email', 'product__name']
-    readonly_fields = ['product', 'quantity', 'unit_price', 'total_price', 'created_at', 'updated_at']
+    list_display = [
+        'id',
+        'product',
+        'full_name',
+        'phone_number',
+        'quantity',
+        'total_price',
+        'payment_status',
+        'status',
+        'created_at',
+    ]
+    list_filter = ['payment_status', 'status', 'created_at', 'product__category']
+    search_fields = ['full_name', 'phone_number', 'email', 'product__name', 'cashfree_order_id', 'cashfree_payment_id']
+    readonly_fields = [
+        'product',
+        'quantity',
+        'unit_price',
+        'total_price',
+        'cashfree_order_id',
+        'cashfree_cf_order_id',
+        'cashfree_payment_session_id',
+        'cashfree_payment_id',
+        'payment_completed_at',
+        'created_at',
+        'updated_at',
+    ]
 
 
 @admin.register(CustomerReview)

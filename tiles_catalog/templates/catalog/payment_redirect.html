@@ -1,0 +1,91 @@
+{% extends 'base/base.html' %}
+{% load currency_tags %}
+
+{% block title %}Redirecting to Payment - Glowall{% endblock %}
+{% block body_class %}checkout-page checkout-success-page{% endblock %}
+
+{% block content %}
+<section class="checkout-section">
+    <div class="container">
+        <div class="checkout-success-card checkout-redirect-card">
+            <div class="checkout-success-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <span class="checkout-kicker">Payment Redirect</span>
+            <h1 class="checkout-title">Redirecting you to Cashfree</h1>
+            <p class="checkout-intro">
+                Your order #{{ order.pk }} has been created and the payment page is opening in this tab.
+            </p>
+
+            <div class="checkout-success-grid">
+                <div class="checkout-success-panel">
+                    <p class="checkout-card-eyebrow">Order Reference</p>
+                    <h2>#{{ order.pk }}</h2>
+                    <p>{{ order.total_price|inr }} for {{ order.quantity }} item{{ order.quantity|pluralize }}</p>
+                </div>
+                <div class="checkout-success-panel">
+                    <p class="checkout-card-eyebrow">Payment Status</p>
+                    <h2>{{ order.payment_status }}</h2>
+                    <p>You will be returned automatically after payment.</p>
+                </div>
+            </div>
+
+            <div class="checkout-success-actions">
+                <button type="button" class="btn btn-primary" id="cashfree-pay-now">Proceed to Payment</button>
+                <a href="{% url 'catalog:checkout_success' order.pk %}" class="btn btn-outline">View Order Status</a>
+            </div>
+
+            <p class="checkout-redirect-error" id="cashfree-pay-error" hidden></p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const payButton = document.getElementById('cashfree-pay-now');
+    const errorMessage = document.getElementById('cashfree-pay-error');
+    const paymentSessionId = '{{ payment_session_id|escapejs }}';
+
+    if (!payButton) {
+        return;
+    }
+
+    const showError = function (message) {
+        if (!errorMessage) {
+            return;
+        }
+
+        errorMessage.hidden = false;
+        errorMessage.textContent = message;
+        payButton.disabled = false;
+        payButton.classList.remove('is-loading');
+    };
+
+    const openCashfreeCheckout = function () {
+        if (!window.Cashfree || !paymentSessionId) {
+            showError('Unable to load the Cashfree checkout. Please refresh and try again.');
+            return;
+        }
+
+        payButton.disabled = true;
+        payButton.classList.add('is-loading');
+
+        const cashfree = window.Cashfree({ mode: '{{ cashfree_mode|escapejs }}' });
+        cashfree.checkout({
+            paymentSessionId: paymentSessionId,
+            redirectTarget: '_self'
+        }).then(function (result) {
+            if (result.error) {
+                showError(result.error.message || 'Payment could not be started.');
+            }
+        });
+    };
+
+    payButton.addEventListener('click', openCashfreeCheckout);
+    window.setTimeout(openCashfreeCheckout, 250);
+});
+</script>
+{% endblock %}

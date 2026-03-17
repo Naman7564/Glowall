@@ -18,7 +18,7 @@
             </div>
         </div>
 
-        <form method="post" class="checkout-layout" novalidate>
+        <form method="post" action="{% url 'catalog:place_order' %}" class="checkout-layout js-checkout-form">
             {% csrf_token %}
             <input type="hidden" name="product_id" value="{{ checkout_item.product.id }}">
             <input type="hidden" name="quantity" value="{{ checkout_item.quantity }}">
@@ -164,8 +164,10 @@
                             <i class="fas fa-lock"></i>
                             <span>Your details are used only for fulfillment.</span>
                         </div>
-                        <button type="submit" class="checkout-submit-btn">
-                            Place Order
+                        <button type="submit" class="checkout-submit-btn" data-checkout-submit>
+                            <span class="checkout-submit-spinner" aria-hidden="true"></span>
+                            <span class="checkout-submit-label">Place Order</span>
+                            <span class="checkout-submit-loading" hidden>Redirecting to payment...</span>
                         </button>
                     </div>
                 </div>
@@ -173,4 +175,35 @@
         </form>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('.js-checkout-form');
+    const submitButton = document.querySelector('[data-checkout-submit]');
+    const submitLabel = submitButton?.querySelector('.checkout-submit-label');
+    const loadingLabel = submitButton?.querySelector('.checkout-submit-loading');
+
+    if (!form || !submitButton) {
+        return;
+    }
+
+    form.addEventListener('submit', function () {
+        if (!form.checkValidity() || submitButton.disabled) {
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.classList.add('is-loading');
+
+        if (submitLabel) {
+            submitLabel.hidden = true;
+        }
+        if (loadingLabel) {
+            loadingLabel.hidden = false;
+        }
+    });
+});
+</script>
 {% endblock %}

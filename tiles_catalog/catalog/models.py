@@ -195,6 +195,15 @@ class Order(models.Model):
         (STATUS_CANCELLED, 'Cancelled'),
     ]
 
+    PAYMENT_PENDING = 'PENDING'
+    PAYMENT_SUCCESS = 'SUCCESS'
+    PAYMENT_FAILED = 'FAILED'
+    PAYMENT_STATUS_CHOICES = [
+        (PAYMENT_PENDING, 'Pending'),
+        (PAYMENT_SUCCESS, 'Success'),
+        (PAYMENT_FAILED, 'Failed'),
+    ]
+
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='orders')
     full_name = models.CharField(max_length=120)
     phone_number = models.CharField(max_length=20)
@@ -207,6 +216,18 @@ class Order(models.Model):
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_NEW)
+    payment_status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS_CHOICES,
+        default=PAYMENT_PENDING,
+        db_index=True,
+    )
+    cashfree_order_id = models.CharField(max_length=45, unique=True, blank=True)
+    cashfree_cf_order_id = models.CharField(max_length=120, blank=True)
+    cashfree_payment_session_id = models.CharField(max_length=255, blank=True)
+    cashfree_payment_id = models.CharField(max_length=120, blank=True)
+    payment_message = models.TextField(blank=True)
+    payment_completed_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 {% load currency_tags %}
 
-{% block title %}Order Confirmed - Glowall{% endblock %}
+{% block title %}Order Status - Glowall{% endblock %}
 {% block body_class %}checkout-page checkout-success-page{% endblock %}
 
 {% block content %}
@@ -9,12 +9,40 @@
     <div class="container">
         <div class="checkout-success-card">
             <div class="checkout-success-icon">
+                {% if order.payment_status == 'SUCCESS' %}
                 <i class="fas fa-check"></i>
+                {% elif order.payment_status == 'FAILED' %}
+                <i class="fas fa-circle-exclamation"></i>
+                {% else %}
+                <i class="fas fa-hourglass-half"></i>
+                {% endif %}
             </div>
-            <span class="checkout-kicker">Order Confirmed</span>
-            <h1 class="checkout-title">Thank you, {{ order.full_name }}</h1>
+            <span class="checkout-kicker">
+                {% if order.payment_status == 'SUCCESS' %}
+                Payment Successful
+                {% elif order.payment_status == 'FAILED' %}
+                Payment Failed
+                {% else %}
+                Payment Pending
+                {% endif %}
+            </span>
+            <h1 class="checkout-title">
+                {% if order.payment_status == 'SUCCESS' %}
+                Thank you, {{ order.full_name }}
+                {% elif order.payment_status == 'FAILED' %}
+                Payment could not be completed
+                {% else %}
+                We are waiting for payment confirmation
+                {% endif %}
+            </h1>
             <p class="checkout-intro">
-                Your order request has been received. Our team will contact you shortly to confirm stock, delivery timing, and dispatch details.
+                {% if order.payment_status == 'SUCCESS' %}
+                Your order has been confirmed and payment was received successfully.
+                {% elif order.payment_status == 'FAILED' %}
+                Your order was created, but Cashfree reported an unsuccessful payment attempt.
+                {% else %}
+                Your order exists and payment verification is still in progress. Refresh shortly if you just completed the payment.
+                {% endif %}
             </p>
 
             <div class="checkout-success-grid">
@@ -24,9 +52,17 @@
                     <p>Placed on {{ order.created_at|date:"M d, Y" }}</p>
                 </div>
                 <div class="checkout-success-panel">
-                    <p class="checkout-card-eyebrow">Order Total</p>
-                    <h2>{{ order.total_price|inr }}</h2>
-                    <p>{{ order.unit_price|inr }} x {{ order.quantity }}</p>
+                    <p class="checkout-card-eyebrow">Payment Status</p>
+                    <h2>{{ order.payment_status }}</h2>
+                    <p>
+                        {% if order.payment_completed_at %}
+                        Paid on {{ order.payment_completed_at|date:"M d, Y H:i" }}
+                        {% elif order.payment_message %}
+                        {{ order.payment_message }}
+                        {% else %}
+                        {{ order.total_price|inr }} for {{ order.quantity }} item{{ order.quantity|pluralize }}
+                        {% endif %}
+                    </p>
                 </div>
             </div>
 
@@ -48,7 +84,11 @@
             </div>
 
             <div class="checkout-success-actions">
+                {% if order.payment_status != 'SUCCESS' %}
+                <a href="{{ order.product.get_absolute_url }}" class="btn btn-primary">Try Again</a>
+                {% else %}
                 <a href="{{ order.product.get_absolute_url }}" class="btn btn-primary">Back to Product</a>
+                {% endif %}
                 <a href="{% url 'catalog:product_list' %}" class="btn btn-outline">Continue Shopping</a>
             </div>
         </div>

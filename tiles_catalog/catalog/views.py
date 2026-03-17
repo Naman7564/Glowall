@@ -1,11 +1,31 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q, Count
+import logging
+import traceback
+import uuid
+
+from django.conf import settings
 from django.contrib import messages
+from django.db.models import Q, Count
 from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Category, Product, CustomerReview, Order
 from .forms import ContactForm, OrderForm
+from .payments import (
+    CashfreeGatewayError,
+    CashfreeWebhookError,
+    create_cashfree_order,
+    fetch_cashfree_order,
+    map_payment_status,
+    parse_cashfree_timestamp,
+    parse_webhook_payload,
+    verify_webhook_signature,
+)
+
+
+logger = logging.getLogger(__name__)
 
 
 CHECKOUT_SESSION_KEY = 'checkout_item'
@@ -18,6 +38,11 @@ def _normalize_quantity(value, default=1):
     except (TypeError, ValueError):
         return default
     return max(1, quantity)
+
+
+def _print_checkout_exception(label, exc):
+    print(f'{label}: {exc.__class__.__name__}: {exc}')
+    traceback.print_exc()
 
 
 def _load_checkout_item(request):
@@ -72,6 +97,86 @@ def _load_checkout_item(request):
         'quantity': quantity,
     }
     return checkout_item
+
+
+def _get_checkout_form_initial(request):
+    initial = {}
+    if request.user.is_authenticated:
+        full_name = ' '.join(part for part in [request.user.first_name, request.user.last_name] if part).strip()
+        if full_name:
+            initial['full_name'] = full_name
+        if request.user.email:
+            initial['email'] = request.user.email
+    return initial
+
+
+def _render_checkout(request, form, checkout_item, status=200):
+    context = {
+        'form': form,
+        'checkout_item': checkout_item,
+        'page_title': 'Checkout',
+    }
+    return render(request, 'catalog/checkout.html', context, status=status)
+
+
+def _update_order_payment_state(order, payment_status, payment_message='', cashfree_payment_id='', payment_time=None):
+    update_fields = ['payment_status', 'payment_message', 'updated_at']
+
+    if payment_status:
+        order.payment_status = payment_status
+    if payment_message is not None:
+        order.payment_message = payment_message
+    if cashfree_payment_id:
+        order.cashfree_payment_id = cashfree_payment_id
+        update_fields.append('cashfree_payment_id')
+    if payment_time:
+        order.payment_completed_at = payment_time
+        update_fields.append('payment_completed_at')
+    if payment_status == Order.PAYMENT_SUCCESS and order.status == Order.STATUS_NEW:
+        order.status = Order.STATUS_PROCESSING
+        update_fields.append('status')
+
+    order.save(update_fields=list(dict.fromkeys(update_fields)))
+
+
+def _sync_order_from_cashfree(order):
+    gateway_order = fetch_cashfree_order(order)
+    payments = sorted(
+        gateway_order.get('payments') or [],
+        key=lambda payment: payment.get('payment_completion_time') or payment.get('payment_time') or '',
+    )
+    latest_payment = payments[-1] if payments else {}
+    payment_status = map_payment_status(
+        gateway_order.get('order_status', ''),
+        latest_payment.get('payment_status', ''),
+    )
+    payment_time = parse_cashfree_timestamp(
+        latest_payment.get('payment_completion_time') or latest_payment.get('payment_time')
+    )
+    _update_order_payment_state(
+        order,
+        payment_status,
+        payment_message=latest_payment.get('payment_message', ''),
+        cashfree_payment_id=latest_payment.get('cf_payment_id', ''),
+        payment_time=payment_time,
+    )
+    if gateway_order.get('payment_session_id') and order.cashfree_payment_session_id != gateway_order['payment_session_id']:
+        order.cashfree_payment_session_id = gateway_order['payment_session_id']
+        order.save(update_fields=['cashfree_payment_session_id', 'updated_at'])
+
+
+def _build_cashfree_urls(request):
+    scheme = 'https' if request.is_secure() or settings.CASHFREE_ENV == 'PRODUCTION' else 'http'
+    payment_return_url = request.build_absolute_uri(reverse('catalog:payment_return'))
+    notify_url = request.build_absolute_uri(reverse('catalog:payment_webhook'))
+    if scheme == 'https':
+        payment_return_url = payment_return_url.replace('http://', 'https://', 1)
+        notify_url = notify_url.replace('http://', 'https://', 1)
+    return {
+        'payment_return_url': payment_return_url,
+        'cashfree_return_url': f'{payment_return_url}?order_id={{order_id}}',
+        'notify_url': notify_url,
+    }
 
 
 def home(request):
@@ -265,6 +370,9 @@ def contact(request):
 
 def checkout_view(request):
     """Checkout page for direct product purchases."""
+    if request.method == 'POST':
+        return place_order_view(request)
+
     checkout_item = _load_checkout_item(request)
     if not checkout_item:
         messages.error(request, 'Select a product before proceeding to checkout.')
@@ -274,47 +382,212 @@ def checkout_view(request):
         messages.error(request, 'This product is not available for direct checkout yet.')
         return redirect(checkout_item['product'].get_absolute_url())
 
-    if request.method == 'POST':
-        form = OrderForm(request.POST)
-        if form.is_valid():
-            order = form.save(commit=False)
-            order.product = checkout_item['product']
-            order.quantity = checkout_item['quantity']
-            order.unit_price = checkout_item['unit_price']
-            order.total_price = checkout_item['total_price']
-            order.save()
-            request.session.pop(CHECKOUT_SESSION_KEY, None)
-            messages.success(request, f'Order #{order.pk} placed successfully. Our team will contact you shortly.')
-            return redirect('catalog:checkout_success', order_id=order.pk)
-    else:
-        initial = {}
-        if request.user.is_authenticated:
-            full_name = ' '.join(part for part in [request.user.first_name, request.user.last_name] if part).strip()
-            if full_name:
-                initial['full_name'] = full_name
-            if request.user.email:
-                initial['email'] = request.user.email
-        form = OrderForm(initial=initial)
+    form = OrderForm(initial=_get_checkout_form_initial(request))
+    return _render_checkout(request, form, checkout_item)
 
-    context = {
-        'form': form,
-        'checkout_item': checkout_item,
-        'page_title': 'Checkout',
-    }
-    return render(request, 'catalog/checkout.html', context)
+
+@require_POST
+def place_order_view(request):
+    """Validate checkout input, create an order, and initiate Cashfree payment."""
+    checkout_item = _load_checkout_item(request)
+    if not checkout_item:
+        messages.error(request, 'Select a product before proceeding to checkout.')
+        return redirect('catalog:product_list')
+
+    if not checkout_item['pricing_available']:
+        messages.error(request, 'This product is not available for direct checkout yet.')
+        return redirect(checkout_item['product'].get_absolute_url())
+
+    form = OrderForm(request.POST)
+    missing_fields = [
+        field_name for field_name in OrderForm.REQUIRED_FIELDS if not request.POST.get(field_name, '').strip()
+    ]
+    if missing_fields:
+        for field_name in missing_fields:
+            if field_name not in form.errors:
+                form.add_error(field_name, 'This field is required.')
+
+    missing_checkout_fields = [
+        field_name for field_name in ('product_id', 'quantity') if not request.POST.get(field_name, '').strip()
+    ]
+    invalid_checkout_fields = []
+    product_id = (request.POST.get('product_id') or '').strip()
+    quantity = (request.POST.get('quantity') or '').strip()
+
+    if product_id and not product_id.isdigit():
+        invalid_checkout_fields.append('product_id')
+
+    if quantity:
+        try:
+            if int(quantity) < 1:
+                invalid_checkout_fields.append('quantity')
+        except (TypeError, ValueError):
+            invalid_checkout_fields.append('quantity')
+
+    if missing_checkout_fields or invalid_checkout_fields:
+        logger.error(
+            'Incomplete checkout POST data. Missing=%s Invalid=%s',
+            missing_checkout_fields,
+            invalid_checkout_fields,
+        )
+        print(
+            'Place order validation error: '
+            f'missing={missing_checkout_fields} invalid={invalid_checkout_fields}'
+        )
+        form.add_error(None, 'Checkout request data is incomplete. Please refresh the page and try again.')
+        messages.error(request, 'Checkout request is incomplete. Please review your details and try again.')
+        return _render_checkout(request, form, checkout_item, status=400)
+
+    if form.errors or not form.is_valid():
+        messages.error(request, 'Enter all required checkout details before continuing to payment.')
+        return _render_checkout(request, form, checkout_item, status=400)
+
+    try:
+        order = form.save(commit=False)
+        order.product = checkout_item['product']
+        order.quantity = checkout_item['quantity']
+        order.unit_price = checkout_item['unit_price']
+        order.total_price = checkout_item['total_price']
+        order.payment_status = Order.PAYMENT_PENDING
+        # Reserve a unique placeholder before the first save to avoid unique-key collisions on blank values.
+        order.cashfree_order_id = f'TMP-{uuid.uuid4().hex[:32].upper()}'
+        order.save()
+
+        order.cashfree_order_id = f'ORD-{order.pk:06d}'
+        order.save(update_fields=['cashfree_order_id', 'updated_at'])
+
+        cashfree_urls = _build_cashfree_urls(request)
+        gateway_order = create_cashfree_order(
+            order,
+            return_url=cashfree_urls['cashfree_return_url'],
+            notify_url=cashfree_urls['notify_url'],
+        )
+
+        order.cashfree_order_id = gateway_order['cashfree_order_id']
+        order.cashfree_cf_order_id = gateway_order['cashfree_cf_order_id']
+        order.cashfree_payment_session_id = gateway_order['payment_session_id']
+        order.payment_status = Order.PAYMENT_PENDING
+        order.payment_message = ''
+        order.save(
+            update_fields=[
+                'cashfree_order_id',
+                'cashfree_cf_order_id',
+                'cashfree_payment_session_id',
+                'payment_status',
+                'payment_message',
+                'updated_at',
+            ]
+        )
+
+        request.session.pop(CHECKOUT_SESSION_KEY, None)
+        if gateway_order.get('payment_link'):
+            return redirect(gateway_order['payment_link'])
+
+        return render(
+            request,
+            'catalog/payment_redirect.html',
+            {
+                'order': order,
+                'payment_session_id': order.cashfree_payment_session_id,
+                'payment_return_url': cashfree_urls['payment_return_url'],
+                'cashfree_mode': 'production'
+                if settings.CASHFREE_ENV == 'PRODUCTION'
+                else 'sandbox',
+                'page_title': 'Redirecting to Payment',
+            },
+        )
+    except CashfreeGatewayError as exc:
+        _print_checkout_exception('Cashfree Error', exc)
+        logger.error('Cashfree Error: %s', str(exc), exc_info=True)
+        if 'order' in locals():
+            _update_order_payment_state(order, Order.PAYMENT_FAILED, payment_message=str(exc))
+        messages.error(request, 'Payment gateway error. Please try again later.')
+        return _render_checkout(request, form, checkout_item, status=200)
+    except Exception as exc:
+        _print_checkout_exception('Place order error', exc)
+        logger.exception('Unexpected checkout error while creating order.')
+        if 'order' in locals():
+            _update_order_payment_state(order, Order.PAYMENT_FAILED, payment_message=str(exc))
+        messages.error(request, 'Something went wrong while creating your order. Please try again.')
+        return _render_checkout(request, form, checkout_item, status=200)
 
 
 def checkout_success(request, order_id):
-    """Confirmation page for a completed order."""
+    """Status page for an order after payment is attempted."""
     order = get_object_or_404(
         Order.objects.select_related('product', 'product__category', 'product__material_type'),
         pk=order_id,
     )
     context = {
         'order': order,
-        'page_title': 'Order Confirmed',
+        'page_title': 'Order Status',
     }
     return render(request, 'catalog/checkout_success.html', context)
+
+
+def payment_return_view(request):
+    """Sync order status after Cashfree redirects the customer back."""
+    cashfree_order_id = (request.GET.get('order_id') or '').strip()
+    if not cashfree_order_id:
+        messages.error(request, 'Payment response was incomplete. Please contact support if money was debited.')
+        return redirect('catalog:product_list')
+
+    order = get_object_or_404(
+        Order.objects.select_related('product', 'product__category', 'product__material_type'),
+        cashfree_order_id=cashfree_order_id,
+    )
+
+    try:
+        _sync_order_from_cashfree(order)
+    except CashfreeGatewayError as exc:
+        logger.error('Cashfree return sync failed for order %s: %s', order.pk, str(exc), exc_info=True)
+        messages.warning(
+            request,
+            'We received your order, but payment verification is still pending. Please refresh this page shortly.',
+        )
+    except Exception as exc:
+        logger.exception('Unexpected payment return sync error for order %s.', order.pk)
+        messages.warning(
+            request,
+            'We received your order, but payment verification is still pending. Please refresh this page shortly.',
+        )
+
+    return redirect('catalog:checkout_success', order_id=order.pk)
+
+
+@csrf_exempt
+@require_POST
+def payment_webhook_view(request):
+    """Receive Cashfree webhook events and update the order payment state."""
+    raw_body = request.body.decode('utf-8')
+
+    try:
+        verify_webhook_signature(
+            raw_body,
+            request.headers.get('x-webhook-signature', ''),
+            request.headers.get('x-webhook-timestamp', ''),
+        )
+        webhook_data = parse_webhook_payload(raw_body)
+        order = Order.objects.filter(cashfree_order_id=webhook_data['cashfree_order_id']).first()
+        if not order:
+            return JsonResponse({'status': 'ignored', 'message': 'Order not found.'}, status=200)
+
+        payment_status = map_payment_status(payment_status=webhook_data['payment_status'])
+        payment_time = parse_cashfree_timestamp(webhook_data['payment_time'])
+        _update_order_payment_state(
+            order,
+            payment_status,
+            payment_message=webhook_data['payment_message'],
+            cashfree_payment_id=webhook_data['cf_payment_id'],
+            payment_time=payment_time,
+        )
+        return JsonResponse({'status': 'ok'})
+    except CashfreeWebhookError as exc:
+        logger.error('Cashfree webhook rejected: %s', str(exc), exc_info=True)
+        return JsonResponse({'status': 'error', 'message': str(exc)}, status=400)
+    except Exception as exc:
+        logger.exception('Unexpected Cashfree webhook processing error.')
+        return JsonResponse({'status': 'error', 'message': 'Unable to process webhook.'}, status=500)
 
 
 def api_products(request):

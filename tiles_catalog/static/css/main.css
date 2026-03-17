@@ -902,17 +902,6 @@ body.nav-open {
     text-shadow: 0 2px 30px rgba(0, 0, 0, 0.2);
 }
 
-/* Subtitle */
-.hero .hero-subtitle {
-    font-family: var(--font-body);
-    font-size: clamp(0.95rem, 1.4vw, 1.1rem);
-    line-height: 1.75;
-    color: rgba(255, 255, 255, 0.68);
-    max-width: 460px;
-    margin-bottom: 36px;
-    opacity: 1;
-}
-
 /* Buttons */
 .hero .hero-buttons {
     display: flex;
@@ -1192,11 +1181,6 @@ body.nav-open {
 
     .hero-badge {
         justify-content: center;
-    }
-
-    .hero .hero-subtitle {
-        margin-left: auto;
-        margin-right: auto;
     }
 
     .hero .hero-buttons {
@@ -4377,12 +4361,56 @@ body.nav-open {
     cursor: pointer;
     transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s ease;
     box-shadow: 0 20px 32px rgba(188, 143, 47, 0.22);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
 .checkout-submit-btn:hover {
     transform: translateY(-2px);
     filter: saturate(1.05);
     box-shadow: 0 26px 40px rgba(188, 143, 47, 0.26);
+}
+
+.checkout-submit-btn:disabled,
+.checkout-submit-btn.is-loading,
+.checkout-success-actions .btn.is-loading {
+    cursor: wait;
+    transform: none;
+    filter: saturate(0.92);
+    box-shadow: 0 16px 24px rgba(188, 143, 47, 0.2);
+    opacity: 0.92;
+}
+
+.checkout-submit-spinner {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid rgba(22, 22, 22, 0.22);
+    border-top-color: #161616;
+    animation: checkout-spin 0.8s linear infinite;
+    display: none;
+}
+
+.checkout-submit-btn.is-loading .checkout-submit-spinner {
+    display: inline-flex;
+}
+
+.checkout-redirect-card {
+    max-width: 720px;
+}
+
+.checkout-redirect-error {
+    margin-top: 18px;
+    color: #b42318;
+    font-weight: 600;
+}
+
+@keyframes checkout-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .checkout-success-card {
