@@ -102,12 +102,14 @@ function initSearch() {
     const RECENT_SEARCHES_KEY = 'glowallRecentSearches';
     const SEARCH_DEBOUNCE_MS = 220;
     const MIN_QUERY_LENGTH = 2;
+    const header = document.querySelector('.header');
     const searchToggle = document.querySelector('.search-toggle');
     const searchOverlay = document.querySelector('.search-overlay');
     const searchClose = document.querySelector('.search-close');
     const overlayInput = searchOverlay?.querySelector('.js-search-input');
     const searchForms = document.querySelectorAll('.js-search-form');
     const recentSearchRefreshers = [];
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     const readRecentSearches = () => {
         try {
@@ -148,19 +150,33 @@ function initSearch() {
             return;
         }
 
+        searchOverlay.hidden = false;
         searchOverlay.classList.add('active');
         searchOverlay.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('search-open');
+        searchToggle?.setAttribute('aria-expanded', 'true');
+
+        const headerOffset = header ? header.getBoundingClientRect().height + 16 : 0;
+        const searchTop = searchOverlay.getBoundingClientRect().top + window.scrollY - headerOffset;
+
+        window.scrollTo({
+            top: Math.max(searchTop, 0),
+            behavior: prefersReducedMotion.matches ? 'auto' : 'smooth',
+        });
 
         window.setTimeout(() => {
             overlayInput?.focus();
-        }, 120);
+        }, prefersReducedMotion.matches ? 0 : 180);
     };
 
     const closeOverlay = () => {
-        searchOverlay?.classList.remove('active');
-        searchOverlay?.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('search-open');
+        if (!searchOverlay) {
+            return;
+        }
+
+        searchOverlay.classList.remove('active');
+        searchOverlay.setAttribute('aria-hidden', 'true');
+        searchOverlay.hidden = true;
+        searchToggle?.setAttribute('aria-expanded', 'false');
     };
 
     const createResultItem = (result) => {
@@ -466,7 +482,11 @@ function initSearch() {
 
     if (searchToggle && searchOverlay) {
         searchToggle.addEventListener('click', function() {
-            openOverlay();
+            if (searchOverlay.hidden) {
+                openOverlay();
+            } else {
+                closeOverlay();
+            }
         });
     }
 

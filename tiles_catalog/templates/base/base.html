@@ -49,7 +49,7 @@
                 </ul>
 
                 <div class="nav-actions">
-                    <button class="search-toggle" type="button" aria-label="Search">
+                    <button class="search-toggle" type="button" aria-label="Search" aria-expanded="false" aria-controls="site-search">
                         <i class="fas fa-search"></i>
                     </button>
                     {% if user.is_authenticated %}
@@ -82,56 +82,56 @@
             </div>
         </nav>
         
-        <!-- Search Overlay -->
-        <div class="search-overlay" aria-hidden="true">
-            <div class="search-container" role="dialog" aria-modal="true" aria-label="Search">
-                <button class="search-close" type="button" aria-label="Close search">
-                    <i class="fas fa-times"></i>
-                </button>
+    </header>
 
-                <div class="search-intro">
-                    <span class="search-eyebrow">Glowall Search</span>
-                </div>
+    <section class="search-overlay" id="site-search" aria-hidden="true" hidden>
+        <div class="search-container" role="search" aria-label="Site search">
+            <button class="search-close" type="button" aria-label="Close search">
+                <i class="fas fa-times"></i>
+            </button>
 
-                <form action="{% url 'catalog:product_list' %}" method="get" class="search-form search-form-modal js-search-form" data-search-url="{% url 'catalog:api_search' %}" data-panel-mode="persistent" data-empty-message="">
-                    <div class="search-box search-box-modal">
-                        <div class="search-field">
-                            <span class="search-field-icon" aria-hidden="true">
-                                <i class="fas fa-search"></i>
-                            </span>
-                            <label class="sr-only" for="global-search-input">Search products</label>
-                            <input type="text" id="global-search-input" name="q" placeholder="Search products..." class="search-input js-search-input" value="{{ request.GET.q }}" autocomplete="off">
-                            <button type="button" class="search-clear js-search-clear" aria-label="Clear search">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        <button type="submit" class="search-btn">
+            <div class="search-intro">
+                <span class="search-eyebrow">Glowall Search</span>
+            </div>
+
+            <form action="{% url 'catalog:product_list' %}" method="get" class="search-form search-form-modal js-search-form" data-search-url="{% url 'catalog:api_search' %}" data-panel-mode="persistent" data-empty-message="">
+                <div class="search-box search-box-modal">
+                    <div class="search-field">
+                        <span class="search-field-icon" aria-hidden="true">
                             <i class="fas fa-search"></i>
-                            <span>Search</span>
+                        </span>
+                        <label class="sr-only" for="global-search-input">Search products</label>
+                        <input type="text" id="global-search-input" name="q" placeholder="Search products..." class="search-input js-search-input" value="{{ request.GET.q }}" autocomplete="off">
+                        <button type="button" class="search-clear js-search-clear" aria-label="Clear search">
+                            <i class="fas fa-times"></i>
                         </button>
                     </div>
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                        <span>Search</span>
+                    </button>
+                </div>
 
-                    <div class="search-panel js-search-panel">
-                        <div class="search-panel-section js-search-recent-section" hidden>
-                            <div class="search-panel-header">
-                                <span class="search-panel-label">Recent searches</span>
-                            </div>
-                            <div class="search-chip-list js-search-recent-list"></div>
+                <div class="search-panel js-search-panel">
+                    <div class="search-panel-section js-search-recent-section" hidden>
+                        <div class="search-panel-header">
+                            <span class="search-panel-label">Recent searches</span>
                         </div>
-
-                        <div class="search-panel-section js-search-results-section" hidden>
-                            <div class="search-panel-header">
-                                <span class="search-panel-label">Suggestions</span>
-                            </div>
-                            <div class="search-results js-search-results" role="listbox" aria-label="Search suggestions"></div>
-                        </div>
-
-                        <p class="search-status js-search-status" aria-live="polite" hidden></p>
+                        <div class="search-chip-list js-search-recent-list"></div>
                     </div>
-                </form>
-            </div>
+
+                    <div class="search-panel-section js-search-results-section" hidden>
+                        <div class="search-panel-header">
+                            <span class="search-panel-label">Suggestions</span>
+                        </div>
+                        <div class="search-results js-search-results" role="listbox" aria-label="Search suggestions"></div>
+                    </div>
+
+                    <p class="search-status js-search-status" aria-live="polite" hidden></p>
+                </div>
+            </form>
         </div>
-    </header>
+    </section>
 
     <!-- Messages -->
     {% if messages %}
