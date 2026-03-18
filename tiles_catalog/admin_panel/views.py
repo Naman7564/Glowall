@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from catalog.models import Product, Category, ProductImage, MaterialType, Finish, Contact, CustomerReview, Order
 from .forms import (
-    AdminLoginForm, ProductForm, CategoryForm, ProductImageFormSet,
+    ProductForm, CategoryForm, ProductImageFormSet,
     MaterialTypeForm, FinishForm, CustomerReviewForm, OrderStatusForm
 )
 
@@ -20,27 +20,6 @@ def is_staff(user):
     return user.is_staff
 
 
-def admin_login(request):
-    """Custom admin login view."""
-    if request.user.is_authenticated and request.user.is_staff:
-        return redirect('admin_panel:dashboard')
-    
-    if request.method == 'POST':
-        form = AdminLoginForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            if user.is_staff:
-                login(request, user)
-                messages.success(request, f'Welcome back, {user.username}!')
-                return redirect('admin_panel:dashboard')
-            else:
-                messages.error(request, 'You do not have admin privileges.')
-    else:
-        form = AdminLoginForm()
-    
-    return render(request, 'admin_panel/login.html', {'form': form})
-
-
 @login_required
 @user_passes_test(is_staff)
 @require_POST
@@ -48,7 +27,7 @@ def admin_logout(request):
     """Admin logout view."""
     logout(request)
     messages.info(request, 'You have been logged out.')
-    return redirect('admin_panel:login')
+    return redirect('catalog:home')
 
 
 @login_required

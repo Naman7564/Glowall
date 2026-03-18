@@ -1,24 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from django.contrib.auth.forms import AuthenticationForm
 from catalog.models import Product, Category, ProductImage, MaterialType, Finish, CustomerReview, Order
-
-
-class AdminLoginForm(AuthenticationForm):
-    """Custom admin login form."""
-    username = forms.CharField(
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Username',
-            'autofocus': True
-        })
-    )
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Password'
-        })
-    )
 
 
 class CategoryForm(forms.ModelForm):

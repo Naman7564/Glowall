@@ -5,7 +5,6 @@ app_name = 'admin_panel'
 
 urlpatterns = [
     # Authentication
-    path('login/', views.admin_login, name='login'),
     path('logout/', views.admin_logout, name='logout'),
     
     # Dashboard
