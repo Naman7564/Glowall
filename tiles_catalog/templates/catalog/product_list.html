@@ -111,55 +111,6 @@
                     {% endif %}
                 </div>
 
-                <!-- Search Filter -->
-                <div class="filter-card">
-                    <div class="filter-card-header">
-                        <h3 class="filter-card-title">
-                            <i class="fas fa-search"></i>
-                            Search
-                        </h3>
-                    </div>
-                    <div class="filter-card-body">
-                        <form action="" method="get" class="filter-form search-form search-form-inline js-search-form" data-search-url="{% url 'catalog:api_search' %}">
-                            {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
-                            {% if current_material %}<input type="hidden" name="material" value="{{ current_material }}">{% endif %}
-                            {% if current_finish %}<input type="hidden" name="finish" value="{{ current_finish }}">{% endif %}
-                            {% if current_sort %}<input type="hidden" name="sort" value="{{ current_sort }}">{% endif %}
-
-                            <div class="modern-search-box">
-                                <div class="search-field">
-                                    <span class="search-field-icon" aria-hidden="true">
-                                        <i class="fas fa-search"></i>
-                                    </span>
-                                    <label class="sr-only" for="catalog-search-input">Search products</label>
-                                    <input type="text" id="catalog-search-input" name="q" placeholder="Search products..." value="{{ search_query }}" class="search-input js-search-input" autocomplete="off">
-                                    <button type="button" class="search-clear js-search-clear" aria-label="Clear search">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="search-panel search-panel-inline js-search-panel" hidden>
-                                <div class="search-panel-section js-search-recent-section" hidden>
-                                    <div class="search-panel-header">
-                                        <span class="search-panel-label">Recent</span>
-                                    </div>
-                                    <div class="search-chip-list js-search-recent-list"></div>
-                                </div>
-
-                                <div class="search-panel-section js-search-results-section" hidden>
-                                    <div class="search-panel-header">
-                                        <span class="search-panel-label">Suggestions</span>
-                                    </div>
-                                    <div class="search-results js-search-results" role="listbox" aria-label="Search suggestions"></div>
-                                </div>
-
-                                <p class="search-status js-search-status" aria-live="polite">Search by product name, material, or category.</p>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
                 <!-- Categories Filter -->
                 <div class="filter-card">
                     <div class="filter-card-header">
