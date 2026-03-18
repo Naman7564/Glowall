@@ -3,205 +3,435 @@
 
 {% block title %}Products - Glowall{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Modern Catalog Page Enhancements */
+.catalog-hero {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #2d2d4a 100%);
+    padding: 80px 0 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+.catalog-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.catalog-hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.catalog-hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+}
+
+.catalog-hero-subtitle {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.75);
+    max-width: 600px;
+    margin: 0 auto 24px;
+    line-height: 1.6;
+}
+
+.catalog-breadcrumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 0.875rem;
+}
+
+.catalog-breadcrumb a {
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.2s ease;
+}
+
+.catalog-breadcrumb a:hover {
+    color: var(--secondary-color);
+}
+
+.catalog-breadcrumb .separator {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.catalog-breadcrumb .current {
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<section class="page-header">
+<!-- Modern Hero Section -->
+<section class="catalog-hero">
     <div class="container">
-        <h1 class="page-title">Product Catalog</h1>
-        <nav class="breadcrumb">
-            <a href="{% url 'catalog:home' %}">Home</a>
-            <span>/</span>
-            <span>Products</span>
-        </nav>
+        <div class="catalog-hero-content">
+            <h1 class="catalog-hero-title">Our Collection</h1>
+            <p class="catalog-hero-subtitle">Discover premium tiles, marble, and natural stone to transform your spaces into stunning masterpieces.</p>
+            <nav class="catalog-breadcrumb" aria-label="Breadcrumb">
+                <a href="{% url 'catalog:home' %}">Home</a>
+                <span class="separator">/</span>
+                <span class="current">All Products</span>
+            </nav>
+        </div>
     </div>
 </section>
 
-<section class="catalog-section">
+<section class="catalog-section-modern">
     <div class="container">
-        <div class="catalog-layout">
-            <!-- Sidebar Filters -->
-            <aside class="catalog-sidebar">
-                <div class="filter-section">
-                    <h3 class="filter-title">Search</h3>
-                    <form action="" method="get" class="filter-form search-form search-form-inline js-search-form" data-search-url="{% url 'catalog:api_search' %}">
-                        {% if request.GET.category %}<input type="hidden" name="category" value="{{ request.GET.category }}">{% endif %}
-                        {% if request.GET.material %}<input type="hidden" name="material" value="{{ request.GET.material }}">{% endif %}
-                        {% if request.GET.finish %}<input type="hidden" name="finish" value="{{ request.GET.finish }}">{% endif %}
-                        {% if request.GET.color %}<input type="hidden" name="color" value="{{ request.GET.color }}">{% endif %}
-                        {% if request.GET.availability %}<input type="hidden" name="availability" value="{{ request.GET.availability }}">{% endif %}
-                        {% if request.GET.sort %}<input type="hidden" name="sort" value="{{ request.GET.sort }}">{% endif %}
+        <div class="catalog-layout-modern">
+            <!-- Modern Sidebar Filters -->
+            <aside class="catalog-sidebar-modern">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">
+                        <i class="fas fa-sliders-h"></i>
+                        Filters
+                    </h2>
+                    {% if current_category or current_material or current_finish or search_query %}
+                    <a href="{% url 'catalog:product_list' %}" class="clear-filters-btn">
+                        <i class="fas fa-times"></i>
+                        Clear All
+                    </a>
+                    {% endif %}
+                </div>
 
-                        <div class="search-box">
-                            <div class="search-field">
-                                <span class="search-field-icon" aria-hidden="true">
-                                    <i class="fas fa-search"></i>
-                                </span>
-                                <label class="sr-only" for="catalog-search-input">Search products</label>
-                                <input type="text" id="catalog-search-input" name="q" placeholder="Search products..." value="{{ search_query }}" class="search-input js-search-input" autocomplete="off">
-                                <button type="button" class="search-clear js-search-clear" aria-label="Clear search">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <button type="submit" class="search-btn">
-                                <i class="fas fa-search"></i>
-                                <span>Search</span>
-                            </button>
-                        </div>
+                <!-- Search Filter -->
+                <div class="filter-card">
+                    <div class="filter-card-header">
+                        <h3 class="filter-card-title">
+                            <i class="fas fa-search"></i>
+                            Search
+                        </h3>
+                    </div>
+                    <div class="filter-card-body">
+                        <form action="" method="get" class="filter-form search-form search-form-inline js-search-form" data-search-url="{% url 'catalog:api_search' %}">
+                            {% if request.GET.category %}<input type="hidden" name="category" value="{{ request.GET.category }}">{% endif %}
+                            {% if request.GET.material %}<input type="hidden" name="material" value="{{ request.GET.material }}">{% endif %}
+                            {% if request.GET.finish %}<input type="hidden" name="finish" value="{{ request.GET.finish }}">{% endif %}
+                            {% if request.GET.color %}<input type="hidden" name="color" value="{{ request.GET.color }}">{% endif %}
+                            {% if request.GET.availability %}<input type="hidden" name="availability" value="{{ request.GET.availability }}">{% endif %}
+                            {% if request.GET.sort %}<input type="hidden" name="sort" value="{{ request.GET.sort }}">{% endif %}
 
-                        <div class="search-panel search-panel-inline js-search-panel" hidden>
-                            <div class="search-panel-section js-search-recent-section" hidden>
-                                <div class="search-panel-header">
-                                    <span class="search-panel-label">Recent</span>
+                            <div class="modern-search-box">
+                                <div class="search-field">
+                                    <span class="search-field-icon" aria-hidden="true">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <label class="sr-only" for="catalog-search-input">Search products</label>
+                                    <input type="text" id="catalog-search-input" name="q" placeholder="Search products..." value="{{ search_query }}" class="search-input js-search-input" autocomplete="off">
+                                    <button type="button" class="search-clear js-search-clear" aria-label="Clear search">
+                                        <i class="fas fa-times"></i>
+                                    </button>
                                 </div>
-                                <div class="search-chip-list js-search-recent-list"></div>
                             </div>
 
-                            <div class="search-panel-section js-search-results-section" hidden>
-                                <div class="search-panel-header">
-                                    <span class="search-panel-label">Suggestions</span>
+                            <div class="search-panel search-panel-inline js-search-panel" hidden>
+                                <div class="search-panel-section js-search-recent-section" hidden>
+                                    <div class="search-panel-header">
+                                        <span class="search-panel-label">Recent</span>
+                                    </div>
+                                    <div class="search-chip-list js-search-recent-list"></div>
                                 </div>
-                                <div class="search-results js-search-results" role="listbox" aria-label="Search suggestions"></div>
-                            </div>
 
-                            <p class="search-status js-search-status" aria-live="polite">Search by product name, material, or category.</p>
-                        </div>
-                    </form>
+                                <div class="search-panel-section js-search-results-section" hidden>
+                                    <div class="search-panel-header">
+                                        <span class="search-panel-label">Suggestions</span>
+                                    </div>
+                                    <div class="search-results js-search-results" role="listbox" aria-label="Search suggestions"></div>
+                                </div>
+
+                                <p class="search-status js-search-status" aria-live="polite">Search by product name, material, or category.</p>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                
-                <div class="filter-section">
-                    <h3 class="filter-title">Categories</h3>
-                    <ul class="filter-list">
-                        <li>
-                            <a href="{% url 'catalog:product_list' %}" class="{% if not current_category %}active{% endif %}">
-                                All Categories
-                            </a>
-                        </li>
-                        {% for category in all_categories %}
-                        <li>
-                            <a href="?category={{ category.slug }}" class="{% if current_category == category.slug %}active{% endif %}">
-                                {{ category.name }}
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
+
+                <!-- Categories Filter -->
+                <div class="filter-card">
+                    <div class="filter-card-header">
+                        <h3 class="filter-card-title">
+                            <i class="fas fa-th-large"></i>
+                            Categories
+                        </h3>
+                    </div>
+                    <div class="filter-card-body">
+                        <ul class="filter-options">
+                            <li>
+                                <a href="{% url 'catalog:product_list' %}" class="filter-option {% if not current_category %}active{% endif %}">
+                                    <span class="filter-option-icon">
+                                        <i class="fas fa-border-all"></i>
+                                    </span>
+                                    <span class="filter-option-text">All Categories</span>
+                                    {% if not current_category %}
+                                    <span class="filter-option-check"><i class="fas fa-check"></i></span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            {% for category in all_categories %}
+                            <li>
+                                <a href="?category={{ category.slug }}" class="filter-option {% if current_category == category.slug %}active{% endif %}">
+                                    <span class="filter-option-text">{{ category.name }}</span>
+                                    {% if current_category == category.slug %}
+                                    <span class="filter-option-check"><i class="fas fa-check"></i></span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
-                
-                <div class="filter-section">
-                    <h3 class="filter-title">Material Type</h3>
-                    <ul class="filter-list">
-                        <li>
-                            <a href="?{% if current_category %}category={{ current_category }}&{% endif %}" class="{% if not current_material %}active{% endif %}">
-                                All Materials
-                            </a>
-                        </li>
-                        {% for material in all_materials %}
-                        <li>
-                            <a href="?{% if current_category %}category={{ current_category }}&{% endif %}material={{ material.slug }}" class="{% if current_material == material.slug %}active{% endif %}">
-                                {{ material.name }}
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
+
+                <!-- Material Filter -->
+                <div class="filter-card">
+                    <div class="filter-card-header">
+                        <h3 class="filter-card-title">
+                            <i class="fas fa-layer-group"></i>
+                            Material Type
+                        </h3>
+                    </div>
+                    <div class="filter-card-body">
+                        <ul class="filter-options">
+                            <li>
+                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}" class="filter-option {% if not current_material %}active{% endif %}">
+                                    <span class="filter-option-text">All Materials</span>
+                                    {% if not current_material %}
+                                    <span class="filter-option-check"><i class="fas fa-check"></i></span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            {% for material in all_materials %}
+                            <li>
+                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}material={{ material.slug }}" class="filter-option {% if current_material == material.slug %}active{% endif %}">
+                                    <span class="filter-option-text">{{ material.name }}</span>
+                                    {% if current_material == material.slug %}
+                                    <span class="filter-option-check"><i class="fas fa-check"></i></span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
-                
-                <div class="filter-section">
-                    <h3 class="filter-title">Finish</h3>
-                    <ul class="filter-list">
-                        <li>
-                            <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}" class="{% if not current_finish %}active{% endif %}">
-                                All Finishes
-                            </a>
-                        </li>
-                        {% for finish in all_finishes %}
-                        <li>
-                            <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}finish={{ finish.slug }}" class="{% if current_finish == finish.slug %}active{% endif %}">
-                                {{ finish.name }}
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
+
+                <!-- Finish Filter -->
+                <div class="filter-card">
+                    <div class="filter-card-header">
+                        <h3 class="filter-card-title">
+                            <i class="fas fa-paint-brush"></i>
+                            Finish
+                        </h3>
+                    </div>
+                    <div class="filter-card-body">
+                        <ul class="filter-options">
+                            <li>
+                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}" class="filter-option {% if not current_finish %}active{% endif %}">
+                                    <span class="filter-option-text">All Finishes</span>
+                                    {% if not current_finish %}
+                                    <span class="filter-option-check"><i class="fas fa-check"></i></span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            {% for finish in all_finishes %}
+                            <li>
+                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}finish={{ finish.slug }}" class="filter-option {% if current_finish == finish.slug %}active{% endif %}">
+                                    <span class="filter-option-text">{{ finish.name }}</span>
+                                    {% if current_finish == finish.slug %}
+                                    <span class="filter-option-check"><i class="fas fa-check"></i></span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
             </aside>
             
             <!-- Products Grid -->
-            <div class="catalog-main">
-                <div class="catalog-header">
-                    <p class="results-count">{{ products.paginator.count }} products found</p>
-                    <div class="sort-dropdown">
-                        <label>Sort by:</label>
-                        <select onchange="location.href='?{% if search_query %}q={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}sort=' + this.value">
-                            <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Newest First</option>
-                            <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>Oldest First</option>
-                            <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name A-Z</option>
-                            <option value="-name" {% if current_sort == '-name' %}selected{% endif %}>Name Z-A</option>
-                            <option value="price" {% if current_sort == 'price' %}selected{% endif %}>Price Low-High</option>
-                            <option value="-price" {% if current_sort == '-price' %}selected{% endif %}>Price High-Low</option>
-                        </select>
+            <div class="catalog-main-modern">
+                <!-- Modern Toolbar -->
+                <div class="catalog-toolbar">
+                    <div class="toolbar-left">
+                        <p class="results-count-modern">
+                            <span class="results-number">{{ products.paginator.count }}</span> 
+                            <span class="results-text">products found</span>
+                        </p>
+                        {% if current_category or current_material or current_finish %}
+                        <div class="active-filters">
+                            {% if current_category %}
+                            <span class="active-filter-tag">
+                                {{ current_category }}
+                                <a href="?{% if current_material %}material={{ current_material }}&{% endif %}{% if current_finish %}finish={{ current_finish }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" class="remove-filter">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </span>
+                            {% endif %}
+                            {% if current_material %}
+                            <span class="active-filter-tag">
+                                {{ current_material }}
+                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_finish %}finish={{ current_finish }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" class="remove-filter">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </span>
+                            {% endif %}
+                            {% if current_finish %}
+                            <span class="active-filter-tag">
+                                {{ current_finish }}
+                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" class="remove-filter">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="toolbar-right">
+                        <div class="view-toggle">
+                            <button class="view-btn-toggle active" data-view="grid" aria-label="Grid view">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button class="view-btn-toggle" data-view="list" aria-label="List view">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                        <div class="sort-dropdown-modern">
+                            <label class="sort-label">
+                                <i class="fas fa-sort-amount-down"></i>
+                                Sort:
+                            </label>
+                            <select class="sort-select" onchange="location.href='?{% if search_query %}q={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}sort=' + this.value">
+                                <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Newest First</option>
+                                <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+                                <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name A-Z</option>
+                                <option value="-name" {% if current_sort == '-name' %}selected{% endif %}>Name Z-A</option>
+                                <option value="price" {% if current_sort == 'price' %}selected{% endif %}>Price: Low to High</option>
+                                <option value="-price" {% if current_sort == '-price' %}selected{% endif %}>Price: High to Low</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="products-grid">
+                <!-- Modern Products Grid -->
+                <div class="products-grid-modern">
                     {% for product in products %}
-                    <article class="product-card">
-                        <a href="{% url 'catalog:product_detail' product.slug %}" class="product-link">
-                            <div class="product-image">
+                    <article class="product-card-modern">
+                        <a href="{% url 'catalog:product_detail' product.slug %}" class="product-card-link">
+                            <div class="product-card-image">
                                 {% if product.primary_image %}
                                 <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" loading="lazy">
                                 {% else %}
-                                <div class="product-placeholder">
+                                <div class="product-card-placeholder">
                                     <i class="fas fa-image"></i>
                                 </div>
                                 {% endif %}
-                                <div class="product-overlay">
-                                    <span class="view-btn">View Details</span>
+                                
+                                <!-- Badges -->
+                                <div class="product-card-badges">
+                                    {% if product.is_featured %}
+                                    <span class="product-badge-modern featured">
+                                        <i class="fas fa-star"></i> Featured
+                                    </span>
+                                    {% endif %}
                                 </div>
-                                {% if product.is_featured %}
-                                <span class="product-badge">Featured</span>
-                                {% endif %}
+                                
+                                <!-- Quick Actions Overlay -->
+                                <div class="product-card-actions">
+                                    <span class="quick-view-btn">
+                                        <i class="fas fa-eye"></i>
+                                        Quick View
+                                    </span>
+                                </div>
                             </div>
-                            <div class="product-info">
-                                <span class="product-category">{{ product.category.name }}</span>
-                                <h3 class="product-name">{{ product.name }}</h3>
-                                <p class="product-size">{{ product.size_display }}</p>
+                            
+                            <div class="product-card-content">
+                                <div class="product-card-meta">
+                                    <span class="product-card-category">{{ product.category.name }}</span>
+                                </div>
+                                <h3 class="product-card-title">{{ product.name }}</h3>
+                                <p class="product-card-specs">
+                                    <i class="fas fa-ruler-combined"></i>
+                                    {{ product.size_display }}
+                                </p>
                                 {% if product.price %}
-                                <p class="product-price">{{ product.price|inr }}</p>
+                                <div class="product-card-price">
+                                    <span class="price-amount">{{ product.price|inr }}</span>
+                                </div>
                                 {% endif %}
                             </div>
                         </a>
                     </article>
                     {% empty %}
-                    <div class="no-results">
-                        <i class="fas fa-search"></i>
-                        <h3>No products found</h3>
-                        <p>Try adjusting your search or filters</p>
-                        <a href="{% url 'catalog:product_list' %}" class="btn btn-primary">View All Products</a>
+                    <div class="no-results-modern">
+                        <div class="no-results-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3 class="no-results-title">No products found</h3>
+                        <p class="no-results-text">We couldn't find any products matching your criteria. Try adjusting your filters or search terms.</p>
+                        <a href="{% url 'catalog:product_list' %}" class="btn btn-primary">
+                            <i class="fas fa-border-all"></i>
+                            View All Products
+                        </a>
                     </div>
                     {% endfor %}
                 </div>
                 
-                <!-- Pagination -->
+                <!-- Modern Pagination -->
                 {% if products.has_other_pages %}
-                <nav class="pagination">
-                    {% if products.has_previous %}
-                    <a href="?page={{ products.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="page-link prev">
-                        <i class="fas fa-chevron-left"></i> Previous
-                    </a>
-                    {% endif %}
-                    
-                    <div class="page-numbers">
-                        {% for num in products.paginator.page_range %}
-                            {% if products.number == num %}
-                            <span class="page-link active">{{ num }}</span>
-                            {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
-                            <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="page-link">{{ num }}</a>
-                            {% endif %}
-                        {% endfor %}
+                <nav class="pagination-modern" aria-label="Product pagination">
+                    <div class="pagination-info">
+                        Page {{ products.number }} of {{ products.paginator.num_pages }}
                     </div>
-                    
-                    {% if products.has_next %}
-                    <a href="?page={{ products.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="page-link next">
-                        Next <i class="fas fa-chevron-right"></i>
-                    </a>
-                    {% endif %}
+                    <div class="pagination-controls">
+                        {% if products.has_previous %}
+                        <a href="?page={{ products.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-btn prev">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Previous</span>
+                        </a>
+                        {% endif %}
+                        
+                        <div class="pagination-numbers">
+                            {% if products.number > 3 %}
+                            <a href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-number">1</a>
+                            {% if products.number > 4 %}
+                            <span class="pagination-ellipsis">...</span>
+                            {% endif %}
+                            {% endif %}
+                            
+                            {% for num in products.paginator.page_range %}
+                                {% if products.number == num %}
+                                <span class="pagination-number active">{{ num }}</span>
+                                {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-number">{{ num }}</a>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if products.number < products.paginator.num_pages|add:'-2' %}
+                            {% if products.number < products.paginator.num_pages|add:'-3' %}
+                            <span class="pagination-ellipsis">...</span>
+                            {% endif %}
+                            <a href="?page={{ products.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-number">{{ products.paginator.num_pages }}</a>
+                            {% endif %}
+                        </div>
+                        
+                        {% if products.has_next %}
+                        <a href="?page={{ products.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-btn next">
+                            <span>Next</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                        {% endif %}
+                    </div>
                 </nav>
                 {% endif %}
             </div>

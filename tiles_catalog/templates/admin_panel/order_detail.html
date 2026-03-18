@@ -128,11 +128,11 @@
             </div>
             <div class="summary-row">
                 <span>Unit Price</span>
-                <span>{% currency order.unit_price %}</span>
+                <span>{{ order.unit_price|currency }}</span>
             </div>
             <div class="summary-row total-row">
                 <span>Total Amount</span>
-                <span>{% currency order.total_price %}</span>
+                <span>{{ order.total_price|currency }}</span>
             </div>
         </div>
     </div>
