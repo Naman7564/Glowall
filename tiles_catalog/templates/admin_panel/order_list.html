@@ -8,6 +8,29 @@
     <h1 class="page-title">Orders</h1>
 </div>
 
+<!-- Order Stats Cards -->
+<div class="stats-grid" style="margin-bottom: 2rem;">
+    <div class="stat-card">
+        <div class="stat-icon products">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">{{ total_orders }}</span>
+            <span class="stat-label">Total Orders</span>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon available">
+            <i class="fas fa-calendar-day"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">{{ today_orders }}</span>
+            <span class="stat-label">Today's Orders</span>
+        </div>
+    </div>
+</div>
+
 <div class="filters-bar">
     <form method="get" class="filters-form">
         <div class="filter-group">

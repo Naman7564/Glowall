@@ -6,6 +6,7 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.utils import timezone
 
 from catalog.models import Product, Category, ProductImage, MaterialType, Finish, Contact, CustomerReview, Order
 from .forms import (
@@ -568,6 +569,11 @@ def order_list(request):
     """Admin order list view."""
     orders = Order.objects.select_related('product', 'user').all()
     
+    # Calculate order statistics
+    total_orders = Order.objects.count()
+    today = timezone.now().date()
+    today_orders = Order.objects.filter(created_at__date=today).count()
+    
     # Filter by status
     status = request.GET.get('status')
     if status:
@@ -599,6 +605,8 @@ def order_list(request):
     
     context = {
         'orders': orders,
+        'total_orders': total_orders,
+        'today_orders': today_orders,
         'current_status': status,
         'current_payment': payment_status,
         'date_from': date_from,
