@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initScrollEffects();
     initReviewCarousel();
     initUserMenu();
+    initMobileFilters();
+    initViewToggle();
 });
 
 /**
@@ -810,4 +812,103 @@ function initUserMenu() {
             dropdown.classList.remove('active');
         }
     });
+}
+
+/**
+ * Mobile Filters Sidebar
+ */
+function initMobileFilters() {
+    const filterBtn = document.getElementById('mobile-filter-btn');
+    const filterSidebar = document.getElementById('filter-sidebar');
+    const filterOverlay = document.getElementById('filter-overlay');
+    const filterCloseBtn = document.getElementById('filter-close-btn');
+
+    if (!filterBtn || !filterSidebar) return;
+
+    const openFilters = () => {
+        filterSidebar.classList.add('active');
+        if (filterOverlay) filterOverlay.classList.add('active');
+        document.body.classList.add('filter-open');
+    };
+
+    const closeFilters = () => {
+        filterSidebar.classList.remove('active');
+        if (filterOverlay) filterOverlay.classList.remove('active');
+        document.body.classList.remove('filter-open');
+    };
+
+    filterBtn.addEventListener('click', openFilters);
+
+    if (filterCloseBtn) {
+        filterCloseBtn.addEventListener('click', closeFilters);
+    }
+
+    if (filterOverlay) {
+        filterOverlay.addEventListener('click', closeFilters);
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && filterSidebar.classList.contains('active')) {
+            closeFilters();
+        }
+    });
+
+    // Close filters on resize if viewport becomes desktop
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+    const handleResize = (e) => {
+        if (e.matches) {
+            closeFilters();
+        }
+    };
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+        mediaQuery.addEventListener('change', handleResize);
+    } else {
+        mediaQuery.addListener(handleResize);
+    }
+}
+
+/**
+ * View Toggle (Grid/List)
+ */
+function initViewToggle() {
+    const viewBtns = document.querySelectorAll('.view-btn-toggle');
+    const productsGrid = document.querySelector('.products-grid-modern');
+
+    if (!viewBtns.length || !productsGrid) return;
+
+    viewBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const view = this.dataset.view;
+
+            viewBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            if (view === 'list') {
+                productsGrid.classList.add('list-view');
+            } else {
+                productsGrid.classList.remove('list-view');
+            }
+
+            // Store preference in localStorage
+            try {
+                localStorage.setItem('glowallProductView', view);
+            } catch (e) {
+                // Ignore storage errors
+            }
+        });
+    });
+
+    // Restore saved preference
+    try {
+        const savedView = localStorage.getItem('glowallProductView');
+        if (savedView === 'list') {
+            const listBtn = document.querySelector('.view-btn-toggle[data-view="list"]');
+            if (listBtn) {
+                listBtn.click();
+            }
+        }
+    } catch (e) {
+        // Ignore storage errors
+    }
 }

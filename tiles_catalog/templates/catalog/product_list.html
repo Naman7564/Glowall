@@ -94,12 +94,15 @@
     <div class="container">
         <div class="catalog-layout-modern">
             <!-- Modern Sidebar Filters -->
-            <aside class="catalog-sidebar-modern">
+            <aside class="catalog-sidebar-modern" id="filter-sidebar">
                 <div class="sidebar-header">
                     <h2 class="sidebar-title">
                         <i class="fas fa-sliders-h"></i>
                         Filters
                     </h2>
+                    <button class="mobile-filter-close" id="filter-close-btn" aria-label="Close filters">
+                        <i class="fas fa-times"></i>
+                    </button>
                     {% if current_category or current_material or current_finish or search_query %}
                     <a href="{% url 'catalog:product_list' %}" class="clear-filters-btn">
                         <i class="fas fa-times"></i>
@@ -118,12 +121,10 @@
                     </div>
                     <div class="filter-card-body">
                         <form action="" method="get" class="filter-form search-form search-form-inline js-search-form" data-search-url="{% url 'catalog:api_search' %}">
-                            {% if request.GET.category %}<input type="hidden" name="category" value="{{ request.GET.category }}">{% endif %}
-                            {% if request.GET.material %}<input type="hidden" name="material" value="{{ request.GET.material }}">{% endif %}
-                            {% if request.GET.finish %}<input type="hidden" name="finish" value="{{ request.GET.finish }}">{% endif %}
-                            {% if request.GET.color %}<input type="hidden" name="color" value="{{ request.GET.color }}">{% endif %}
-                            {% if request.GET.availability %}<input type="hidden" name="availability" value="{{ request.GET.availability }}">{% endif %}
-                            {% if request.GET.sort %}<input type="hidden" name="sort" value="{{ request.GET.sort }}">{% endif %}
+                            {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                            {% if current_material %}<input type="hidden" name="material" value="{{ current_material }}">{% endif %}
+                            {% if current_finish %}<input type="hidden" name="finish" value="{{ current_finish }}">{% endif %}
+                            {% if current_sort %}<input type="hidden" name="sort" value="{{ current_sort }}">{% endif %}
 
                             <div class="modern-search-box">
                                 <div class="search-field">
@@ -170,7 +171,7 @@
                     <div class="filter-card-body">
                         <ul class="filter-options">
                             <li>
-                                <a href="{% url 'catalog:product_list' %}" class="filter-option {% if not current_category %}active{% endif %}">
+                                <a href="?{% if current_material %}material={{ current_material }}&{% endif %}{% if current_finish %}finish={{ current_finish }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" class="filter-option {% if not current_category %}active{% endif %}">
                                     <span class="filter-option-icon">
                                         <i class="fas fa-border-all"></i>
                                     </span>
@@ -182,7 +183,7 @@
                             </li>
                             {% for category in all_categories %}
                             <li>
-                                <a href="?category={{ category.slug }}" class="filter-option {% if current_category == category.slug %}active{% endif %}">
+                                <a href="?category={{ category.slug }}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_finish %}&finish={{ current_finish }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="filter-option {% if current_category == category.slug %}active{% endif %}">
                                     <span class="filter-option-text">{{ category.name }}</span>
                                     {% if current_category == category.slug %}
                                     <span class="filter-option-check"><i class="fas fa-check"></i></span>
@@ -205,7 +206,7 @@
                     <div class="filter-card-body">
                         <ul class="filter-options">
                             <li>
-                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}" class="filter-option {% if not current_material %}active{% endif %}">
+                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_finish %}finish={{ current_finish }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" class="filter-option {% if not current_material %}active{% endif %}">
                                     <span class="filter-option-text">All Materials</span>
                                     {% if not current_material %}
                                     <span class="filter-option-check"><i class="fas fa-check"></i></span>
@@ -214,7 +215,7 @@
                             </li>
                             {% for material in all_materials %}
                             <li>
-                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}material={{ material.slug }}" class="filter-option {% if current_material == material.slug %}active{% endif %}">
+                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}material={{ material.slug }}{% if current_finish %}&finish={{ current_finish }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="filter-option {% if current_material == material.slug %}active{% endif %}">
                                     <span class="filter-option-text">{{ material.name }}</span>
                                     {% if current_material == material.slug %}
                                     <span class="filter-option-check"><i class="fas fa-check"></i></span>
@@ -237,7 +238,7 @@
                     <div class="filter-card-body">
                         <ul class="filter-options">
                             <li>
-                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}" class="filter-option {% if not current_finish %}active{% endif %}">
+                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" class="filter-option {% if not current_finish %}active{% endif %}">
                                     <span class="filter-option-text">All Finishes</span>
                                     {% if not current_finish %}
                                     <span class="filter-option-check"><i class="fas fa-check"></i></span>
@@ -246,7 +247,7 @@
                             </li>
                             {% for finish in all_finishes %}
                             <li>
-                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}finish={{ finish.slug }}" class="filter-option {% if current_finish == finish.slug %}active{% endif %}">
+                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}finish={{ finish.slug }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="filter-option {% if current_finish == finish.slug %}active{% endif %}">
                                     <span class="filter-option-text">{{ finish.name }}</span>
                                     {% if current_finish == finish.slug %}
                                     <span class="filter-option-check"><i class="fas fa-check"></i></span>
@@ -259,40 +260,70 @@
                 </div>
             </aside>
             
+            <!-- Mobile Filter Overlay -->
+            <div class="filter-overlay" id="filter-overlay"></div>
+            
             <!-- Products Grid -->
             <div class="catalog-main-modern">
                 <!-- Modern Toolbar -->
                 <div class="catalog-toolbar">
                     <div class="toolbar-left">
+                        <button class="mobile-filter-btn" id="mobile-filter-btn">
+                            <i class="fas fa-sliders-h"></i>
+                            <span>Filters</span>
+                            {% if current_category or current_material or current_finish or search_query %}
+                            <span class="filter-count"></span>
+                            {% endif %}
+                        </button>
                         <p class="results-count-modern">
                             <span class="results-number">{{ products.paginator.count }}</span> 
                             <span class="results-text">products found</span>
                         </p>
-                        {% if current_category or current_material or current_finish %}
+                        {% if current_category or current_material or current_finish or search_query %}
                         <div class="active-filters">
-                            {% if current_category %}
+                            {% if search_query %}
                             <span class="active-filter-tag">
-                                {{ current_category }}
+                                <i class="fas fa-search"></i> {{ search_query }}
+                                <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}{% if current_finish %}finish={{ current_finish }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" class="remove-filter">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </span>
+                            {% endif %}
+                            {% if current_category %}
+                            {% for cat in all_categories %}
+                            {% if cat.slug == current_category %}
+                            <span class="active-filter-tag">
+                                {{ cat.name }}
                                 <a href="?{% if current_material %}material={{ current_material }}&{% endif %}{% if current_finish %}finish={{ current_finish }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" class="remove-filter">
                                     <i class="fas fa-times"></i>
                                 </a>
                             </span>
                             {% endif %}
+                            {% endfor %}
+                            {% endif %}
                             {% if current_material %}
+                            {% for mat in all_materials %}
+                            {% if mat.slug == current_material %}
                             <span class="active-filter-tag">
-                                {{ current_material }}
+                                {{ mat.name }}
                                 <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_finish %}finish={{ current_finish }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" class="remove-filter">
                                     <i class="fas fa-times"></i>
                                 </a>
                             </span>
                             {% endif %}
+                            {% endfor %}
+                            {% endif %}
                             {% if current_finish %}
+                            {% for fin in all_finishes %}
+                            {% if fin.slug == current_finish %}
                             <span class="active-filter-tag">
-                                {{ current_finish }}
+                                {{ fin.name }}
                                 <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" class="remove-filter">
                                     <i class="fas fa-times"></i>
                                 </a>
                             </span>
+                            {% endif %}
+                            {% endfor %}
                             {% endif %}
                         </div>
                         {% endif %}
@@ -311,7 +342,7 @@
                                 <i class="fas fa-sort-amount-down"></i>
                                 Sort:
                             </label>
-                            <select class="sort-select" onchange="location.href='?{% if search_query %}q={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}sort=' + this.value">
+                            <select class="sort-select" onchange="location.href='?{% if search_query %}q={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}{% if current_finish %}finish={{ current_finish }}&{% endif %}sort=' + this.value">
                                 <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Newest First</option>
                                 <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>Oldest First</option>
                                 <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name A-Z</option>
@@ -395,7 +426,7 @@
                     </div>
                     <div class="pagination-controls">
                         {% if products.has_previous %}
-                        <a href="?page={{ products.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-btn prev">
+                        <a href="?page={{ products.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_finish %}&finish={{ current_finish }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-btn prev">
                             <i class="fas fa-arrow-left"></i>
                             <span>Previous</span>
                         </a>
@@ -403,7 +434,7 @@
                         
                         <div class="pagination-numbers">
                             {% if products.number > 3 %}
-                            <a href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-number">1</a>
+                            <a href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_finish %}&finish={{ current_finish }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-number">1</a>
                             {% if products.number > 4 %}
                             <span class="pagination-ellipsis">...</span>
                             {% endif %}
@@ -413,7 +444,7 @@
                                 {% if products.number == num %}
                                 <span class="pagination-number active">{{ num }}</span>
                                 {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
-                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-number">{{ num }}</a>
+                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_finish %}&finish={{ current_finish }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-number">{{ num }}</a>
                                 {% endif %}
                             {% endfor %}
                             
@@ -421,12 +452,12 @@
                             {% if products.number < products.paginator.num_pages|add:'-3' %}
                             <span class="pagination-ellipsis">...</span>
                             {% endif %}
-                            <a href="?page={{ products.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-number">{{ products.paginator.num_pages }}</a>
+                            <a href="?page={{ products.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_finish %}&finish={{ current_finish }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-number">{{ products.paginator.num_pages }}</a>
                             {% endif %}
                         </div>
                         
                         {% if products.has_next %}
-                        <a href="?page={{ products.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-btn next">
+                        <a href="?page={{ products.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_material %}&material={{ current_material }}{% endif %}{% if current_finish %}&finish={{ current_finish }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="pagination-btn next">
                             <span>Next</span>
                             <i class="fas fa-arrow-right"></i>
                         </a>

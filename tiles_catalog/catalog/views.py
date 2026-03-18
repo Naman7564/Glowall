@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .models import Category, Product, CustomerReview, Order
+from .models import Category, Product, CustomerReview, Order, MaterialType, Finish
 from .forms import ContactForm, OrderForm
 from .payments import (
     CashfreeGatewayError,
@@ -319,17 +319,21 @@ def product_list(request):
     except EmptyPage:
         products = paginator.page(paginator.num_pages)
     
-    current_category = None
-    if category_slug:
-        current_category = Category.objects.filter(slug=category_slug).first()
+    # Get all filter options for sidebar
+    all_categories = Category.objects.filter(is_active=True).order_by('name')
+    all_materials = MaterialType.objects.all().order_by('name')
+    all_finishes = Finish.objects.all().order_by('name')
     
     context = {
         'products': products,
         'search_query': search_query,
-        'current_category': current_category,
+        'current_category': category_slug,
         'current_material': material_slug,
         'current_finish': finish_slug,
         'current_sort': sort,
+        'all_categories': all_categories,
+        'all_materials': all_materials,
+        'all_finishes': all_finishes,
         'page_title': 'Product Catalog',
     }
     return render(request, 'catalog/product_list.html', context)
