@@ -229,11 +229,14 @@ ul {
     align-items: center;
     gap: 20px;
     position: relative;
+    margin-left: auto;
 }
 
 .user-menu {
     position: relative;
     z-index: 80;
+    display: flex;
+    align-items: center;
 }
 
 .user-btn {
@@ -286,7 +289,9 @@ ul {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
+    left: auto;
     min-width: 220px;
+    max-width: 280px;
     background: var(--admin-card);
     border: 1px solid var(--admin-border);
     border-radius: 12px;
@@ -295,8 +300,9 @@ ul {
     visibility: hidden;
     transform: translateY(-8px) scale(0.96);
     transition: all 0.2s ease;
-    z-index: 100;
+    z-index: 1000;
     overflow: hidden;
+    white-space: nowrap;
 }
 
 .user-dropdown.active {

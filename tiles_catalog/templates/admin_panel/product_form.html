@@ -228,45 +228,6 @@
                         </div>
                     </div>
                 </section>
-
-                <section class="admin-form-card form-section collapsible-card is-open">
-                    <button type="button" class="admin-form-card-header collapsible-trigger section-toggle" aria-expanded="true">
-                        <span class="section-heading">
-                            <span class="section-icon seo">
-                                <i class="fas fa-magnifying-glass"></i>
-                            </span>
-                            <span>
-                                <span class="section-title-text">SEO Settings</span>
-                                <span class="section-subtitle-text">These fields help search engines understand your product page.</span>
-                            </span>
-                        </span>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-
-                    <div class="admin-form-card-body section-content">
-                        <div class="form-group">
-                            <label for="id_meta_title">Meta Title</label>
-                            <div class="field-shell">
-                                <span class="field-icon"><i class="fas fa-heading"></i></span>
-                                {{ form.meta_title }}
-                            </div>
-                            {% if form.meta_title.errors %}
-                            <span class="error">{{ form.meta_title.errors.0 }}</span>
-                            {% endif %}
-                        </div>
-
-                        <div class="form-group">
-                            <label for="id_meta_description">Meta Description</label>
-                            <div class="field-shell field-shell-textarea">
-                                <span class="field-icon"><i class="fas fa-file-lines"></i></span>
-                                {{ form.meta_description }}
-                            </div>
-                            {% if form.meta_description.errors %}
-                            <span class="error">{{ form.meta_description.errors.0 }}</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </section>
             </aside>
         </div>
         
