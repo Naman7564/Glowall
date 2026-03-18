@@ -1,0 +1,175 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load currency_tags %}
+
+{% block title %}Order #{{ order.pk }} - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Order #{{ order.pk }}</h1>
+    <a href="{% url 'admin_panel:order_list' %}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Back to Orders
+    </a>
+</div>
+
+<div class="order-detail-grid">
+    <!-- Order Status Card -->
+    <div class="detail-card status-card">
+        <div class="card-header">
+            <h3><i class="fas fa-info-circle"></i> Order Status</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" class="status-form">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.status.id_for_label }}">Order Status</label>
+                        {{ form.status }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.payment_status.id_for_label }}">Payment Status</label>
+                        {{ form.payment_status }}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Update Status
+                </button>
+            </form>
+            
+            <div class="order-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Created:</span>
+                    <span class="meta-value">{{ order.created_at|date:"M d, Y H:i" }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Last Updated:</span>
+                    <span class="meta-value">{{ order.updated_at|date:"M d, Y H:i" }}</span>
+                </div>
+                {% if order.user %}
+                <div class="meta-item">
+                    <span class="meta-label">Registered User:</span>
+                    <span class="meta-value">{{ order.user.username }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Information Card -->
+    <div class="detail-card customer-card">
+        <div class="card-header">
+            <h3><i class="fas fa-user"></i> Customer Information</h3>
+        </div>
+        <div class="card-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Full Name</span>
+                    <span class="info-value">{{ order.full_name }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">
+                        <a href="mailto:{{ order.email }}">{{ order.email }}</a>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Phone</span>
+                    <span class="info-value">
+                        <a href="tel:{{ order.phone_number }}">{{ order.phone_number }}</a>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="address-section">
+                <h4><i class="fas fa-map-marker-alt"></i> Shipping Address</h4>
+                <div class="address">
+                    {{ order.address }}<br>
+                    {{ order.city }}, {{ order.state }} - {{ order.pincode }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Information Card -->
+    <div class="detail-card product-card">
+        <div class="card-header">
+            <h3><i class="fas fa-box"></i> Product Information</h3>
+        </div>
+        <div class="card-body">
+            <div class="product-detail">
+                {% if order.product.primary_image %}
+                <div class="product-image">
+                    <img src="{{ order.product.primary_image.image.url }}" alt="{{ order.product.name }}">
+                </div>
+                {% endif %}
+                <div class="product-info">
+                    <h4>{{ order.product.name }}</h4>
+                    <p class="product-category">{{ order.product.category.name }}</p>
+                    {% if order.product.material_type %}
+                    <p class="product-material">{{ order.product.material_type.name }}</p>
+                    {% endif %}
+                    <p class="product-sku">SKU: {{ order.product.sku }}</p>
+                    <a href="{% url 'catalog:product_detail' order.product.slug %}" class="btn btn-sm btn-outline" target="_blank">
+                        <i class="fas fa-external-link-alt"></i> View Product
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Summary Card -->
+    <div class="detail-card summary-card">
+        <div class="card-header">
+            <h3><i class="fas fa-receipt"></i> Order Summary</h3>
+        </div>
+        <div class="card-body">
+            <div class="summary-row">
+                <span>Quantity</span>
+                <span>{{ order.quantity }} unit(s)</span>
+            </div>
+            <div class="summary-row">
+                <span>Unit Price</span>
+                <span>{% currency order.unit_price %}</span>
+            </div>
+            <div class="summary-row total-row">
+                <span>Total Amount</span>
+                <span>{% currency order.total_price %}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Information Card -->
+    <div class="detail-card payment-card">
+        <div class="card-header">
+            <h3><i class="fas fa-credit-card"></i> Payment Information</h3>
+        </div>
+        <div class="card-body">
+            <div class="info-grid">
+                {% if order.cashfree_order_id %}
+                <div class="info-item">
+                    <span class="info-label">Order ID</span>
+                    <span class="info-value code">{{ order.cashfree_order_id }}</span>
+                </div>
+                {% endif %}
+                {% if order.cashfree_payment_id %}
+                <div class="info-item">
+                    <span class="info-label">Payment ID</span>
+                    <span class="info-value code">{{ order.cashfree_payment_id }}</span>
+                </div>
+                {% endif %}
+                {% if order.payment_completed_at %}
+                <div class="info-item">
+                    <span class="info-label">Payment Date</span>
+                    <span class="info-value">{{ order.payment_completed_at|date:"M d, Y H:i" }}</span>
+                </div>
+                {% endif %}
+                {% if order.payment_message %}
+                <div class="info-item full-width">
+                    <span class="info-label">Payment Message</span>
+                    <span class="info-value">{{ order.payment_message }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

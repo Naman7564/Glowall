@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import inlineformset_factory
 from django.contrib.auth.forms import AuthenticationForm
-from .models import Product, Category, ProductImage, MaterialType, Finish, CustomerReview
+from catalog.models import Product, Category, ProductImage, MaterialType, Finish, CustomerReview, Order
 
 
 class AdminLoginForm(AuthenticationForm):
@@ -194,6 +194,22 @@ class CustomerReviewForm(forms.ModelForm):
                 'placeholder': 'Short review text (optional)'
             }),
         }
+class OrderStatusForm(forms.ModelForm):
+    """Form for updating order status."""
+
+    class Meta:
+        model = Order
+        fields = ['status', 'payment_status']
+        widgets = {
+            'status': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'payment_status': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+        }
+
+
 # Formset for multiple images
 ProductImageFormSet = inlineformset_factory(
     Product,

@@ -1,0 +1,121 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load currency_tags %}
+
+{% block title %}Orders - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Orders</h1>
+</div>
+
+<div class="filters-bar">
+    <form method="get" class="filters-form">
+        <div class="filter-group">
+            <label>Status:</label>
+            <select name="status" class="form-control filter-select">
+                <option value="">All Statuses</option>
+                {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label>Payment:</label>
+            <select name="payment" class="form-control filter-select">
+                <option value="">All Payments</option>
+                {% for value, label in payment_choices %}
+                <option value="{{ value }}" {% if current_payment == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label>From:</label>
+            <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+        </div>
+        
+        <div class="filter-group">
+            <label>To:</label>
+            <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+        </div>
+        
+        <div class="filter-group search-group">
+            <input type="text" name="q" class="form-control" placeholder="Search orders..." value="{{ search_query }}">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-filter"></i> Filter
+        </button>
+        <a href="{% url 'admin_panel:order_list' %}" class="btn btn-outline">Clear</a>
+    </form>
+</div>
+
+<div class="data-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td><strong>#{{ order.pk }}</strong></td>
+                    <td>
+                        <div class="customer-info">
+                            <span class="customer-name">{{ order.full_name }}</span>
+                            <span class="customer-email">{{ order.email }}</span>
+                        </div>
+                    </td>
+                    <td>{{ order.product.name|truncatechars:30 }}</td>
+                    <td>{{ order.quantity }}</td>
+                    <td>{% currency order.total_price %}</td>
+                    <td>
+                        {% if order.status == 'new' %}
+                        <span class="badge badge-primary">{{ order.get_status_display }}</span>
+                        {% elif order.status == 'processing' %}
+                        <span class="badge badge-warning">{{ order.get_status_display }}</span>
+                        {% elif order.status == 'completed' %}
+                        <span class="badge badge-success">{{ order.get_status_display }}</span>
+                        {% elif order.status == 'cancelled' %}
+                        <span class="badge badge-danger">{{ order.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if order.payment_status == 'PENDING' %}
+                        <span class="badge badge-warning">{{ order.get_payment_status_display }}</span>
+                        {% elif order.payment_status == 'SUCCESS' %}
+                        <span class="badge badge-success">{{ order.get_payment_status_display }}</span>
+                        {% elif order.payment_status == 'FAILED' %}
+                        <span class="badge badge-danger">{{ order.get_payment_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'admin_panel:order_detail' order.pk %}" class="btn btn-sm btn-outline" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center">No orders found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

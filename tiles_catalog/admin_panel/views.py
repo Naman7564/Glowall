@@ -7,10 +7,10 @@ from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
-from catalog.models import Product, Category, ProductImage, MaterialType, Finish, Contact, CustomerReview
+from catalog.models import Product, Category, ProductImage, MaterialType, Finish, Contact, CustomerReview, Order
 from .forms import (
     AdminLoginForm, ProductForm, CategoryForm, ProductImageFormSet,
-    MaterialTypeForm, FinishForm, CustomerReviewForm
+    MaterialTypeForm, FinishForm, CustomerReviewForm, OrderStatusForm
 )
 
 
@@ -559,3 +559,74 @@ def review_toggle_active(request, pk):
         'success': True,
         'is_active': review.is_active,
     })
+
+
+# Order Management
+@login_required
+@user_passes_test(is_staff)
+def order_list(request):
+    """Admin order list view."""
+    orders = Order.objects.select_related('product', 'user').all()
+    
+    # Filter by status
+    status = request.GET.get('status')
+    if status:
+        orders = orders.filter(status=status)
+    
+    # Filter by payment status
+    payment_status = request.GET.get('payment')
+    if payment_status:
+        orders = orders.filter(payment_status=payment_status)
+    
+    # Filter by date range
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    if date_from:
+        orders = orders.filter(created_at__date__gte=date_from)
+    if date_to:
+        orders = orders.filter(created_at__date__lte=date_to)
+    
+    # Search by customer name, email, phone, or order ID
+    search = request.GET.get('q', '')
+    if search:
+        orders = orders.filter(
+            Q(full_name__icontains=search) |
+            Q(email__icontains=search) |
+            Q(phone_number__icontains=search) |
+            Q(pk__icontains=search) |
+            Q(product__name__icontains=search)
+        )
+    
+    context = {
+        'orders': orders,
+        'current_status': status,
+        'current_payment': payment_status,
+        'date_from': date_from,
+        'date_to': date_to,
+        'search_query': search,
+        'status_choices': Order.STATUS_CHOICES,
+        'payment_choices': Order.PAYMENT_STATUS_CHOICES,
+    }
+    return render(request, 'admin_panel/order_list.html', context)
+
+
+@login_required
+@user_passes_test(is_staff)
+def order_detail(request, pk):
+    """View order detail."""
+    order = get_object_or_404(Order.objects.select_related('product', 'user'), pk=pk)
+    
+    if request.method == 'POST':
+        form = OrderStatusForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Order #{order.pk} status has been updated.')
+            return redirect('admin_panel:order_detail', pk=order.pk)
+    else:
+        form = OrderStatusForm(instance=order)
+    
+    context = {
+        'order': order,
+        'form': form,
+    }
+    return render(request, 'admin_panel/order_detail.html', context)
