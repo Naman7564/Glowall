@@ -21,6 +21,8 @@ def _get_safe_redirect(request):
 def user_login(request):
     """User login view with modern UI."""
     if request.user.is_authenticated:
+        if request.user.is_staff:
+            return redirect('admin_panel:dashboard')
         return redirect('catalog:home')
 
     if request.method == 'POST':
@@ -32,6 +34,9 @@ def user_login(request):
             if not remember_me:
                 request.session.set_expiry(0)  # Session expires on browser close
             messages.success(request, f'Welcome back, {user.first_name or user.username}!')
+            # Redirect admin users to admin panel
+            if user.is_staff:
+                return redirect(_get_safe_redirect(request) or 'admin_panel:dashboard')
             return redirect(_get_safe_redirect(request) or 'catalog:home')
     else:
         form = UserLoginForm()
