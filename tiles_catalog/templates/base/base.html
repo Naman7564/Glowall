@@ -52,6 +52,10 @@
                     <button class="search-toggle" type="button" aria-label="Search" aria-expanded="false" aria-controls="site-search">
                         <i class="fas fa-search"></i>
                     </button>
+                    <a href="{% url 'catalog:cart' %}" class="cart-icon" aria-label="Shopping cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        {% if cart_count %}<span class="cart-badge">{{ cart_count }}</span>{% endif %}
+                    </a>
                     {% if user.is_authenticated %}
                     <div class="user-menu" id="user-menu">
                         <button class="user-menu-toggle" id="user-menu-toggle" type="button" aria-label="User menu">

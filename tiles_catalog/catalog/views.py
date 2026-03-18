@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 CHECKOUT_SESSION_KEY = 'checkout_item'
+CART_SESSION_KEY = 'shopping_cart'
 
 
 def _normalize_quantity(value, default=1):
@@ -712,3 +713,136 @@ def api_search(request):
     ]
 
     return JsonResponse({'results': results})
+
+
+# Cart Functions
+def _get_cart(request):
+    """Get the cart from session."""
+    return request.session.get(CART_SESSION_KEY, {})
+
+
+def _save_cart(request, cart):
+    """Save the cart to session."""
+    request.session[CART_SESSION_KEY] = cart
+    request.session.modified = True
+
+
+def cart_view(request):
+    """View the shopping cart."""
+    cart = _get_cart(request)
+    cart_items = []
+    total = 0
+    
+    for product_id, item in cart.items():
+        product = Product.objects.filter(pk=product_id, is_available=True).first()
+        if product:
+            quantity = item.get('quantity', 1)
+            item_total = (product.price or 0) * quantity
+            cart_items.append({
+                'product': product,
+                'quantity': quantity,
+                'item_total': item_total,
+            })
+            total += item_total
+    
+    context = {
+        'cart_items': cart_items,
+        'cart_total': total,
+        'page_title': 'Shopping Cart',
+    }
+    return render(request, 'catalog/cart.html', context)
+
+
+@require_POST
+def add_to_cart(request):
+    """Add a product to the cart."""
+    product_id = request.POST.get('product_id')
+    quantity = _normalize_quantity(request.POST.get('quantity'), default=1)
+    
+    product = Product.objects.filter(pk=product_id, is_available=True).first()
+    if not product:
+        messages.error(request, 'Product not found or unavailable.')
+        return redirect('catalog:product_list')
+    
+    cart = _get_cart(request)
+    product_key = str(product_id)
+    
+    if product_key in cart:
+        cart[product_key]['quantity'] += quantity
+    else:
+        cart[product_key] = {'quantity': quantity}
+    
+    _save_cart(request, cart)
+    messages.success(request, f'{product.name} added to cart!')
+    
+    # Return JSON for AJAX requests
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        cart_count = sum(item.get('quantity', 0) for item in cart.values())
+        return JsonResponse({'success': True, 'cart_count': cart_count, 'message': f'{product.name} added to cart!'})
+    
+    return redirect('catalog:cart')
+
+
+@require_POST
+def update_cart(request):
+    """Update cart item quantity."""
+    product_id = request.POST.get('product_id')
+    quantity = _normalize_quantity(request.POST.get('quantity'), default=1)
+    
+    cart = _get_cart(request)
+    product_key = str(product_id)
+    
+    if product_key in cart:
+        if quantity > 0:
+            cart[product_key]['quantity'] = quantity
+        else:
+            del cart[product_key]
+        _save_cart(request, cart)
+        messages.success(request, 'Cart updated.')
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        cart_count = sum(item.get('quantity', 0) for item in cart.values())
+        return JsonResponse({'success': True, 'cart_count': cart_count})
+    
+    return redirect('catalog:cart')
+
+
+@require_POST
+def remove_from_cart(request):
+    """Remove a product from the cart."""
+    product_id = request.POST.get('product_id')
+    
+    cart = _get_cart(request)
+    product_key = str(product_id)
+    
+    if product_key in cart:
+        del cart[product_key]
+        _save_cart(request, cart)
+        messages.success(request, 'Item removed from cart.')
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        cart_count = sum(item.get('quantity', 0) for item in cart.values())
+        return JsonResponse({'success': True, 'cart_count': cart_count})
+    
+    return redirect('catalog:cart')
+
+
+def cart_checkout(request):
+    """Checkout from cart - redirect to checkout with first item or show cart."""
+    cart = _get_cart(request)
+    if not cart:
+        messages.error(request, 'Your cart is empty.')
+        return redirect('catalog:cart')
+    
+    # Get first item for checkout (simple approach)
+    first_item = list(cart.items())[0]
+    product_id, item = first_item
+    quantity = item.get('quantity', 1)
+    
+    # Clear cart after checkout initiation
+    request.session[CHECKOUT_SESSION_KEY] = {
+        'product_id': product_id,
+        'quantity': quantity,
+    }
+    
+    return redirect('catalog:checkout')

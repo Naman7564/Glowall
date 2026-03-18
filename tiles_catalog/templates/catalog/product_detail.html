@@ -128,10 +128,15 @@
                     </form>
 
                     <div class="pd-actions pd-actions-secondary">
-                        <a href="{% url 'catalog:contact' %}?subject=Inquiry about {{ product.name }}" class="pd-btn pd-btn-outline" id="addToCartBtn">
-                            <span class="material-symbols-outlined">add_shopping_cart</span>
-                            Add to Cart
-                        </a>
+                        <form method="post" action="{% url 'catalog:add_to_cart' %}" class="add-to-cart-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="quantity" value="10" id="cartQtyInput">
+                            <button type="submit" class="pd-btn pd-btn-outline" id="addToCartBtn">
+                                <span class="material-symbols-outlined">add_shopping_cart</span>
+                                Add to Cart
+                            </button>
+                        </form>
                     </div>
 
 
@@ -310,10 +315,18 @@ function changeImage(src, thumbBtn) {
 // Quantity Selector
 function updateQty(change) {
     const input = document.getElementById('qtyInput');
+    const cartInput = document.getElementById('cartQtyInput');
     let val = parseInt(input.value) || 1;
     val = Math.max(1, val + change);
     input.value = val;
+    if (cartInput) cartInput.value = val;
 }
+
+// Sync quantity on manual input change
+document.getElementById('qtyInput').addEventListener('change', function() {
+    const cartInput = document.getElementById('cartQtyInput');
+    if (cartInput) cartInput.value = this.value;
+});
 
 // Tabs
 document.querySelectorAll('.pd-tab').forEach(tab => {
