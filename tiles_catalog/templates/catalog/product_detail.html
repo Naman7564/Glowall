@@ -134,21 +134,7 @@
                         </a>
                     </div>
 
-                    <!-- Secondary Actions -->
-                    <div class="pd-secondary-actions">
-                        <button class="pd-icon-btn" type="button" id="addWishlistBtn">
-                            <span class="material-symbols-outlined">favorite_border</span>
-                            Add to Wishlist
-                        </button>
-                        <button class="pd-icon-btn" type="button" id="shareBtn">
-                            <span class="material-symbols-outlined">share</span>
-                            Share
-                        </button>
-                        <a href="{% url 'catalog:contact' %}?subject=Request a Quote for {{ product.name }}" class="pd-icon-btn" id="requestQuoteBtn">
-                            <span class="material-symbols-outlined">request_quote</span>
-                            Get a Quote
-                        </a>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -285,9 +271,7 @@
                                 <span class="material-symbols-outlined">image</span>
                             </div>
                             {% endif %}
-                            <button class="pd-wishlist-mini" type="button" aria-label="Add to wishlist">
-                                <span class="material-symbols-outlined">favorite_border</span>
-                            </button>
+
                         </div>
                         <div class="pd-related-info">
                             <span class="pd-related-category">{{ related.category.name }}</span>
