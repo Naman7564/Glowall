@@ -241,7 +241,7 @@ def home(request):
     
     marble_textures = Product.objects.filter(
         is_available=True,
-        category__slug='marble-texture'
+        category__slug='marbels'
     ).select_related('category', 'material_type')[:4]
     
     featured_categories = Category.objects.filter(
