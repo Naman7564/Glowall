@@ -41,3 +41,8 @@ def inr(value):
     integer_part, decimal_part = f"{amount:.2f}".split(".")
     grouped_integer = _group_indian_digits(integer_part)
     return f"{sign}₹{grouped_integer}.{decimal_part}"
+
+
+# Alias for backwards compatibility
+currency = inr
+register.filter('currency', currency)
