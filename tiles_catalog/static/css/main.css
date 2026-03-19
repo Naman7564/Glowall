@@ -1333,6 +1333,34 @@ body.nav-open {
         max-width: 260px;
     }
 
+    .showcase-card-copy {
+        left: 14px;
+        right: 14px;
+        bottom: 14px;
+        gap: 2px;
+    }
+
+    .showcase-card-kicker {
+        display: none;
+    }
+
+    .showcase-card-title {
+        font-size: 0.9rem;
+        line-height: 1.15;
+        letter-spacing: 0.02em;
+        max-width: 7ch;
+    }
+
+    .showcase-card-badge {
+        width: 42px;
+        height: 42px;
+        top: 44%;
+    }
+
+    .showcase-card-badge i {
+        font-size: 15px;
+    }
+
     .hero-scroll span {
         font-size: 9px;
     }
