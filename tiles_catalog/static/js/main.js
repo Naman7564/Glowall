@@ -101,7 +101,6 @@ function initNavigation() {
  * Search Overlay
  */
 function initSearch() {
-    const RECENT_SEARCHES_KEY = 'glowallRecentSearches';
     const SEARCH_DEBOUNCE_MS = 220;
     const MIN_QUERY_LENGTH = 2;
     const header = document.querySelector('.header');
@@ -110,42 +109,7 @@ function initSearch() {
     const searchClose = document.querySelector('.search-close');
     const overlayInput = searchOverlay?.querySelector('.js-search-input');
     const searchForms = document.querySelectorAll('.js-search-form');
-    const recentSearchRefreshers = [];
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-    const readRecentSearches = () => {
-        try {
-            const storedSearches = window.localStorage.getItem(RECENT_SEARCHES_KEY);
-            const parsedSearches = JSON.parse(storedSearches || '[]');
-            return Array.isArray(parsedSearches) ? parsedSearches.filter(Boolean).slice(0, 5) : [];
-        } catch (error) {
-            return [];
-        }
-    };
-
-    const writeRecentSearches = (searches) => {
-        try {
-            window.localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(searches.slice(0, 5)));
-        } catch (error) {
-            // Ignore storage failures and keep search functional.
-        }
-    };
-
-    const saveRecentSearch = (query) => {
-        const normalizedQuery = query.trim();
-
-        if (!normalizedQuery) {
-            return;
-        }
-
-        const updatedSearches = [
-            normalizedQuery,
-            ...readRecentSearches().filter((item) => item.toLowerCase() !== normalizedQuery.toLowerCase()),
-        ].slice(0, 5);
-
-        writeRecentSearches(updatedSearches);
-        recentSearchRefreshers.forEach((refreshRecentSearches) => refreshRecentSearches());
-    };
 
     const openOverlay = () => {
         if (!searchOverlay) {
@@ -213,9 +177,6 @@ function initSearch() {
         resultCopy.appendChild(resultMeta);
         resultLink.appendChild(resultCopy);
         resultLink.appendChild(resultArrow);
-        resultLink.addEventListener('click', function() {
-            saveRecentSearch(result.name || '');
-        });
 
         return resultLink;
     };
@@ -224,8 +185,6 @@ function initSearch() {
         const input = form.querySelector('.js-search-input');
         const clearButton = form.querySelector('.js-search-clear');
         const panel = form.querySelector('.js-search-panel');
-        const recentSection = form.querySelector('.js-search-recent-section');
-        const recentList = form.querySelector('.js-search-recent-list');
         const resultsSection = form.querySelector('.js-search-results-section');
         const resultsList = form.querySelector('.js-search-results');
         const status = form.querySelector('.js-search-status');
@@ -279,46 +238,17 @@ function initSearch() {
                 return;
             }
 
-            const hasRecentSearches = recentSection ? !recentSection.hidden : false;
             const hasResults = resultsSection ? !resultsSection.hidden : false;
             const hasStatus = status ? !status.hidden : false;
             const shouldShowPanel = persistentPanel
-                ? hasRecentSearches || hasResults || hasStatus
+                ? hasResults || hasStatus
                 : form.contains(document.activeElement) || hasResults;
             panel.hidden = !shouldShowPanel;
-        };
-
-        const renderRecentSearches = () => {
-            if (!recentList || !recentSection) {
-                return;
-            }
-
-            const recentSearches = input.value.trim().length >= MIN_QUERY_LENGTH ? [] : readRecentSearches();
-            recentList.innerHTML = '';
-
-            recentSearches.forEach((query) => {
-                const recentButton = document.createElement('button');
-                recentButton.type = 'button';
-                recentButton.className = 'search-chip';
-                recentButton.textContent = query;
-                recentButton.addEventListener('click', function() {
-                    input.value = query;
-                    updateClearButton();
-                    renderRecentSearches();
-                    queueSuggestions(query);
-                    input.focus();
-                });
-                recentList.appendChild(recentButton);
-            });
-
-            recentSection.hidden = recentSearches.length === 0;
-            syncPanelVisibility();
         };
 
         const showIdleState = () => {
             cancelPendingSearch();
             clearResults();
-            renderRecentSearches();
             setStatus(emptyMessage, 'idle');
             syncPanelVisibility();
         };
@@ -396,7 +326,6 @@ function initSearch() {
             const normalizedQuery = query.trim();
 
             cancelPendingSearch();
-            renderRecentSearches();
 
             if (normalizedQuery.length < MIN_QUERY_LENGTH) {
                 clearResults();
@@ -423,7 +352,6 @@ function initSearch() {
             if (input.value.trim().length >= MIN_QUERY_LENGTH) {
                 queueSuggestions(input.value);
             } else {
-                renderRecentSearches();
                 setStatus(emptyMessage, 'idle');
                 syncPanelVisibility();
             }
@@ -443,10 +371,6 @@ function initSearch() {
             }
         });
 
-        form.addEventListener('submit', function() {
-            saveRecentSearch(input.value);
-        });
-
         form.addEventListener('focusout', function() {
             window.setTimeout(() => {
                 if (persistentPanel || form.contains(document.activeElement)) {
@@ -455,11 +379,8 @@ function initSearch() {
 
                 cancelPendingSearch();
                 clearResults();
-                renderRecentSearches();
 
-                if (!input.value.trim() && !recentList?.children.length) {
-                    setStatus('', 'idle');
-                } else if (!input.value.trim()) {
+                if (!input.value.trim()) {
                     setStatus(emptyMessage, 'idle');
                 }
 
@@ -468,14 +389,11 @@ function initSearch() {
         });
 
         updateClearButton();
-        renderRecentSearches();
 
         if (persistentPanel) {
             setStatus(emptyMessage, 'idle');
             syncPanelVisibility();
         }
-
-        recentSearchRefreshers.push(renderRecentSearches);
     };
 
     searchForms.forEach((form) => {
