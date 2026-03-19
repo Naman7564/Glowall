@@ -593,19 +593,24 @@
             }
             .auth-brand-panel {
                 flex: none;
-                min-height: 200px;
-                padding: 40px 20px;
+                min-height: 150px;
+                padding: 32px 20px 24px;
             }
             .auth-brand-corner {
                 width: 60px;
                 height: 60px;
             }
             .auth-brand-logo {
-                font-size: 30px;
+                font-size: 28px;
+                margin-bottom: 4px;
+            }
+            .auth-brand-accent {
+                margin: 10px auto 8px;
             }
             .auth-brand-tagline {
-                font-size: 12px;
-                margin-bottom: 12px;
+                font-size: 11px;
+                margin-bottom: 6px;
+                letter-spacing: 2px;
             }
             .auth-brand-desc {
                 display: none;
@@ -626,6 +631,21 @@
         }
 
         @media (max-width: 480px) {
+            .auth-brand-panel {
+                min-height: 132px;
+                padding: 28px 16px 20px;
+            }
+            .auth-brand-logo {
+                font-size: 24px;
+            }
+            .auth-brand-accent {
+                width: 48px;
+                margin: 8px auto 6px;
+            }
+            .auth-brand-tagline {
+                font-size: 10px;
+                letter-spacing: 1.6px;
+            }
             .auth-card {
                 padding: 28px 20px;
             }
