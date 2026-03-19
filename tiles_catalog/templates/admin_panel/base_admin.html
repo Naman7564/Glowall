@@ -1,22 +1,24 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Admin Dashboard - Glowall{% endblock %}</title>
-    
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <!-- Admin CSS -->
     <link rel="stylesheet" href="{% static 'css/admin.css' %}">
 </head>
+
 <body class="admin-body">
     <div class="admin-wrapper">
         <!-- Sidebar -->
@@ -27,31 +29,35 @@
                     <span class="logo-sub">Admin Panel</span>
                 </a>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <ul class="nav-list">
                     <li class="nav-item">
-                        <a href="{% url 'admin_panel:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        <a href="{% url 'admin_panel:dashboard' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                             <i class="fas fa-tachometer-alt"></i>
                             <span>Dashboard</span>
                         </a>
                     </li>
-                    
+
                     <li class="nav-item">
-                        <a href="{% url 'admin_panel:product_list' %}" class="nav-link {% if 'product' in request.resolver_match.url_name %}active{% endif %}">
+                        <a href="{% url 'admin_panel:product_list' %}"
+                            class="nav-link {% if 'product' in request.resolver_match.url_name %}active{% endif %}">
                             <i class="fas fa-box"></i>
                             <span>Products</span>
                         </a>
                     </li>
-                    
+
                     <li class="nav-item">
-                        <a href="{% url 'admin_panel:category_list' %}" class="nav-link {% if 'categor' in request.resolver_match.url_name %}active{% endif %}">
+                        <a href="{% url 'admin_panel:category_list' %}"
+                            class="nav-link {% if 'categor' in request.resolver_match.url_name %}active{% endif %}">
                             <i class="fas fa-folder"></i>
                             <span>Categories</span>
                         </a>
                     </li>
-                    
-                    <li class="nav-item has-submenu {% if 'material' in request.resolver_match.url_name %}open{% endif %}">
+
+                    <li
+                        class="nav-item has-submenu {% if 'material' in request.resolver_match.url_name %}open{% endif %}">
                         <a href="#" class="nav-link">
                             <i class="fas fa-cubes"></i>
                             <span>Materials</span>
@@ -62,8 +68,9 @@
                             <li><a href="{% url 'admin_panel:finish_list' %}">Finishes</a></li>
                         </ul>
                     </li>
-                    
+
                     <li class="nav-item">
+<<<<<<< HEAD
                         <a href="{% url 'admin_panel:order_list' %}" class="nav-link {% if 'order' in request.resolver_match.url_name %}active{% endif %}">
                             <i class="fas fa-shopping-cart"></i>
                             <span>Orders</span>
@@ -72,20 +79,31 @@
 
                     <li class="nav-item">
                         <a href="{% url 'admin_panel:message_list' %}" class="nav-link {% if request.resolver_match.url_name == 'message_list' or request.resolver_match.url_name == 'message_detail' %}active{% endif %}">
+=======
+                        <a href="{% url 'admin_panel:message_list' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'message_list' or request.resolver_match.url_name == 'message_detail' %}active{% endif %}">
+>>>>>>> f9d423aefd9f5610453da9d3d9140355b74c3b0b
                             <i class="fas fa-envelope"></i>
                             <span>Messages</span>
                         </a>
                     </li>
 
                     <li class="nav-item">
+<<<<<<< HEAD
                         <a href="{% url 'admin_panel:review_list' %}" class="nav-link {% if 'review' in request.resolver_match.url_name %}active{% endif %}">
                             <i class="fas fa-star-half-stroke"></i>
                             <span>Customer Reviews</span>
+=======
+                        <a href="{% url 'admin_panel:payments_list' %}"
+                            class="nav-link {% if 'payment' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Payments</span>
+>>>>>>> f9d423aefd9f5610453da9d3d9140355b74c3b0b
                         </a>
                     </li>
                 </ul>
             </nav>
-            
+
             <div class="sidebar-footer">
                 <a href="{% url 'catalog:home' %}" class="nav-link">
                     <i class="fas fa-external-link-alt"></i>
@@ -93,7 +111,7 @@
                 </a>
             </div>
         </aside>
-        
+
         <!-- Main Content -->
         <main class="main-content">
             <!-- Top Bar -->
@@ -101,7 +119,7 @@
                 <button class="sidebar-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
-                
+
                 <div class="topbar-right">
                     <div class="user-menu">
                         <button class="user-btn" type="button" aria-haspopup="true" aria-expanded="false">
@@ -135,7 +153,7 @@
                     </div>
                 </div>
             </header>
-            
+
             <!-- Page Content -->
             <div class="page-content">
                 <!-- Messages -->
@@ -149,13 +167,14 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-                
+
                 {% block content %}{% endblock %}
             </div>
         </main>
     </div>
-    
+
     <script src="{% static 'js/admin.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>

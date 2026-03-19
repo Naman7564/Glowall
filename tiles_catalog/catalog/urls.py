@@ -27,4 +27,9 @@ urlpatterns = [
     # API endpoints
     path('api/products/', views.api_products, name='api_products'),
     path('api/search/', views.api_search, name='api_search'),
+    
+    # Payment endpoints
+    path('checkout/<int:product_id>/', views.create_checkout_session, name='create_checkout_session'),
+    path('payment-success/', views.payment_success, name='payment_success'),
+    path('payment-cancel/', views.payment_cancel, name='payment_cancel'),
 ]

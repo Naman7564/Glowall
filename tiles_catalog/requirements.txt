@@ -1,6 +1,11 @@
 Django==5.0.1
-Pillow==10.2.0
+Pillow>=10.2.0
 gunicorn==21.2.0
 whitenoise==6.6.0
 python-dotenv==1.0.0
+<<<<<<< HEAD
 cashfree-pg==5.0.6
+=======
+stripe==11.4.0
+cashfree-pg
+>>>>>>> f9d423aefd9f5610453da9d3d9140355b74c3b0b

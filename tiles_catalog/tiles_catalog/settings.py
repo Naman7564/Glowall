@@ -161,6 +161,7 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = SECURE_COOKIES
     SESSION_COOKIE_SECURE = SECURE_COOKIES
 
+<<<<<<< HEAD
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 
@@ -172,3 +173,10 @@ CASHFREE_ENVIRONMENT = CASHFREE_ENV
 CASHFREE_API_VERSION = os.getenv('CASHFREE_API_VERSION', '2023-08-01')
 CASHFREE_CURRENCY = os.getenv('CASHFREE_CURRENCY', 'INR')
 CASHFREE_CUSTOMER_PHONE_FALLBACK = os.getenv('CASHFREE_CUSTOMER_PHONE_FALLBACK', '9999999999')
+=======
+# Cashfree Payment Gateway Configuration
+CASHFREE_APP_ID     = os.environ.get('CASHFREE_APP_ID', 'your_app_id_here')
+CASHFREE_SECRET_KEY = os.environ.get('CASHFREE_SECRET_KEY', 'your_secret_key_here')
+# 'sandbox' for testing, 'production' for live
+CASHFREE_ENV        = os.environ.get('CASHFREE_ENV', 'sandbox')
+>>>>>>> f9d423aefd9f5610453da9d3d9140355b74c3b0b

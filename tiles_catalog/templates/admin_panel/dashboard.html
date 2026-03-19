@@ -18,7 +18,7 @@
             <span class="stat-label">Total Products</span>
         </div>
     </div>
-    
+
     <div class="stat-card">
         <div class="stat-icon categories">
             <i class="fas fa-folder"></i>
@@ -28,7 +28,7 @@
             <span class="stat-label">Categories</span>
         </div>
     </div>
-    
+
     <div class="stat-card">
         <div class="stat-icon available">
             <i class="fas fa-check-circle"></i>
@@ -38,7 +38,7 @@
             <span class="stat-label">Available Products</span>
         </div>
     </div>
-    
+
     <div class="stat-card">
         <div class="stat-icon featured">
             <i class="fas fa-star"></i>
@@ -48,7 +48,7 @@
             <span class="stat-label">Featured Products</span>
         </div>
     </div>
-    
+
     <div class="stat-card">
         <div class="stat-icon messages-icon">
             <i class="fas fa-envelope"></i>
@@ -56,6 +56,27 @@
         <div class="stat-info">
             <span class="stat-number">{{ unread_messages }}</span>
             <span class="stat-label">Unread Messages</span>
+        </div>
+    </div>
+</div>
+
+<!-- Analytics Charts -->
+<div class="dashboard-grid" style="margin-top:24px;">
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h2><i class="fas fa-chart-bar" style="margin-right:8px;color:#f5a623;"></i>Products by Category</h2>
+        </div>
+        <div class="card-body" style="padding: 20px;">
+            <canvas id="categoryBarChart" height="120"></canvas>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h2><i class="fas fa-chart-pie" style="margin-right:8px;color:#635bff;"></i>Availability Breakdown</h2>
+        </div>
+        <div class="card-body" style="padding: 20px; display:flex; align-items:center; justify-content:center;">
+            <canvas id="availabilityDoughnut" height="220" style="max-width:260px;"></canvas>
         </div>
     </div>
 </div>
@@ -68,6 +89,7 @@
             <a href="{% url 'admin_panel:product_list' %}" class="view-all">View All</a>
         </div>
         <div class="card-body">
+<<<<<<< HEAD
             <div class="table-responsive recent-products-table-wrap">
                 <table class="data-table recent-products-table">
                     <thead>
@@ -94,6 +116,28 @@
                                         <span class="product-name">{{ product.name }}</span>
                                         <span class="product-subtitle">{{ product.size_display }}</span>
                                     </div>
+=======
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in recent_products %}
+                    <tr>
+                        <td>
+                            <div class="product-cell">
+                                {% if product.primary_image %}
+                                <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}"
+                                    class="product-thumb">
+                                {% else %}
+                                <div class="product-thumb placeholder">
+                                    <i class="fas fa-image"></i>
+>>>>>>> f9d423aefd9f5610453da9d3d9140355b74c3b0b
                                 </div>
                             </td>
                             <td data-label="Category">
@@ -132,7 +176,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Categories Overview -->
     <div class="dashboard-card">
         <div class="card-header">
@@ -148,7 +192,12 @@
                         <span class="category-count">{{ category.total_product_count }} products</span>
                     </div>
                     <div class="category-bar">
+<<<<<<< HEAD
                         <div class="bar-fill" data-width="{% widthratio category.total_product_count total_products 100 %}"></div>
+=======
+                        <div class="bar-fill" data-width="{% widthratio category.product_count total_products 100 %}">
+                        </div>
+>>>>>>> f9d423aefd9f5610453da9d3d9140355b74c3b0b
                     </div>
                 </div>
                 {% empty %}
@@ -175,10 +224,75 @@
             <i class="fas fa-envelope-open"></i>
             <span>View Messages</span>
         </a>
+        <a href="{% url 'admin_panel:payments_list' %}" class="action-card">
+            <i class="fas fa-credit-card"></i>
+            <span>View Payments</span>
+        </a>
         <a href="{% url 'catalog:home' %}" class="action-card">
             <i class="fas fa-external-link-alt"></i>
             <span>View Site</span>
         </a>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script>
+    // Bar Chart - Products per Category
+    const barCtx = document.getElementById('categoryBarChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels| safe }},
+        datasets: [{
+            label: 'Products',
+            data: {{ chart_data| safe }},
+        backgroundColor: [
+            '#635bff', '#f5a623', '#4CAF50', '#e74c3c', '#3498db',
+            '#9b59b6', '#1abc9c', '#e67e22'
+        ],
+        borderRadius: 6,
+        borderSkipped: false,
+        }]
+    },
+        options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} products` } }
+        },
+        scales: {
+            x: { grid: { display: false }, ticks: { color: '#aaa' } },
+            y: { beginAtZero: true, ticks: { color: '#aaa', stepSize: 1 }, grid: { color: '#2a2f4a' } }
+        }
+    }
+});
+
+    // Doughnut Chart - Availability
+    const dCtx = document.getElementById('availabilityDoughnut').getContext('2d');
+    new Chart(dCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ avail_chart_labels| safe }},
+        datasets: [{
+            data: {{ avail_chart_data| safe }},
+        backgroundColor: ['#4CAF50', '#e74c3c'],
+        borderColor: ['#1e2235', '#1e2235'],
+        borderWidth: 3,
+        hoverOffset: 6,
+        }]
+    },
+        options: {
+        responsive: true,
+        cutout: '70%',
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { color: '#ccc', padding: 16, font: { size: 13 } }
+            }
+        }
+    }
+});
+</script>
 {% endblock %}

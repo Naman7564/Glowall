@@ -61,6 +61,7 @@
             <span class="pd-breadcrumb-current">{{ product.name }}</span>
         </nav>
 
+<<<<<<< HEAD
         <!-- Product Detail Card -->
         <div class="pd-card">
             <div class="pd-grid">
@@ -178,10 +179,121 @@
                     </div>
 
 
+=======
+        <div class="product-detail-grid">
+            <!-- Product Images -->
+            <div class="product-gallery">
+                <div class="gallery-main">
+                    {% if product.primary_image %}
+                    <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" id="mainImage">
+                    {% else %}
+                    <div class="product-placeholder large">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if images.count > 1 %}
+                <div class="gallery-thumbs">
+                    {% for image in images %}
+                    <button class="thumb-btn {% if forloop.first %}active{% endif %}"
+                        onclick="changeImage('{{ image.image.url }}')">
+                        <img src="{{ image.image.url }}" alt="{{ product.name }} - Image {{ forloop.counter }}">
+                    </button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Product Info -->
+            <div class="product-info-detail">
+                <span class="product-category-badge">{{ product.category.name }}</span>
+                <h1 class="product-title">{{ product.name }}</h1>
+
+                {% if product.sku %}
+                <p class="product-sku">SKU: {{ product.sku }}</p>
+                {% endif %}
+
+                {% if product.price %}
+                <div class="product-price-large">
+                    <span class="price">${{ product.price }}</span>
+                    <span class="price-note">per unit</span>
+                </div>
+                {% endif %}
+
+                <div class="product-status">
+                    {% if product.is_available %}
+                    <span class="status available"><i class="fas fa-check-circle"></i> In Stock</span>
+                    {% else %}
+                    <span class="status unavailable"><i class="fas fa-times-circle"></i> Out of Stock</span>
+                    {% endif %}
+                </div>
+
+                <div class="product-description">
+                    <h3>Description</h3>
+                    <p>{{ product.description|linebreaks }}</p>
+                </div>
+
+                <!-- Specifications -->
+                <div class="product-specs">
+                    <h3>Specifications</h3>
+                    <table class="specs-table">
+                        <tr>
+                            <th>Category</th>
+                            <td>{{ product.category.name }}</td>
+                        </tr>
+                        {% if product.material_type %}
+                        <tr>
+                            <th>Material Type</th>
+                            <td>{{ product.material_type.name }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>Size</th>
+                            <td>{{ product.size_display }}</td>
+                        </tr>
+                        {% if product.thickness_mm %}
+                        <tr>
+                            <th>Thickness</th>
+                            <td>{{ product.thickness_mm }} mm</td>
+                        </tr>
+                        {% endif %}
+                        {% if product.finish %}
+                        <tr>
+                            <th>Finish</th>
+                            <td>{{ product.finish.name }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if product.color %}
+                        <tr>
+                            <th>Color</th>
+                            <td>{{ product.color.name }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+
+                <!-- Actions -->
+                <div class="product-actions">
+                    <a href="{% url 'catalog:contact' %}?subject=Inquiry about {{ product.name }}"
+                        class="btn btn-primary btn-lg">
+                        <i class="fas fa-envelope"></i> Request Quote
+                    </a>
+                    {% if product.price and product.is_available %}
+                    <form action="{% url 'catalog:create_checkout_session' product.id %}" method="POST"
+                        style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-lg"
+                            style="background-color:#f5821f; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-size:16px;">
+                            <i class="fas fa-credit-card"></i> Pay with Cashfree
+                        </button>
+                    </form>
+                    {% endif %}
+>>>>>>> f9d423aefd9f5610453da9d3d9140355b74c3b0b
                 </div>
             </div>
         </div>
 
+<<<<<<< HEAD
         <!-- Tabs Section -->
         <div class="pd-tabs-card">
             <div class="pd-tabs-nav" role="tablist">
@@ -292,6 +404,8 @@
             </div>
         </div>
 
+=======
+>>>>>>> f9d423aefd9f5610453da9d3d9140355b74c3b0b
         <!-- Related Products -->
         {% if related_products %}
         <section class="pd-related">
@@ -336,6 +450,7 @@
 
 {% block extra_js %}
 <script>
+<<<<<<< HEAD
 // Image Gallery
 function changeImage(src, thumbBtn) {
     const mainImage = document.getElementById('mainImage');
@@ -464,5 +579,12 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.pd-card, .pd-tabs-card, .pd-related-card').forEach(el => {
     observer.observe(el);
 });
+=======
+    function changeImage(src) {
+        document.getElementById('mainImage').src = src;
+        document.querySelectorAll('.thumb-btn').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+>>>>>>> f9d423aefd9f5610453da9d3d9140355b74c3b0b
 </script>
 {% endblock %}
