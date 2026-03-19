@@ -154,9 +154,24 @@
         <div class="footer-main">
             <div class="container">
                 <div class="footer-grid">
-                    <div class="footer-col">
+                    <div class="footer-brand-panel">
+                        <span class="footer-kicker">Premium Surfaces</span>
                         <h3 class="footer-title">Glowall</h3>
                         <p class="footer-desc">Glowall Building Solution Private Limited is a trusted provider of premium tiles, marble, granite, and natural stone solutions. We help transform residential and commercial spaces with high-quality materials and elegant designs.</p>
+                        <div class="footer-highlights" aria-label="Glowall highlights">
+                            <div class="footer-highlight">
+                                <strong>500+</strong>
+                                <span>Curated designs</span>
+                            </div>
+                            <div class="footer-highlight">
+                                <strong>20+ Years</strong>
+                                <span>Industry experience</span>
+                            </div>
+                            <div class="footer-highlight">
+                                <strong>Pan India</strong>
+                                <span>Delivery support</span>
+                            </div>
+                        </div>
                         <div class="social-links">
                             <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                             <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
@@ -165,7 +180,7 @@
                         </div>
                     </div>
                     
-                    <div class="footer-col">
+                    <div class="footer-link-card">
                         <h4 class="footer-subtitle">Quick Links</h4>
                         <ul class="footer-links">
                             <li><a href="{% url 'catalog:home' %}">Home</a></li>
@@ -176,7 +191,7 @@
                         </ul>
                     </div>
                     
-                    <div class="footer-col">
+                    <div class="footer-link-card">
                         <h4 class="footer-subtitle">Categories</h4>
                         <ul class="footer-links">
                             <li><a href="{% url 'catalog:product_list' %}?category=floor-tiles">Floor Tiles</a></li>
@@ -187,7 +202,7 @@
                         </ul>
                     </div>
                     
-                    <div class="footer-col">
+                    <div class="footer-contact-card">
                         <h4 class="footer-subtitle">Contact Info</h4>
                         <ul class="footer-contact">
                             <li>
@@ -220,7 +235,10 @@
         
         <div class="footer-bottom">
             <div class="container">
-                <p>&copy; 2026 Glowall Building Solution Private Limited. All rights reserved.</p>
+                <div class="footer-bottom-inner">
+                    <p>&copy; 2026 Glowall Building Solution Private Limited. All rights reserved.</p>
+                    <span class="footer-bottom-tag">Designed for modern spaces.</span>
+                </div>
             </div>
         </div>
     </footer>
