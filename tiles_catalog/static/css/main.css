@@ -1053,12 +1053,6 @@ body.nav-open {
     transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.showcase-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
 .showcase-card-shine {
     position: absolute;
     inset: 0;
@@ -1086,8 +1080,10 @@ body.nav-open {
     width: 100%;
     height: 100%;
     background:
-        linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 30%, #1a1a1a 60%, #2d2d2d 100%),
-        repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(201, 169, 98, 0.08) 20px, rgba(201, 169, 98, 0.08) 21px);
+        radial-gradient(circle at 22% 18%, rgba(126, 177, 209, 0.55), transparent 22%),
+        radial-gradient(circle at 72% 68%, rgba(255, 255, 255, 0.18), transparent 24%),
+        linear-gradient(145deg, #35556e 0%, #6fa5cd 34%, #41637c 62%, #223746 100%),
+        repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255, 255, 255, 0.08) 20px, rgba(255, 255, 255, 0.08) 21px);
     background-blend-mode: overlay;
     position: relative;
 }
@@ -1098,8 +1094,18 @@ body.nav-open {
     inset: 0;
     background:
         linear-gradient(30deg, transparent 40%, rgba(201, 169, 98, 0.12) 42%, rgba(201, 169, 98, 0.06) 44%, transparent 46%),
-        linear-gradient(150deg, transparent 50%, rgba(201, 169, 98, 0.1) 52%, rgba(201, 169, 98, 0.04) 54%, transparent 56%),
-        linear-gradient(70deg, transparent 30%, rgba(201, 169, 98, 0.08) 32%, transparent 35%);
+        linear-gradient(150deg, transparent 50%, rgba(255, 255, 255, 0.2) 52%, rgba(255, 255, 255, 0.05) 54%, transparent 56%),
+        linear-gradient(70deg, transparent 30%, rgba(255, 255, 255, 0.12) 32%, transparent 35%);
+}
+
+.showcase-placeholder-dark::before {
+    content: '';
+    position: absolute;
+    inset: 10% 14% 18% 18%;
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(2px);
 }
 
 /* Light card — front, overlapping */
@@ -1122,7 +1128,8 @@ body.nav-open {
     width: 100%;
     height: 100%;
     background:
-        linear-gradient(135deg, #f0ece4 0%, #e8e2d8 30%, #f5f0e8 60%, #ebe5db 100%),
+        radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.9), transparent 18%),
+        linear-gradient(135deg, #f6f1e8 0%, #ece4d8 32%, #fffaf2 62%, #e7dfd1 100%),
         repeating-linear-gradient(120deg, transparent, transparent 30px, rgba(180, 170, 150, 0.08) 30px, rgba(180, 170, 150, 0.08) 31px);
     background-blend-mode: overlay;
     position: relative;
@@ -1135,6 +1142,50 @@ body.nav-open {
     background:
         linear-gradient(40deg, transparent 35%, rgba(180, 170, 150, 0.15) 37%, rgba(180, 170, 150, 0.06) 40%, transparent 42%),
         linear-gradient(160deg, transparent 45%, rgba(180, 170, 150, 0.12) 47%, rgba(180, 170, 150, 0.04) 50%, transparent 52%);
+}
+
+.showcase-placeholder-light::before {
+    content: '';
+    position: absolute;
+    inset: 14% 18% 22% 16%;
+    border-radius: 18px;
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(247, 240, 228, 0.52)),
+        linear-gradient(45deg, transparent 35%, rgba(201, 169, 98, 0.1) 50%, transparent 64%);
+    box-shadow: inset 0 0 0 1px rgba(201, 169, 98, 0.16);
+}
+
+.showcase-card-copy {
+    position: absolute;
+    left: 22px;
+    right: 22px;
+    bottom: 22px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    pointer-events: none;
+}
+
+.showcase-card-copy-dark {
+    color: rgba(255, 255, 255, 0.96);
+}
+
+.showcase-card-copy-light {
+    color: #5f513f;
+}
+
+.showcase-card-kicker {
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    opacity: 0.72;
+}
+
+.showcase-card-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
 }
 
 /* Badge on light card */

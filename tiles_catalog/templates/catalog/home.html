@@ -64,20 +64,20 @@
             <div class="hero-showcase">
                 <!-- Dark marble card (background, tilted) -->
                 <div class="showcase-card showcase-card-dark">
-                    {% if marble_textures and marble_textures.0.primary_image %}
-                    <img src="{{ marble_textures.0.primary_image.image.url }}" alt="{{ marble_textures.0.name }}" loading="eager">
-                    {% else %}
                     <div class="showcase-placeholder showcase-placeholder-dark"></div>
-                    {% endif %}
+                    <div class="showcase-card-copy showcase-card-copy-dark">
+                        <span class="showcase-card-kicker">Signature Finish</span>
+                        <span class="showcase-card-title">Marble Texture</span>
+                    </div>
                     <div class="showcase-card-shine"></div>
                 </div>
                 <!-- Light marble card (foreground, overlapping) -->
                 <div class="showcase-card showcase-card-light">
-                    {% if marble_textures and marble_textures.1.primary_image %}
-                    <img src="{{ marble_textures.1.primary_image.image.url }}" alt="{{ marble_textures.1.name }}" loading="eager">
-                    {% else %}
                     <div class="showcase-placeholder showcase-placeholder-light"></div>
-                    {% endif %}
+                    <div class="showcase-card-copy showcase-card-copy-light">
+                        <span class="showcase-card-kicker">Curated Surface</span>
+                        <span class="showcase-card-title">Premium Look</span>
+                    </div>
                     <div class="showcase-card-badge">
                         <i class="fas fa-gem"></i>
                     </div>
