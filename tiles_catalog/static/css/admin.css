@@ -2736,3 +2736,383 @@ select.form-control {
         height: 150px;
     }
 }
+
+/* ==========================================
+   Poster List Mobile Responsive
+   ========================================== */
+@media (max-width: 768px) {
+    .poster-list-table,
+    .poster-list-table thead,
+    .poster-list-table tbody,
+    .poster-list-table th,
+    .poster-list-table td,
+    .poster-list-table tr {
+        display: block;
+    }
+
+    .poster-list-table thead {
+        display: none;
+    }
+
+    .poster-list-table tbody {
+        display: grid;
+        gap: 16px;
+    }
+
+    .poster-list-table .poster-row {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+        border: 1px solid var(--admin-border);
+        border-radius: 12px;
+        background: var(--admin-card);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .poster-list-table .poster-row:hover {
+        background: var(--admin-card);
+    }
+
+    .poster-list-table td,
+    .poster-list-table td:first-child,
+    .poster-list-table td:last-child {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0;
+        border: none;
+        background: transparent;
+    }
+
+    .poster-list-table td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--admin-text-light);
+        flex-shrink: 0;
+        min-width: 70px;
+    }
+
+    .poster-list-table td[data-label="Image"] {
+        justify-content: center;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--admin-border);
+        margin-bottom: 4px;
+    }
+
+    .poster-list-table td[data-label="Image"]::before {
+        display: none;
+    }
+
+    .poster-thumb {
+        width: 100%;
+        max-width: 200px;
+        height: auto;
+        min-height: 80px;
+        max-height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .poster-actions {
+        justify-content: flex-end;
+    }
+
+    .poster-list-table .poster-empty td {
+        display: block;
+    }
+
+    .poster-list-table .poster-empty td::before {
+        content: none;
+    }
+}
+
+/* ==========================================
+   Order List Mobile Responsive
+   ========================================== */
+@media (max-width: 768px) {
+    .order-list-table,
+    .order-list-table thead,
+    .order-list-table tbody,
+    .order-list-table th,
+    .order-list-table td,
+    .order-list-table tr {
+        display: block;
+    }
+
+    .order-list-table thead {
+        display: none;
+    }
+
+    .order-list-table tbody {
+        display: grid;
+        gap: 16px;
+    }
+
+    .order-list-table .order-row {
+        display: grid;
+        gap: 10px;
+        padding: 16px;
+        border: 1px solid var(--admin-border);
+        border-radius: 12px;
+        background: var(--admin-card);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .order-list-table .order-row:hover {
+        background: var(--admin-card);
+    }
+
+    .order-list-table td,
+    .order-list-table td:first-child,
+    .order-list-table td:last-child {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0;
+        border: none;
+        background: transparent;
+    }
+
+    .order-list-table td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--admin-text-light);
+        flex-shrink: 0;
+        min-width: 70px;
+    }
+
+    .order-list-table td[data-label="Order ID"] {
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--admin-border);
+        margin-bottom: 4px;
+    }
+
+    .order-list-table td[data-label="Order ID"] strong {
+        font-size: 16px;
+    }
+
+    .order-list-table .customer-info {
+        align-items: flex-end;
+        text-align: right;
+    }
+
+    .order-list-table .customer-name {
+        font-weight: 600;
+    }
+
+    .order-actions {
+        justify-content: flex-end;
+    }
+
+    .order-list-table .order-empty td {
+        display: block;
+    }
+
+    .order-list-table .order-empty td::before {
+        content: none;
+    }
+}
+
+/* ==========================================
+   Product List Mobile Responsive
+   ========================================== */
+@media (max-width: 768px) {
+    .product-list-table,
+    .product-list-table thead,
+    .product-list-table tbody,
+    .product-list-table th,
+    .product-list-table td,
+    .product-list-table tr {
+        display: block;
+    }
+
+    .product-list-table thead {
+        display: none;
+    }
+
+    .product-list-table tbody {
+        display: grid;
+        gap: 16px;
+    }
+
+    .product-list-table .product-row {
+        display: grid;
+        gap: 10px;
+        padding: 16px;
+        border: 1px solid var(--admin-border);
+        border-radius: 12px;
+        background: var(--admin-card);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .product-list-table .product-row:hover {
+        background: var(--admin-card);
+    }
+
+    .product-list-table td,
+    .product-list-table td:first-child,
+    .product-list-table td:last-child {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0;
+        border: none;
+        background: transparent;
+    }
+
+    .product-list-table td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--admin-text-light);
+        flex-shrink: 0;
+        min-width: 70px;
+    }
+
+    .product-list-table td[data-label="Image"] {
+        justify-content: center;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--admin-border);
+        margin-bottom: 4px;
+    }
+
+    .product-list-table td[data-label="Image"]::before {
+        display: none;
+    }
+
+    .product-thumb {
+        width: 100%;
+        max-width: 150px;
+        height: auto;
+        min-height: 80px;
+        max-height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .product-list-table td[data-label="Product Name"] {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .product-list-table td[data-label="Product Name"]::before {
+        margin-bottom: 4px;
+    }
+
+    .product-actions {
+        justify-content: flex-end;
+    }
+
+    .product-list-table .product-empty td {
+        display: block;
+    }
+
+    .product-list-table .product-empty td::before {
+        content: none;
+    }
+}
+
+/* ==========================================
+   Category List Mobile Responsive
+   ========================================== */
+@media (max-width: 768px) {
+    .category-list-table,
+    .category-list-table thead,
+    .category-list-table tbody,
+    .category-list-table th,
+    .category-list-table td,
+    .category-list-table tr {
+        display: block;
+    }
+
+    .category-list-table thead {
+        display: none;
+    }
+
+    .category-list-table tbody {
+        display: grid;
+        gap: 16px;
+    }
+
+    .category-list-table .category-row {
+        display: grid;
+        gap: 10px;
+        padding: 16px;
+        border: 1px solid var(--admin-border);
+        border-radius: 12px;
+        background: var(--admin-card);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .category-list-table .category-row:hover {
+        background: var(--admin-card);
+    }
+
+    .category-list-table td,
+    .category-list-table td:first-child,
+    .category-list-table td:last-child {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0;
+        border: none;
+        background: transparent;
+    }
+
+    .category-list-table td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--admin-text-light);
+        flex-shrink: 0;
+        min-width: 70px;
+    }
+
+    .category-list-table td[data-label="Image"] {
+        justify-content: center;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--admin-border);
+        margin-bottom: 4px;
+    }
+
+    .category-list-table td[data-label="Image"]::before {
+        display: none;
+    }
+
+    .category-thumb {
+        width: 100%;
+        max-width: 150px;
+        height: auto;
+        min-height: 80px;
+        max-height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .category-actions {
+        justify-content: flex-end;
+    }
+
+    .category-list-table .category-empty td {
+        display: block;
+    }
+
+    .category-list-table .category-empty td::before {
+        content: none;
+    }
+}

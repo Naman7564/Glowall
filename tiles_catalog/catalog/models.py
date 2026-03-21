@@ -74,6 +74,7 @@ class Product(models.Model):
     """Main product model for tiles and marble."""
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
+    code = models.PositiveIntegerField(unique=True, blank=True, null=True, help_text='Product code (101-200)')
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     material_type = models.ForeignKey(MaterialType, on_delete=models.SET_NULL, null=True, related_name='products')
     finish = models.ForeignKey(Finish, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
@@ -102,7 +103,7 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['code']
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -114,16 +115,22 @@ class Product(models.Model):
                 counter += 1
             self.slug = slug
         if not self.sku:
-            # Generate SKU from category and material
-            prefix = self.category.slug[:3].upper() if self.category else 'PRD'
-            import random
-            self.sku = f'{prefix}-{random.randint(10000, 99999)}'
+            # Generate SKU from code
+            if self.code:
+                self.sku = f'GBS-{self.code}'
+            else:
+                # Fallback: Generate SKU from category and material
+                prefix = self.category.slug[:3].upper() if self.category else 'PRD'
+                import random
+                self.sku = f'{prefix}-{random.randint(10000, 99999)}'
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
     def get_absolute_url(self):
+        if self.code:
+            return reverse('catalog:product_detail', kwargs={'code': self.code})
         return reverse('catalog:product_detail', kwargs={'slug': self.slug})
 
     @property
@@ -305,3 +312,22 @@ class CustomerReview(models.Model):
                 save_format = 'JPEG'
 
             img.save(image_path, format=save_format, **save_kwargs)
+
+
+class Poster(models.Model):
+    """Homepage poster/banner for hero section showcase."""
+
+    title = models.CharField(max_length=100, blank=True)
+    subtitle = models.CharField(max_length=150, blank=True)
+    image = models.ImageField(upload_to='posters/')
+    link_url = models.URLField(blank=True, help_text='Optional link when clicked')
+    order = models.PositiveIntegerField(default=0, help_text='Display order (lower first)')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+
+    def __str__(self):
+        return self.title or f'Poster #{self.pk or "new"}'

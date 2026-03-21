@@ -294,12 +294,17 @@
                                 Sort:
                             </label>
                             <select class="sort-select" onchange="location.href='?{% if search_query %}q={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_material %}material={{ current_material }}&{% endif %}{% if current_finish %}finish={{ current_finish }}&{% endif %}sort=' + this.value">
-                                <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Newest First</option>
-                                <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>Oldest First</option>
-                                <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name A-Z</option>
-                                <option value="-name" {% if current_sort == '-name' %}selected{% endif %}>Name Z-A</option>
-                                <option value="price" {% if current_sort == 'price' %}selected{% endif %}>Price: Low to High</option>
-                                <option value="-price" {% if current_sort == '-price' %}selected{% endif %}>Price: High to Low</option>
+                                <option value="code" {% if current_sort == 'code' %}selected{% endif %}>All: 101-200</option>
+                                <option value="101-110" {% if current_sort == '101-110' %}selected{% endif %}>Code: 101-110</option>
+                                <option value="111-120" {% if current_sort == '111-120' %}selected{% endif %}>Code: 111-120</option>
+                                <option value="121-130" {% if current_sort == '121-130' %}selected{% endif %}>Code: 121-130</option>
+                                <option value="131-140" {% if current_sort == '131-140' %}selected{% endif %}>Code: 131-140</option>
+                                <option value="141-150" {% if current_sort == '141-150' %}selected{% endif %}>Code: 141-150</option>
+                                <option value="151-160" {% if current_sort == '151-160' %}selected{% endif %}>Code: 151-160</option>
+                                <option value="161-170" {% if current_sort == '161-170' %}selected{% endif %}>Code: 161-170</option>
+                                <option value="171-180" {% if current_sort == '171-180' %}selected{% endif %}>Code: 171-180</option>
+                                <option value="181-190" {% if current_sort == '181-190' %}selected{% endif %}>Code: 181-190</option>
+                                <option value="191-200" {% if current_sort == '191-200' %}selected{% endif %}>Code: 191-200</option>
                             </select>
                         </div>
                     </div>
@@ -309,7 +314,7 @@
                 <div class="products-grid-modern">
                     {% for product in products %}
                     <article class="product-card-modern">
-                        <a href="{% url 'catalog:product_detail' product.slug %}" class="product-card-link">
+                        <a href="{% url 'catalog:product_detail' product.code %}" class="product-card-link">
                             <div class="product-card-image">
                                 {% if product.primary_image %}
                                 <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" loading="lazy">

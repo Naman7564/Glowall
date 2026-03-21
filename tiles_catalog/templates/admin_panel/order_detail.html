@@ -108,7 +108,7 @@
                     <p class="product-material">{{ order.product.material_type.name }}</p>
                     {% endif %}
                     <p class="product-sku">SKU: {{ order.product.sku }}</p>
-                    <a href="{% url 'catalog:product_detail' order.product.slug %}" class="btn btn-sm btn-outline" target="_blank">
+                    <a href="{% url 'catalog:product_detail' order.product.code %}" class="btn btn-sm btn-outline" target="_blank">
                         <i class="fas fa-external-link-alt"></i> View Product
                     </a>
                 </div>

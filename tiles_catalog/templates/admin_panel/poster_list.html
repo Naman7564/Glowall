@@ -1,0 +1,118 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Posters - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Posters</h1>
+    <a href="{% url 'admin_panel:poster_add' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Poster
+    </a>
+</div>
+
+<div class="filters-bar">
+    <form method="get" class="filters-form">
+        <div class="filter-group">
+            <select name="status" class="form-control">
+                <option value="">All Status</option>
+                <option value="active" {% if current_status == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if current_status == 'inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-secondary"><i class="fas fa-filter"></i> Filter</button>
+        <a href="{% url 'admin_panel:poster_list' %}" class="btn btn-outline">Clear</a>
+    </form>
+</div>
+
+<div class="data-card">
+    <div class="table-responsive">
+        <table class="data-table poster-list-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Title</th>
+                    <th>Subtitle</th>
+                    <th>Order</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for poster in posters %}
+                <tr class="poster-row">
+                    <td data-label="Image">
+                        <img src="{{ poster.image.url }}" alt="{{ poster.title|default:'Poster' }}" class="table-thumb poster-thumb">
+                    </td>
+                    <td data-label="Title">
+                        <strong>{{ poster.title|default:'No title' }}</strong>
+                    </td>
+                    <td data-label="Subtitle">{{ poster.subtitle|default:'-'|truncatechars:50 }}</td>
+                    <td data-label="Order">{{ poster.order }}</td>
+                    <td data-label="Status">
+                        <button class="badge badge-toggle {% if poster.is_active %}badge-success{% else %}badge-secondary{% endif %}"
+                                onclick="togglePosterActive({{ poster.id }})">
+                            {% if poster.is_active %}Active{% else %}Inactive{% endif %}
+                        </button>
+                    </td>
+                    <td data-label="Actions">
+                        <div class="action-buttons poster-actions">
+                            <a href="{% url 'admin_panel:poster_edit' poster.pk %}" class="btn btn-sm btn-outline" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:poster_delete' poster.pk %}" class="btn btn-sm btn-danger" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="poster-empty">
+                    <td colspan="6" class="text-center">
+                        <div class="empty-state">
+                            <i class="fas fa-images"></i>
+                            <h3>No posters found</h3>
+                            <p>Add posters to display them on the homepage hero section.</p>
+                            <a href="{% url 'admin_panel:poster_add' %}" class="btn btn-primary">Add Poster</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePosterActive(posterId) {
+    fetch(`/admin/posters/${posterId}/toggle-active/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

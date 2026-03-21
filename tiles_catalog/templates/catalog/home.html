@@ -59,8 +59,44 @@
             </div>
         </div>
 
-        <!-- Right: Marble Showcase -->
+        <!-- Right: Poster Showcase -->
         <div class="hero-showcase-col">
+            {% if posters %}
+            <div class="hero-posters" data-poster-carousel data-autoplay-delay="5000">
+                <div class="posters-viewport">
+                    <div class="posters-track" data-carousel-track>
+                        {% for poster in posters %}
+                        <div class="poster-slide" data-carousel-slide>
+                            {% if poster.link_url %}
+                            <a href="{{ poster.link_url }}" class="poster-link">
+                            {% endif %}
+                                <img src="{{ poster.image.url }}" alt="{{ poster.title|default:'Poster' }}" class="poster-image">
+                                {% if poster.title or poster.subtitle %}
+                                <div class="poster-overlay">
+                                    {% if poster.title %}<span class="poster-title">{{ poster.title }}</span>{% endif %}
+                                    {% if poster.subtitle %}<span class="poster-subtitle">{{ poster.subtitle }}</span>{% endif %}
+                                </div>
+                                {% endif %}
+                            {% if poster.link_url %}
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% if posters.count > 1 %}
+                <div class="posters-nav">
+                    <button type="button" class="poster-nav-btn poster-nav-prev" data-carousel-prev aria-label="Previous">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button type="button" class="poster-nav-btn poster-nav-next" data-carousel-next aria-label="Next">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="posters-dots" data-carousel-dots></div>
+                {% endif %}
+            </div>
+            {% else %}
             <div class="hero-showcase">
                 <!-- Dark marble card (background, tilted) -->
                 <div class="showcase-card showcase-card-dark">
@@ -86,6 +122,7 @@
                 <!-- Decorative gold ring -->
                 <div class="showcase-ring"></div>
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -108,7 +145,7 @@
         <div class="products-grid">
             {% for product in marble_textures %}
             <article class="product-card">
-                <a href="{% url 'catalog:product_detail' product.slug %}" class="product-link">
+                <a href="{% url 'catalog:product_detail' product.code %}" class="product-link">
                     <div class="product-image">
                         {% if product.primary_image %}
                         <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" loading="lazy">
@@ -154,7 +191,7 @@
         <div class="products-grid">
             {% for product in featured_products %}
             <article class="product-card">
-                <a href="{% url 'catalog:product_detail' product.slug %}" class="product-link">
+                <a href="{% url 'catalog:product_detail' product.code %}" class="product-link">
                     <div class="product-image">
                         {% if product.primary_image %}
                         <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" loading="lazy">

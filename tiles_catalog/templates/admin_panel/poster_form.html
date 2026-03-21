@@ -1,0 +1,124 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}{{ title }} - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{{ title }}</h1>
+    <a href="{% url 'admin_panel:poster_list' %}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Back to Posters
+    </a>
+</div>
+
+<div class="form-card">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <div class="form-group">
+                <label for="id_title">Title</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                <span class="error">{{ form.title.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_subtitle">Subtitle</label>
+                {{ form.subtitle }}
+                {% if form.subtitle.errors %}
+                <span class="error">{{ form.subtitle.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_image">Poster Image *</label>
+                <div class="file-upload-wrapper">
+                    <div class="file-upload-area">
+                        {{ form.image }}
+                        <div class="file-upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="file-upload-text">
+                            <h4>Upload Poster Image</h4>
+                            <p>Supports JPG, PNG, and WebP formats</p>
+                        </div>
+                        <div class="file-upload-hint">
+                            <i class="fas fa-image"></i>
+                            Images are stored in /media/posters/
+                        </div>
+                    </div>
+                    <div class="file-preview">
+                        <div class="file-preview-card">
+                            <div class="file-preview-image">
+                                <img src="" alt="Preview">
+                            </div>
+                            <div class="file-preview-info">
+                                <div class="file-preview-name">poster-image.jpg</div>
+                                <div class="file-preview-size">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>0 KB</span>
+                                </div>
+                            </div>
+                            <div class="file-preview-actions">
+                                <button type="button" class="btn-remove" title="Remove image">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if form.image.errors %}
+                <span class="error">{{ form.image.errors.0 }}</span>
+                {% endif %}
+                {% if poster and poster.image %}
+                <div class="current-image">
+                    <div class="current-image-label">
+                        <i class="fas fa-check-circle"></i>
+                        Current Image
+                    </div>
+                    <div class="current-image-card">
+                        <img src="{{ poster.image.url }}" alt="{{ poster.title|default:'Poster' }}">
+                        <div class="current-image-info">
+                            <span>{{ poster.image.name|slice:"8:" }}</span>
+                            <small>Upload a new image to replace the existing poster.</small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_link_url">Link URL</label>
+                {{ form.link_url }}
+                {% if form.link_url.errors %}
+                <span class="error">{{ form.link_url.errors.0 }}</span>
+                {% endif %}
+                <small class="form-hint">Optional: URL to navigate to when poster is clicked</small>
+            </div>
+
+            <div class="form-group">
+                <label for="id_order">Display Order</label>
+                {{ form.order }}
+                {% if form.order.errors %}
+                <span class="error">{{ form.order.errors.0 }}</span>
+                {% endif %}
+                <small class="form-hint">Lower numbers appear first</small>
+            </div>
+
+            <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                    {{ form.is_active }} Show this poster on the homepage
+                </label>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-save"></i> Save Poster
+            </button>
+            <a href="{% url 'admin_panel:poster_list' %}" class="btn btn-outline btn-lg">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

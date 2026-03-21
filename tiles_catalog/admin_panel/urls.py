@@ -52,4 +52,11 @@ urlpatterns = [
     # Orders
     path('orders/', views.order_list, name='order_list'),
     path('orders/<int:pk>/', views.order_detail, name='order_detail'),
+
+    # Posters
+    path('posters/', views.poster_list, name='poster_list'),
+    path('posters/add/', views.poster_add, name='poster_add'),
+    path('posters/<int:pk>/edit/', views.poster_edit, name='poster_edit'),
+    path('posters/<int:pk>/delete/', views.poster_delete, name='poster_delete'),
+    path('posters/<int:pk>/toggle-active/', views.poster_toggle_active, name='poster_toggle_active'),
 ]

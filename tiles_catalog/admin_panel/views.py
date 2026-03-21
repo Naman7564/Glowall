@@ -8,10 +8,10 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
-from catalog.models import Product, Category, ProductImage, MaterialType, Finish, Contact, CustomerReview, Order
+from catalog.models import Product, Category, ProductImage, MaterialType, Finish, Contact, CustomerReview, Order, Poster
 from .forms import (
     ProductForm, CategoryForm, ProductImageFormSet,
-    MaterialTypeForm, FinishForm, CustomerReviewForm, OrderStatusForm
+    MaterialTypeForm, FinishForm, CustomerReviewForm, OrderStatusForm, PosterForm
 )
 
 
@@ -617,3 +617,96 @@ def order_detail(request, pk):
         'form': form,
     }
     return render(request, 'admin_panel/order_detail.html', context)
+
+
+# Poster Management
+@login_required
+@user_passes_test(is_staff)
+def poster_list(request):
+    """Poster list view."""
+    posters = Poster.objects.all()
+
+    active_status = request.GET.get('status')
+    if active_status == 'active':
+        posters = posters.filter(is_active=True)
+    elif active_status == 'inactive':
+        posters = posters.filter(is_active=False)
+
+    context = {
+        'posters': posters,
+        'current_status': active_status,
+    }
+    return render(request, 'admin_panel/poster_list.html', context)
+
+
+@login_required
+@user_passes_test(is_staff)
+def poster_add(request):
+    """Add a new poster."""
+    if request.method == 'POST':
+        form = PosterForm(request.POST, request.FILES)
+        if form.is_valid():
+            poster = form.save()
+            messages.success(request, f'Poster "{poster}" has been created.')
+            return redirect('admin_panel:poster_list')
+    else:
+        form = PosterForm()
+
+    context = {
+        'form': form,
+        'title': 'Add New Poster',
+    }
+    return render(request, 'admin_panel/poster_form.html', context)
+
+
+@login_required
+@user_passes_test(is_staff)
+def poster_edit(request, pk):
+    """Edit a poster."""
+    poster = get_object_or_404(Poster, pk=pk)
+
+    if request.method == 'POST':
+        form = PosterForm(request.POST, request.FILES, instance=poster)
+        if form.is_valid():
+            poster = form.save()
+            messages.success(request, f'Poster "{poster}" has been updated.')
+            return redirect('admin_panel:poster_list')
+    else:
+        form = PosterForm(instance=poster)
+
+    context = {
+        'form': form,
+        'poster': poster,
+        'title': 'Edit Poster',
+    }
+    return render(request, 'admin_panel/poster_form.html', context)
+
+
+@login_required
+@user_passes_test(is_staff)
+def poster_delete(request, pk):
+    """Delete a poster."""
+    poster = get_object_or_404(Poster, pk=pk)
+
+    if request.method == 'POST':
+        poster_label = str(poster)
+        poster.delete()
+        messages.success(request, f'Poster "{poster_label}" has been deleted.')
+        return redirect('admin_panel:poster_list')
+
+    context = {'poster': poster}
+    return render(request, 'admin_panel/poster_confirm_delete.html', context)
+
+
+@login_required
+@user_passes_test(is_staff)
+@require_POST
+def poster_toggle_active(request, pk):
+    """Toggle poster active status."""
+    poster = get_object_or_404(Poster, pk=pk)
+    poster.is_active = not poster.is_active
+    poster.save(update_fields=['is_active'])
+    return JsonResponse({
+        'success': True,
+        'is_active': poster.is_active,
+    })

@@ -39,7 +39,7 @@
 
 <div class="data-card">
     <div class="table-responsive">
-        <table class="data-table">
+        <table class="data-table product-list-table">
             <thead>
                 <tr>
                     <th>Image</th>
@@ -54,38 +54,38 @@
             </thead>
             <tbody>
                 {% for product in products %}
-                <tr data-product-id="{{ product.id }}">
-                    <td>
+                <tr class="product-row" data-product-id="{{ product.id }}">
+                    <td data-label="Image">
                         {% if product.primary_image %}
-                        <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" class="table-thumb">
+                        <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" class="table-thumb product-thumb">
                         {% else %}
-                        <div class="table-thumb placeholder">
+                        <div class="table-thumb product-thumb placeholder">
                             <i class="fas fa-image"></i>
                         </div>
                         {% endif %}
                     </td>
-                    <td>
+                    <td data-label="Product Name">
                         <strong>{{ product.name }}</strong>
-                        <br><small class="text-muted">SKU: {{ product.sku }}</small>
+                        <br><small class="text-muted">Code: {{ product.code|default:"-" }} | SKU: {{ product.sku }}</small>
                     </td>
-                    <td>{{ product.category.name }}</td>
-                    <td>{{ product.size_display }}</td>
-                    <td>{% if product.price %}{{ product.price|inr }}{% else %}-{% endif %}</td>
-                    <td>
+                    <td data-label="Category">{{ product.category.name }}</td>
+                    <td data-label="Size">{{ product.size_display }}</td>
+                    <td data-label="Price">{% if product.price %}{{ product.price|inr }}{% else %}-{% endif %}</td>
+                    <td data-label="Status">
                         <button class="badge badge-toggle {% if product.is_available %}badge-success{% else %}badge-danger{% endif %}" 
                                 onclick="toggleAvailable({{ product.id }})">
                             {% if product.is_available %}Available{% else %}Unavailable{% endif %}
                         </button>
                     </td>
-                    <td>
+                    <td data-label="Featured">
                         <button class="badge badge-toggle {% if product.is_featured %}badge-warning{% else %}badge-secondary{% endif %}"
                                 onclick="toggleFeatured({{ product.id }})">
                             {% if product.is_featured %}Featured{% else %}Normal{% endif %}
                         </button>
                     </td>
-                    <td>
-                        <div class="action-buttons">
-                            <a href="{% url 'catalog:product_detail' product.slug %}" class="btn btn-sm btn-outline" title="View" target="_blank">
+                    <td data-label="Actions">
+                        <div class="action-buttons product-actions">
+                            <a href="{% url 'catalog:product_detail' product.code %}" class="btn btn-sm btn-outline" title="View" target="_blank">
                                 <i class="fas fa-eye"></i>
                             </a>
                             <a href="{% url 'admin_panel:product_edit' product.pk %}" class="btn btn-sm btn-outline" title="Edit">
@@ -98,7 +98,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr>
+                <tr class="product-empty">
                     <td colspan="8" class="text-center">
                         <div class="empty-state">
                             <i class="fas fa-box-open"></i>

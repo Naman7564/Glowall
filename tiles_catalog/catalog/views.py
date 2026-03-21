@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .models import Category, Product, CustomerReview, Order, MaterialType, Finish
+from .models import Category, Product, CustomerReview, Order, MaterialType, Finish, Poster
 from .forms import ContactForm, OrderForm
 from .payments import (
     CashfreeGatewayError,
@@ -255,11 +255,14 @@ def home(request):
         is_active=True
     )[:12]
 
+    posters = Poster.objects.filter(is_active=True)[:5]
+
     context = {
         'featured_products': featured_products,
         'marble_textures': marble_textures,
         'featured_categories': featured_categories,
         'customer_reviews': customer_reviews,
+        'posters': posters,
         'page_title': 'Premium Tiles & Marble Showroom',
     }
     return render(request, 'catalog/home.html', context)
@@ -304,11 +307,25 @@ def product_list(request):
     if availability == 'available':
         products = products.filter(is_available=True)
     
-    # Sorting
-    sort = request.GET.get('sort', '-created_at')
-    valid_sorts = ['name', '-name', 'created_at', '-created_at', 'price', '-price']
-    if sort in valid_sorts:
-        products = products.order_by(sort)
+    # Filter by code range (e.g., 101-110, 111-120, etc.)
+    # This is now handled via the sort parameter
+    
+    # Sorting (also handles code ranges like 101-110, 111-120, etc.)
+    sort = request.GET.get('sort', 'code')
+    
+    # Check if sort is a code range (e.g., "101-110")
+    if sort and '-' in sort and sort != 'code' and not sort.startswith('-'):
+        try:
+            parts = sort.split('-')
+            if len(parts) == 2:
+                code_min = int(parts[0])
+                code_max = int(parts[1])
+                products = products.filter(code__gte=code_min, code__lte=code_max)
+        except (ValueError, TypeError):
+            pass
+    
+    # Always order by code
+    products = products.order_by('code')
     
     # Pagination
     paginator = Paginator(products, 12)
@@ -350,11 +367,22 @@ def category_detail(request, slug):
         is_available=True
     ).select_related('category', 'material_type')
     
-    # Sorting
-    sort = request.GET.get('sort', '-created_at')
-    valid_sorts = ['name', '-name', 'created_at', '-created_at', 'price', '-price']
-    if sort in valid_sorts:
-        products = products.order_by(sort)
+    # Sorting (also handles code ranges like 101-110, 111-120, etc.)
+    sort = request.GET.get('sort', 'code')
+    
+    # Check if sort is a code range (e.g., "101-110")
+    if sort and '-' in sort and sort != 'code' and not sort.startswith('-'):
+        try:
+            parts = sort.split('-')
+            if len(parts) == 2:
+                code_min = int(parts[0])
+                code_max = int(parts[1])
+                products = products.filter(code__gte=code_min, code__lte=code_max)
+        except (ValueError, TypeError):
+            pass
+    
+    # Always order by code
+    products = products.order_by('code')
     
     # Pagination
     paginator = Paginator(products, 12)
@@ -375,11 +403,11 @@ def category_detail(request, slug):
     return render(request, 'catalog/category_detail.html', context)
 
 
-def product_detail(request, slug):
+def product_detail(request, code):
     """Product detail view."""
     product = get_object_or_404(
         Product.objects.select_related('category', 'material_type', 'finish'),
-        slug=slug, 
+        code=code, 
         is_available=True
     )
     
@@ -704,10 +732,10 @@ def api_search(request):
     results = [
         {
             'name': product.name,
-            'slug': product.slug,
+            'code': product.code,
             'category': product.category.name if product.category else '',
             'material': product.material_type.name if product.material_type else '',
-            'url': reverse('catalog:product_detail', args=[product.slug]),
+            'url': reverse('catalog:product_detail', args=[product.code]) if product.code else '',
         }
         for product in products
     ]

@@ -12,7 +12,7 @@
 
 <div class="data-card">
     <div class="table-responsive">
-        <table class="data-table">
+        <table class="data-table category-list-table">
             <thead>
                 <tr>
                     <th>Image</th>
@@ -24,27 +24,27 @@
             </thead>
             <tbody>
                 {% for category in categories %}
-                <tr>
-                    <td>
+                <tr class="category-row">
+                    <td data-label="Image">
                         {% if category.image %}
-                        <img src="{{ category.image.url }}" alt="{{ category.name }}" class="table-thumb">
+                        <img src="{{ category.image.url }}" alt="{{ category.name }}" class="table-thumb category-thumb">
                         {% else %}
-                        <div class="table-thumb placeholder">
+                        <div class="table-thumb category-thumb placeholder">
                             <i class="fas fa-folder"></i>
                         </div>
                         {% endif %}
                     </td>
-                    <td><strong>{{ category.name }}</strong></td>
-                    <td>{{ category.total_product_count }}</td>
-                    <td>
+                    <td data-label="Category Name"><strong>{{ category.name }}</strong></td>
+                    <td data-label="Products">{{ category.total_product_count }}</td>
+                    <td data-label="Status">
                         {% if category.is_active %}
                         <span class="badge badge-success">Active</span>
                         {% else %}
                         <span class="badge badge-danger">Inactive</span>
                         {% endif %}
                     </td>
-                    <td>
-                        <div class="action-buttons">
+                    <td data-label="Actions">
+                        <div class="action-buttons category-actions">
                             <a href="{% url 'catalog:category_detail' category.slug %}" class="btn btn-sm btn-outline" title="View" target="_blank">
                                 <i class="fas fa-eye"></i>
                             </a>
@@ -58,7 +58,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr>
+                <tr class="category-empty">
                     <td colspan="5" class="text-center">
                         <div class="empty-state">
                             <i class="fas fa-folder-open"></i>

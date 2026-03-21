@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from catalog.models import Product, Category, ProductImage, MaterialType, Finish, CustomerReview, Order
+from catalog.models import Product, Category, ProductImage, MaterialType, Finish, CustomerReview, Order, Poster
 
 
 class CategoryForm(forms.ModelForm):
@@ -188,6 +188,39 @@ class OrderStatusForm(forms.ModelForm):
             }),
             'payment_status': forms.Select(attrs={
                 'class': 'form-control'
+            }),
+        }
+
+
+class PosterForm(forms.ModelForm):
+    """Form for adding/editing homepage posters."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['image'].widget.attrs.update({
+            'accept': 'image/*',
+            'class': 'file-upload-input',
+        })
+
+    class Meta:
+        model = Poster
+        fields = ['title', 'subtitle', 'image', 'link_url', 'order', 'is_active']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Poster title (optional)'
+            }),
+            'subtitle': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Poster subtitle (optional)'
+            }),
+            'link_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://example.com (optional)'
+            }),
+            'order': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'value': '0'
             }),
         }
 
