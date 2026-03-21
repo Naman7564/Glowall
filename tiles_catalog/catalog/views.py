@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Category, Product, CustomerReview, Order, MaterialType, Finish, Poster
-from .forms import ContactForm, OrderForm
+from .forms import OrderForm
 from .payments import (
     CashfreeGatewayError,
     CashfreeWebhookError,
@@ -437,18 +437,8 @@ def about(request):
 
 
 def contact(request):
-    """Contact page with form."""
-    if request.method == 'POST':
-        form = ContactForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Thank you for your message! We will get back to you soon.')
-            return redirect('catalog:contact')
-    else:
-        form = ContactForm()
-    
+    """Contact page."""
     context = {
-        'form': form,
         'page_title': 'Contact Us',
     }
     return render(request, 'catalog/contact.html', context)

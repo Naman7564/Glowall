@@ -71,13 +71,6 @@
                     </li>
 
                     <li class="nav-item">
-                        <a href="{% url 'admin_panel:message_list' %}" class="nav-link {% if request.resolver_match.url_name == 'message_list' or request.resolver_match.url_name == 'message_detail' %}active{% endif %}">
-                            <i class="fas fa-envelope"></i>
-                            <span>Messages</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
                         <a href="{% url 'admin_panel:review_list' %}" class="nav-link {% if 'review' in request.resolver_match.url_name %}active{% endif %}">
                             <i class="fas fa-star-half-stroke"></i>
                             <span>Customer Reviews</span>

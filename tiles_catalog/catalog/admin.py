@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, MaterialType, Finish, Product, ProductImage, Contact, Order, CustomerReview
+from .models import Category, MaterialType, Finish, Product, ProductImage, Order, CustomerReview
 
 
 class ProductImageInline(admin.TabularInline):
@@ -67,14 +67,6 @@ class ProductAdmin(admin.ModelAdmin):
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ['product', 'is_primary', 'order', 'created_at']
     list_filter = ['is_primary', 'product__category']
-
-
-@admin.register(Contact)
-class ContactAdmin(admin.ModelAdmin):
-    list_display = ['name', 'email', 'subject', 'created_at', 'is_read']
-    list_filter = ['is_read']
-    search_fields = ['name', 'email', 'subject', 'message']
-    readonly_fields = ['name', 'email', 'phone', 'subject', 'message', 'created_at']
 
 
 @admin.register(Order)

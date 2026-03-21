@@ -1,30 +1,5 @@
 from django import forms
-from .models import Contact, Order
-
-
-class ContactForm(forms.ModelForm):
-    """Contact form for customer inquiries."""
-    
-    class Meta:
-        model = Contact
-        fields = ['name', 'phone', 'message']
-        widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Your Name',
-                'required': True
-            }),
-            'phone': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Your Phone Number'
-            }),
-            'message': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Your Message',
-                'rows': 5,
-                'required': True
-            }),
-        }
+from .models import Order
 
 
 class ProductSearchForm(forms.Form):

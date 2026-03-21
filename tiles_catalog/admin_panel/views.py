@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
-from catalog.models import Product, Category, ProductImage, MaterialType, Finish, Contact, CustomerReview, Order, Poster
+from catalog.models import Product, Category, ProductImage, MaterialType, Finish, CustomerReview, Order, Poster
 from .forms import (
     ProductForm, CategoryForm, ProductImageFormSet,
     MaterialTypeForm, FinishForm, CustomerReviewForm, OrderStatusForm, PosterForm
@@ -39,7 +39,6 @@ def dashboard(request):
     available_products = Product.objects.filter(is_available=True).count()
     featured_products = Product.objects.filter(is_featured=True).count()
     recent_products = Product.objects.select_related('category')[:5]
-    unread_messages = Contact.objects.filter(is_read=False).count()
     
     # Products by category
     categories_with_count = Category.objects.annotate(
@@ -53,7 +52,6 @@ def dashboard(request):
         'featured_products': featured_products,
         'recent_products': recent_products,
         'categories_with_count': categories_with_count,
-        'unread_messages': unread_messages,
     }
     return render(request, 'admin_panel/dashboard.html', context)
 
@@ -393,51 +391,6 @@ def finish_delete(request, pk):
     
     context = {'finish': finish}
     return render(request, 'admin_panel/finish_confirm_delete.html', context)
-
-# Contact Messages
-@login_required
-@user_passes_test(is_staff)
-def message_list(request):
-    """Contact messages list."""
-    messages_list = Contact.objects.all()
-    
-    # Filter by read status
-    read_status = request.GET.get('read')
-    if read_status == 'unread':
-        messages_list = messages_list.filter(is_read=False)
-    elif read_status == 'read':
-        messages_list = messages_list.filter(is_read=True)
-    
-    context = {'messages': messages_list, 'current_filter': read_status}
-    return render(request, 'admin_panel/message_list.html', context)
-
-
-@login_required
-@user_passes_test(is_staff)
-def message_detail(request, pk):
-    """View contact message detail."""
-    message = get_object_or_404(Contact, pk=pk)
-    message.is_read = True
-    message.save()
-    
-    context = {'message': message}
-    return render(request, 'admin_panel/message_detail.html', context)
-
-
-@login_required
-@user_passes_test(is_staff)
-def message_delete(request, pk):
-    """Delete contact message."""
-    message = get_object_or_404(Contact, pk=pk)
-    
-    if request.method == 'POST':
-        message.delete()
-        messages.success(request, 'Message has been deleted.')
-        return redirect('admin_panel:message_list')
-    
-    context = {'message': message}
-    return render(request, 'admin_panel/message_confirm_delete.html', context)
-
 
 # Customer Reviews
 @login_required

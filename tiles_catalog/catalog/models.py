@@ -172,23 +172,6 @@ class ProductImage(models.Model):
         super().save(*args, **kwargs)
 
 
-class Contact(models.Model):
-    """Contact form submissions."""
-    name = models.CharField(max_length=100)
-    email = models.EmailField(blank=True, null=True)
-    phone = models.CharField(max_length=20, blank=True)
-    subject = models.CharField(max_length=200, blank=True)
-    message = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_read = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f'{self.name} - {self.subject}'
-
-
 class Order(models.Model):
     """Direct checkout orders submitted from the storefront."""
 
