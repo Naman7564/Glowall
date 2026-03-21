@@ -38,6 +38,7 @@ def dashboard(request):
     total_categories = Category.objects.count()
     available_products = Product.objects.filter(is_available=True).count()
     featured_products = Product.objects.filter(is_featured=True).count()
+    total_orders = Order.objects.count()
     recent_products = Product.objects.select_related('category')[:5]
     
     # Products by category
@@ -50,6 +51,7 @@ def dashboard(request):
         'total_categories': total_categories,
         'available_products': available_products,
         'featured_products': featured_products,
+        'total_orders': total_orders,
         'recent_products': recent_products,
         'categories_with_count': categories_with_count,
     }

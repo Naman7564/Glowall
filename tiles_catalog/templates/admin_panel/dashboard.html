@@ -51,11 +51,11 @@
     
     <div class="stat-card">
         <div class="stat-icon messages-icon">
-            <i class="fas fa-envelope"></i>
+            <i class="fas fa-shopping-cart"></i>
         </div>
         <div class="stat-info">
-            <span class="stat-number">{{ unread_messages }}</span>
-            <span class="stat-label">Unread Messages</span>
+            <span class="stat-number">{{ total_orders }}</span>
+            <span class="stat-label">Total Orders</span>
         </div>
     </div>
 </div>
@@ -171,9 +171,9 @@
             <i class="fas fa-folder-plus"></i>
             <span>Add Category</span>
         </a>
-        <a href="{% url 'admin_panel:message_list' %}?read=unread" class="action-card">
-            <i class="fas fa-envelope-open"></i>
-            <span>View Messages</span>
+        <a href="{% url 'admin_panel:order_list' %}" class="action-card">
+            <i class="fas fa-shopping-bag"></i>
+            <span>View Orders</span>
         </a>
         <a href="{% url 'catalog:home' %}" class="action-card">
             <i class="fas fa-external-link-alt"></i>
