@@ -50,7 +50,7 @@
         <div class="products-grid">
             {% for product in products %}
             <article class="product-card">
-                <a href="{% url 'catalog:product_detail' product.code %}" class="product-link">
+                <a href="{{ product.get_absolute_url }}" class="product-link">
                     <div class="product-image">
                         {% if product.primary_image %}
                         <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" loading="lazy">

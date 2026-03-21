@@ -403,11 +403,15 @@ def category_detail(request, slug):
     return render(request, 'catalog/category_detail.html', context)
 
 
-def product_detail(request, code):
+def product_detail(request, identifier):
     """Product detail view."""
+    product_lookup = {'slug': identifier}
+    if str(identifier).isdigit():
+        product_lookup = {'code': int(identifier)}
+
     product = get_object_or_404(
         Product.objects.select_related('category', 'material_type', 'finish'),
-        code=code, 
+        **product_lookup,
         is_available=True
     )
     
@@ -725,7 +729,7 @@ def api_search(request):
             'code': product.code,
             'category': product.category.name if product.category else '',
             'material': product.material_type.name if product.material_type else '',
-            'url': reverse('catalog:product_detail', args=[product.code]) if product.code else '',
+            'url': product.get_absolute_url(),
         }
         for product in products
     ]

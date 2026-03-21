@@ -85,7 +85,7 @@
                     </td>
                     <td data-label="Actions">
                         <div class="action-buttons product-actions">
-                            <a href="{% url 'catalog:product_detail' product.code %}" class="btn btn-sm btn-outline" title="View" target="_blank">
+                            <a href="{{ product.get_absolute_url }}" class="btn btn-sm btn-outline" title="View" target="_blank">
                                 <i class="fas fa-eye"></i>
                             </a>
                             <a href="{% url 'admin_panel:product_edit' product.pk %}" class="btn btn-sm btn-outline" title="Edit">

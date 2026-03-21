@@ -305,7 +305,7 @@
             <div class="pd-related-grid">
                 {% for related in related_products %}
                 <article class="pd-related-card">
-                    <a href="{% url 'catalog:product_detail' related.code %}" class="pd-related-link">
+                    <a href="{{ related.get_absolute_url }}" class="pd-related-link">
                         <div class="pd-related-image">
                             {% if related.primary_image %}
                             <img src="{{ related.primary_image.image.url }}" alt="{{ related.name }}" loading="lazy">

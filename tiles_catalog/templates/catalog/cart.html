@@ -499,7 +499,7 @@
                     </div>
                     <div class="cart-item-body">
                         <div class="cart-item-info">
-                            <h3><a href="{% url 'catalog:product_detail' item.product.code %}">{{ item.product.name }}</a></h3>
+                            <h3><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></h3>
                             <p class="cart-item-category">{{ item.product.category.name }}</p>
                             {% if item.product.price %}
                             <p class="cart-item-price">{{ item.product.price|inr }} <span>/unit</span></p>

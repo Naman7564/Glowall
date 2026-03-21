@@ -32,7 +32,7 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'name', 'slug', 'category', 'material_type', 'finish', 'color',
+            'name', 'code', 'slug', 'category', 'material_type', 'finish', 'color',
             'length_mm', 'width_mm', 'thickness_mm', 'description', 'price',
             'is_available', 'is_featured', 'meta_title', 'meta_description'
         ]
@@ -40,6 +40,11 @@ class ProductForm(forms.ModelForm):
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Product Name'
+            }),
+            'code': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Auto-generated if left blank',
+                'min': '101'
             }),
             'slug': forms.TextInput(attrs={
                 'class': 'form-control',

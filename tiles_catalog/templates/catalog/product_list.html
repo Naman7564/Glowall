@@ -314,7 +314,7 @@
                 <div class="products-grid-modern">
                     {% for product in products %}
                     <article class="product-card-modern">
-                        <a href="{% url 'catalog:product_detail' product.code %}" class="product-card-link">
+                        <a href="{{ product.get_absolute_url }}" class="product-card-link">
                             <div class="product-card-image">
                                 {% if product.primary_image %}
                                 <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" loading="lazy">

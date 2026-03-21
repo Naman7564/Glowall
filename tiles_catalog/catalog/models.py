@@ -106,6 +106,17 @@ class Product(models.Model):
         ordering = ['code']
 
     def save(self, *args, **kwargs):
+        if self.code is None:
+            max_code = (
+                Product.objects.exclude(pk=self.pk)
+                .exclude(code__isnull=True)
+                .aggregate(max_code=models.Max('code'))['max_code']
+                or 100
+            )
+            next_code = max(101, max_code + 1)
+            while Product.objects.exclude(pk=self.pk).filter(code=next_code).exists():
+                next_code += 1
+            self.code = next_code
         if not self.slug:
             base_slug = slugify(self.name)
             slug = base_slug
@@ -129,9 +140,8 @@ class Product(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        if self.code:
-            return reverse('catalog:product_detail', kwargs={'code': self.code})
-        return reverse('catalog:product_detail', kwargs={'slug': self.slug})
+        identifier = self.code if self.code is not None else self.slug
+        return reverse('catalog:product_detail', kwargs={'identifier': identifier})
 
     @property
     def size_display(self):
