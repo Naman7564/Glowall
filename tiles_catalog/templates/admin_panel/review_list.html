@@ -29,7 +29,7 @@
 
 <div class="data-card">
     <div class="table-responsive">
-        <table class="data-table">
+        <table class="data-table review-list-table">
             <thead>
                 <tr>
                     <th>Image</th>
@@ -42,24 +42,24 @@
             </thead>
             <tbody>
                 {% for review in reviews %}
-                <tr>
-                    <td>
-                        <img src="{{ review.review_image.url }}" alt="{{ review.customer_name|default:'Customer review' }}" class="table-thumb">
+                <tr class="review-row">
+                    <td data-label="Image">
+                        <img src="{{ review.review_image.url }}" alt="{{ review.customer_name|default:'Customer review' }}" class="table-thumb review-thumb">
                     </td>
-                    <td>
+                    <td data-label="Customer">
                         <strong>{{ review.customer_name|default:'Anonymous customer' }}</strong>
                         <br><small class="text-muted">{{ review.customer_location|default:'Location not provided' }}</small>
                     </td>
-                    <td class="review-table-text">{{ review.review_text|default:'No review text provided.'|truncatechars:100 }}</td>
-                    <td>
+                    <td data-label="Review" class="review-table-text">{{ review.review_text|default:'No review text provided.'|truncatechars:100 }}</td>
+                    <td data-label="Status">
                         <button class="badge badge-toggle {% if review.is_active %}badge-success{% else %}badge-secondary{% endif %}"
                                 onclick="toggleReviewActive({{ review.id }})">
                             {% if review.is_active %}Active{% else %}Inactive{% endif %}
                         </button>
                     </td>
-                    <td>{{ review.created_at|date:"M d, Y" }}</td>
-                    <td>
-                        <div class="action-buttons">
+                    <td data-label="Created">{{ review.created_at|date:"M d, Y" }}</td>
+                    <td data-label="Actions">
+                        <div class="action-buttons review-actions">
                             <a href="{% url 'admin_panel:review_edit' review.pk %}" class="btn btn-sm btn-outline" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
@@ -70,7 +70,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr>
+                <tr class="review-empty">
                     <td colspan="6" class="text-center">
                         <div class="empty-state">
                             <i class="fas fa-comments"></i>

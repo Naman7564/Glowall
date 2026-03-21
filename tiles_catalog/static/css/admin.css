@@ -3116,3 +3116,116 @@ select.form-control {
         content: none;
     }
 }
+
+/* ==========================================
+   Review List Mobile Responsive
+   ========================================== */
+@media (max-width: 768px) {
+    .review-list-table,
+    .review-list-table thead,
+    .review-list-table tbody,
+    .review-list-table th,
+    .review-list-table td,
+    .review-list-table tr {
+        display: block;
+    }
+
+    .review-list-table thead {
+        display: none;
+    }
+
+    .review-list-table tbody {
+        display: grid;
+        gap: 16px;
+    }
+
+    .review-list-table .review-row {
+        display: grid;
+        gap: 10px;
+        padding: 16px;
+        border: 1px solid var(--admin-border);
+        border-radius: 12px;
+        background: var(--admin-card);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .review-list-table .review-row:hover {
+        background: var(--admin-card);
+    }
+
+    .review-list-table td,
+    .review-list-table td:first-child,
+    .review-list-table td:last-child {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0;
+        border: none;
+        background: transparent;
+    }
+
+    .review-list-table td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--admin-text-light);
+        flex-shrink: 0;
+        min-width: 70px;
+    }
+
+    .review-list-table td[data-label="Image"] {
+        justify-content: center;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--admin-border);
+        margin-bottom: 4px;
+    }
+
+    .review-list-table td[data-label="Image"]::before {
+        display: none;
+    }
+
+    .review-thumb {
+        width: 100%;
+        max-width: 150px;
+        height: auto;
+        min-height: 80px;
+        max-height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .review-list-table td[data-label="Customer"] {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .review-list-table td[data-label="Customer"]::before {
+        margin-bottom: 4px;
+    }
+
+    .review-list-table td[data-label="Review"] {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .review-list-table td[data-label="Review"]::before {
+        margin-bottom: 4px;
+    }
+
+    .review-actions {
+        justify-content: flex-end;
+    }
+
+    .review-list-table .review-empty td {
+        display: block;
+    }
+
+    .review-list-table .review-empty td::before {
+        content: none;
+    }
+}
