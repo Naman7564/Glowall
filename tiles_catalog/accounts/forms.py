@@ -13,12 +13,12 @@ phone_validator = RegexValidator(
 class UserLoginForm(AuthenticationForm):
     """Custom login form with modern styling."""
     username = forms.CharField(
-        max_length=150,
+        max_length=17,
         widget=forms.TextInput(attrs={
             'class': 'auth-input',
-            'placeholder': 'Email or Username',
+            'placeholder': 'Phone Number',
             'id': 'login-username',
-            'autocomplete': 'username',
+            'autocomplete': 'tel',
         })
     )
     password = forms.CharField(
@@ -49,22 +49,13 @@ class UserSignupForm(UserCreationForm):
             'autocomplete': 'name',
         })
     )
-    email = forms.EmailField(
-        max_length=254,
-        widget=forms.EmailInput(attrs={
-            'class': 'auth-input',
-            'placeholder': 'Email Address',
-            'id': 'signup-email',
-            'autocomplete': 'email',
-        })
-    )
     phone = forms.CharField(
         max_length=17,
-        required=False,
+        required=True,
         validators=[phone_validator],
         widget=forms.TextInput(attrs={
             'class': 'auth-input',
-            'placeholder': 'Phone Number (optional)',
+            'placeholder': 'Phone Number',
             'id': 'signup-phone',
             'autocomplete': 'tel',
         })
@@ -78,12 +69,8 @@ class UserSignupForm(UserCreationForm):
         })
     )
     password2 = forms.CharField(
-        widget=forms.PasswordInput(attrs={
-            'class': 'auth-input',
-            'placeholder': 'Confirm Password',
-            'id': 'signup-password2',
-            'autocomplete': 'new-password',
-        })
+        required=False,
+        widget=forms.HiddenInput(),
     )
     agree_terms = forms.BooleanField(
         required=True,
@@ -96,22 +83,37 @@ class UserSignupForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('first_name', 'email', 'password1', 'password2')
+        fields = ('first_name', 'phone', 'password1', 'password2')
 
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
-            raise forms.ValidationError('An account with this email already exists.')
-        return email
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove password validation errors for password2 since we don't use it
+        if 'password2' in self.errors:
+            del self.errors['password2']
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        if User.objects.filter(username=phone).exists():
+            raise forms.ValidationError('An account with this phone number already exists.')
+        return phone
+
+    def clean_password2(self):
+        """Override to skip password confirmation - just return password1."""
+        return self.cleaned_data.get('password1')
+
+    def _post_clean(self):
+        """Override to skip Django's password validation - accept any password."""
+        # Skip the parent's password validation by calling grandparent's _post_clean
+        from django.contrib.auth.forms import BaseUserCreationForm
+        BaseUserCreationForm._post_clean(self)
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.email = self.cleaned_data['email']
         name_parts = self.cleaned_data['first_name'].split(' ', 1)
         user.first_name = name_parts[0]
         user.last_name = name_parts[1] if len(name_parts) > 1 else ''
-        # Use email as username
-        user.username = self.cleaned_data['email']
+        # Use phone number as username for login
+        user.username = self.cleaned_data['phone']
         if commit:
             user.save()
         return user

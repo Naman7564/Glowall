@@ -677,12 +677,12 @@
                     <input type="hidden" name="next" value="{{ request.GET.next|default:request.POST.next }}">
                     {% endif %}
 
-                    <!-- Username / Email -->
+                    <!-- Phone Number -->
                     <div class="auth-field">
-                        <label class="auth-field-label" for="login-username">Email or Username</label>
+                        <label class="auth-field-label" for="login-username">Phone Number</label>
                         <div class="auth-input-wrapper">
                             {{ form.username }}
-                            <i class="fas fa-envelope auth-input-icon"></i>
+                            <i class="fas fa-phone auth-input-icon"></i>
                         </div>
                         {% if form.username.errors %}
                         <div class="auth-errors" style="margin-top: 6px; margin-bottom: 0;">
