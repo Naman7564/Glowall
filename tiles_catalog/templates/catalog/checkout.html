@@ -136,7 +136,7 @@
                         <div class="checkout-product-copy">
                             <p class="checkout-product-category">{{ checkout_item.product.category.name }}</p>
                             <h3>{{ checkout_item.product.name }}</h3>
-                            <p class="checkout-product-meta">{{ checkout_item.product.size_display }}</p>
+                            {% if checkout_item.product.specification_display %}<p class="checkout-product-meta">{{ checkout_item.product.specification_display }}</p>{% endif %}
                         </div>
                     </div>
 

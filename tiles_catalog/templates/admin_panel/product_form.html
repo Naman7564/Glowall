@@ -117,48 +117,13 @@
                     <div class="admin-form-card-body">
                         <div class="form-row form-row-compact">
                             <div class="form-group">
-                                <label for="id_length_mm">Length (mm) <span class="required-indicator">*</span></label>
+                                <label for="id_weight_kg">Weight (kg)</label>
                                 <div class="field-shell">
-                                    <span class="field-icon"><i class="fas fa-arrows-left-right"></i></span>
-                                    {{ form.length_mm }}
+                                    <span class="field-icon"><i class="fas fa-weight-hanging"></i></span>
+                                    {{ form.weight_kg }}
                                 </div>
-                                {% if form.length_mm.errors %}
-                                <span class="error">{{ form.length_mm.errors.0 }}</span>
-                                {% endif %}
-                            </div>
-
-                            <div class="form-group">
-                                <label for="id_width_mm">Width (mm) <span class="required-indicator">*</span></label>
-                                <div class="field-shell">
-                                    <span class="field-icon"><i class="fas fa-arrows-up-down"></i></span>
-                                    {{ form.width_mm }}
-                                </div>
-                                {% if form.width_mm.errors %}
-                                <span class="error">{{ form.width_mm.errors.0 }}</span>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="form-row form-row-compact">
-                            <div class="form-group">
-                                <label for="id_thickness_mm">Thickness (mm)</label>
-                                <div class="field-shell">
-                                    <span class="field-icon"><i class="fas fa-layer-group"></i></span>
-                                    {{ form.thickness_mm }}
-                                </div>
-                                {% if form.thickness_mm.errors %}
-                                <span class="error">{{ form.thickness_mm.errors.0 }}</span>
-                                {% endif %}
-                            </div>
-
-                            <div class="form-group">
-                                <label for="id_finish">Finish</label>
-                                <div class="field-shell">
-                                    <span class="field-icon"><i class="fas fa-brush"></i></span>
-                                    {{ form.finish }}
-                                </div>
-                                {% if form.finish.errors %}
-                                <span class="error">{{ form.finish.errors.0 }}</span>
+                                {% if form.weight_kg.errors %}
+                                <span class="error">{{ form.weight_kg.errors.0 }}</span>
                                 {% endif %}
                             </div>
                         </div>

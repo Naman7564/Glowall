@@ -31,7 +31,7 @@ class FinishAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['code', 'name', 'category', 'material_type', 'size_display', 'is_available', 'is_featured', 'created_at']
+    list_display = ['code', 'name', 'category', 'material_type', 'specification_display', 'is_available', 'is_featured', 'created_at']
     list_filter = ['category', 'material_type', 'finish', 'is_available', 'is_featured']
     search_fields = ['name', 'description', 'sku', 'code', 'color']
     prepopulated_fields = {'slug': ('name',)}
@@ -44,7 +44,7 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('name', 'slug', 'code', 'category', 'material_type', 'description')
         }),
         ('Specifications', {
-            'fields': ('length_mm', 'width_mm', 'thickness_mm', 'finish', 'color')
+            'fields': ('weight_kg', 'color', 'finish', 'length_mm', 'width_mm', 'thickness_mm')
         }),
         ('Pricing & SKU', {
             'fields': ('price', 'sku')

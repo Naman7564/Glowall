@@ -45,7 +45,7 @@
                     <th>Image</th>
                     <th>Product Name</th>
                     <th>Category</th>
-                    <th>Size</th>
+                    <th>Specification</th>
                     <th>Price</th>
                     <th>Status</th>
                     <th>Featured</th>
@@ -69,7 +69,7 @@
                         <br><small class="text-muted">Code: {{ product.code|default:"-" }} | SKU: {{ product.sku }}</small>
                     </td>
                     <td data-label="Category">{{ product.category.name }}</td>
-                    <td data-label="Size">{{ product.size_display }}</td>
+                    <td data-label="Specification">{{ product.specification_display|default:'-' }}</td>
                     <td data-label="Price">{% if product.price %}{{ product.price|inr }}{% else %}-{% endif %}</td>
                     <td data-label="Status">
                         <button class="badge badge-toggle {% if product.is_available %}badge-success{% else %}badge-danger{% endif %}" 

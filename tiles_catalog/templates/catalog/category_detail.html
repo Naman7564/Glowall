@@ -66,7 +66,7 @@
                     <div class="product-info">
                         <span class="product-category">{{ product.category.name }}</span>
                         <h3 class="product-name">{{ product.name }}</h3>
-                        <p class="product-size">{{ product.size_display }}</p>
+                        {% if product.specification_display %}<p class="product-size">{{ product.specification_display }}</p>{% endif %}
                         {% if product.price %}
                         <p class="product-price">{{ product.price|inr }}</p>
                         {% endif %}

@@ -32,9 +32,9 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'name', 'code', 'slug', 'category', 'material_type', 'finish', 'color',
-            'length_mm', 'width_mm', 'thickness_mm', 'description', 'price',
-            'is_available', 'is_featured', 'meta_title', 'meta_description'
+            'name', 'code', 'slug', 'category', 'material_type', 'weight_kg', 'color',
+            'description', 'price', 'is_available', 'is_featured',
+            'meta_title', 'meta_description'
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -56,25 +56,15 @@ class ProductForm(forms.ModelForm):
             'material_type': forms.Select(attrs={
                 'class': 'form-control'
             }),
-            'finish': forms.Select(attrs={
-                'class': 'form-control'
-            }),
             'color': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'e.g. White, Beige Marble, Dark Grey'
             }),
-            'length_mm': forms.NumberInput(attrs={
+            'weight_kg': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Length in mm'
-            }),
-            'width_mm': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Width in mm'
-            }),
-            'thickness_mm': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Thickness in mm',
-                'step': '0.01'
+                'placeholder': 'Weight in kg',
+                'step': '0.01',
+                'min': '0'
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',

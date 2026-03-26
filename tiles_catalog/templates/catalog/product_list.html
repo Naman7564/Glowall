@@ -339,10 +339,12 @@
                                     <span class="product-card-category">{{ product.category.name }}</span>
                                 </div>
                                 <h3 class="product-card-title">{{ product.name }}</h3>
+                                {% if product.specification_display %}
                                 <p class="product-card-specs">
-                                    <i class="fas fa-ruler-combined"></i>
-                                    {{ product.size_display }}
+                                    <i class="fas fa-box"></i>
+                                    {{ product.specification_display }}
                                 </p>
+                                {% endif %}
                                 {% if product.price %}
                                 <div class="product-card-price">
                                     <span class="price-amount">{{ product.price|inr }}</span>

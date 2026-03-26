@@ -92,7 +92,7 @@
                                     {% endif %}
                                     <div class="product-meta">
                                         <span class="product-name">{{ product.name }}</span>
-                                        <span class="product-subtitle">{{ product.size_display }}</span>
+                                        <span class="product-subtitle">{{ product.specification_display|default:'-' }}</span>
                                     </div>
                                 </div>
                             </td>

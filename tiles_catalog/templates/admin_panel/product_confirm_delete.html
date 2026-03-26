@@ -20,7 +20,7 @@
         {% endif %}
         <div class="confirm-details">
             <strong>{{ product.name }}</strong>
-            <span>{{ product.category.name }} - {{ product.size_display }}</span>
+            <span>{{ product.category.name }}{% if product.specification_display %} - {{ product.specification_display }}{% endif %}</span>
         </div>
     </div>
     

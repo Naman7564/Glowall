@@ -235,10 +235,18 @@
                             <span class="pd-spec-value">{{ product.material_type.name }}</span>
                         </div>
                         {% endif %}
+                        {% if product.weight_display %}
+                        <div class="pd-spec-row">
+                            <span class="pd-spec-label">Weight</span>
+                            <span class="pd-spec-value">{{ product.weight_display }}</span>
+                        </div>
+                        {% endif %}
+                        {% if product.size_display %}
                         <div class="pd-spec-row">
                             <span class="pd-spec-label">Size</span>
                             <span class="pd-spec-value">{{ product.size_display }}</span>
                         </div>
+                        {% endif %}
                         {% if product.thickness_mm %}
                         <div class="pd-spec-row">
                             <span class="pd-spec-label">Thickness</span>
@@ -319,7 +327,7 @@
                         <div class="pd-related-info">
                             <span class="pd-related-category">{{ related.category.name }}</span>
                             <h3 class="pd-related-name">{{ related.name }}</h3>
-                            <p class="pd-related-size">{{ related.size_display }}</p>
+                            {% if related.specification_display %}<p class="pd-related-size">{{ related.specification_display }}</p>{% endif %}
                             {% if related.price %}
                             <p class="pd-related-price">{{ related.price|inr }} <span>/unit</span></p>
                             {% endif %}

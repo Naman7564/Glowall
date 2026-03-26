@@ -163,8 +163,7 @@ Uploaded product images are stored in `/media/products/`. In Docker deployment, 
 1. Go to Admin Panel → Products → Add Product
 2. Fill in product details:
    - Name, Category, Material Type
-   - Size (length x width in mm)
-   - Finish, Color
+   - Weight, Color
    - Description
    - Price (optional)
    - Multiple product images

@@ -81,8 +81,15 @@ class Product(models.Model):
     color = models.CharField(max_length=100, blank=True, help_text='Enter a color name manually')
     
     # Size specifications
-    length_mm = models.PositiveIntegerField(help_text='Length in millimeters')
-    width_mm = models.PositiveIntegerField(help_text='Width in millimeters')
+    weight_kg = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        help_text='Weight in kilograms'
+    )
+    length_mm = models.PositiveIntegerField(blank=True, null=True, help_text='Length in millimeters')
+    width_mm = models.PositiveIntegerField(blank=True, null=True, help_text='Width in millimeters')
     thickness_mm = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text='Thickness in millimeters')
     
     # Product details
@@ -145,7 +152,22 @@ class Product(models.Model):
 
     @property
     def size_display(self):
-        return f'{self.length_mm}x{self.width_mm} mm'
+        if self.length_mm and self.width_mm:
+            return f'{self.length_mm}x{self.width_mm} mm'
+        return ''
+
+    @property
+    def weight_display(self):
+        if self.weight_kg is None:
+            return ''
+        weight_text = format(self.weight_kg, 'f').rstrip('0').rstrip('.')
+        return f'{weight_text} kg'
+
+    @property
+    def specification_display(self):
+        if self.weight_display:
+            return self.weight_display
+        return self.size_display
 
     @property
     def primary_image(self):

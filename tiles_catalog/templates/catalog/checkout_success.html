@@ -79,7 +79,7 @@
                 <div class="checkout-product-copy">
                     <p class="checkout-product-category">{{ order.product.category.name }}</p>
                     <h3>{{ order.product.name }}</h3>
-                    <p class="checkout-product-meta">{{ order.product.size_display }}</p>
+                    {% if order.product.specification_display %}<p class="checkout-product-meta">{{ order.product.specification_display }}</p>{% endif %}
                 </div>
             </div>
 
