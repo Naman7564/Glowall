@@ -65,9 +65,15 @@
                             <a href="{% url 'catalog:profile' %}" class="user-dropdown-item">
                                 <i class="fas fa-user"></i> Profile
                             </a>
+                            {% if user.is_staff or user.is_superuser %}
+                            <a href="{% url 'admin_panel:dashboard' %}" class="user-dropdown-item">
+                                <i class="fas fa-cog"></i> Manage
+                            </a>
+                            {% else %}
                             <a href="{% url 'catalog:orders' %}" class="user-dropdown-item">
                                 <i class="fas fa-box-open"></i> My Orders
                             </a>
+                            {% endif %}
                             <div class="user-dropdown-divider"></div>
                             <form method="post" action="{% url 'accounts:logout' %}">
                                 {% csrf_token %}
