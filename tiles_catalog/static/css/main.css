@@ -6522,6 +6522,14 @@ body.filter-open {
     line-height: 1;
 }
 
+.call-float__icon {
+    color: #2563eb;
+}
+
+.call-float__icon {
+    color: #2563eb;
+}
+
 .call-float::before,
 .whatsapp-float::before {
     content: '';
