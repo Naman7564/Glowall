@@ -6470,48 +6470,91 @@ body.filter-open {
 }
 
 /* ==========================================
-   WhatsApp Floating Button
+   Floating Contact Buttons
    ========================================== */
+.call-float,
 .whatsapp-float {
     position: fixed;
-    bottom: 24px;
     right: 24px;
     width: 60px;
     height: 60px;
-    background-color: #25D366;
     color: #ffffff;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 32px;
-    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
     z-index: 9999;
     transition: all 0.3s ease;
     text-decoration: none;
 }
 
+.call-float {
+    bottom: 96px;
+    background-color: #1f2937;
+    box-shadow: 0 4px 12px rgba(31, 41, 55, 0.35);
+}
+
+.whatsapp-float {
+    bottom: 24px;
+    background-color: #25D366;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+}
+
+.call-float:hover,
 .whatsapp-float:hover {
-    background-color: #20bd5a;
     transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
     color: #ffffff;
 }
 
+.call-float:hover {
+    background-color: #111827;
+    box-shadow: 0 6px 20px rgba(31, 41, 55, 0.45);
+}
+
+.whatsapp-float:hover {
+    background-color: #20bd5a;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+}
+
+.call-float__icon,
 .whatsapp-float i {
     line-height: 1;
 }
 
-/* Pulse animation */
+.call-float::before,
 .whatsapp-float::before {
     content: '';
     position: absolute;
     width: 100%;
     height: 100%;
     border-radius: 50%;
+    z-index: -1;
+}
+
+.call-float::before {
+    background-color: #1f2937;
+    animation: call-pulse 2s infinite;
+}
+
+.whatsapp-float::before {
     background-color: #25D366;
     animation: whatsapp-pulse 2s infinite;
-    z-index: -1;
+}
+
+@keyframes call-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.45;
+    }
+    50% {
+        transform: scale(1.3);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
 }
 
 @keyframes whatsapp-pulse {
@@ -6531,11 +6574,19 @@ body.filter-open {
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
+    .call-float,
     .whatsapp-float {
-        bottom: 20px;
         right: 20px;
         width: 54px;
         height: 54px;
         font-size: 28px;
+    }
+
+    .call-float {
+        bottom: 86px;
+    }
+
+    .whatsapp-float {
+        bottom: 20px;
     }
 }
