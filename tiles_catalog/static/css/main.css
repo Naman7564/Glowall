@@ -2020,7 +2020,7 @@ body.nav-open {
 
 .footer-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.7fr) repeat(2, minmax(180px, 0.8fr)) minmax(260px, 1fr);
+    grid-template-columns: minmax(0, 1.7fr) minmax(220px, 0.9fr) minmax(260px, 1fr);
     gap: 24px;
     align-items: stretch;
 }
