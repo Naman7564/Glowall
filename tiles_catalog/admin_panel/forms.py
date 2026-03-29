@@ -32,7 +32,7 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'name', 'code', 'slug', 'category', 'material_type', 'weight_kg', 'color',
+            'name', 'code', 'gmt_code', 'category', 'material_type', 'weight_kg', 'color',
             'description', 'price', 'is_available', 'is_featured',
             'meta_title', 'meta_description'
         ]
@@ -46,9 +46,9 @@ class ProductForm(forms.ModelForm):
                 'placeholder': 'Auto-generated if left blank',
                 'min': '101'
             }),
-            'slug': forms.TextInput(attrs={
+            'gmt_code': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Leave blank for auto-generation'
+                'placeholder': 'Enter GMT code for product filtering'
             }),
             'category': forms.Select(attrs={
                 'class': 'form-control'

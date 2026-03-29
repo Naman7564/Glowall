@@ -1,9 +1,12 @@
+import re
+
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count, Q, IntegerField
+from django.db.models.functions import Cast, Trim
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
@@ -18,6 +21,33 @@ from .forms import (
 def is_staff(user):
     """Check if user is staff."""
     return user.is_staff
+
+
+def _parse_gmt_code_range(value):
+    """Parse a single code or a numeric range into inclusive bounds."""
+    match = re.fullmatch(r"\s*(\d+)(?:\s*[-–]\s*(\d+))?\s*", value or "")
+    if not match:
+        return None
+
+    lower_bound = int(match.group(1))
+    upper_bound = int(match.group(2) or match.group(1))
+    if lower_bound > upper_bound:
+        lower_bound, upper_bound = upper_bound, lower_bound
+    return lower_bound, upper_bound
+
+
+def _filter_products_by_gmt_range(queryset, value):
+    bounds = _parse_gmt_code_range(value)
+    if not bounds:
+        return queryset
+
+    lower_bound, upper_bound = bounds
+    queryset = queryset.filter(gmt_code__regex=r"^\s*\d+\s*$").annotate(
+        gmt_code_number=Cast(Trim("gmt_code"), IntegerField())
+    )
+    if lower_bound == upper_bound:
+        return queryset.filter(gmt_code_number=lower_bound)
+    return queryset.filter(gmt_code_number__gte=lower_bound, gmt_code_number__lte=upper_bound)
 
 
 @login_required
@@ -76,19 +106,32 @@ def product_list(request):
         products = products.filter(is_available=True)
     elif availability == 'unavailable':
         products = products.filter(is_available=False)
-    
+
+    # Filter by GMT code range (e.g. 111-120 or 111–120)
+    gmt_code = request.GET.get('gmt_code', '').strip()
+    if gmt_code:
+        products = _filter_products_by_gmt_range(products, gmt_code)
+
     # Search
-    search = request.GET.get('q', '')
+    search = request.GET.get('q', '').strip()
     if search:
-        products = products.filter(name__icontains=search)
-    
+        search_filters = (
+            Q(name__icontains=search)
+            | Q(sku__icontains=search)
+            | Q(gmt_code__icontains=search)
+        )
+        if search.isdigit():
+            search_filters |= Q(code=int(search))
+        products = products.filter(search_filters)
+
     categories = Category.objects.all()
-    
+
     context = {
         'products': products,
         'categories': categories,
         'current_category': category_id,
         'current_availability': availability,
+        'current_gmt_code': gmt_code,
         'search_query': search,
     }
     return render(request, 'admin_panel/product_list.html', context)

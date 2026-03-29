@@ -75,6 +75,12 @@ class Product(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     code = models.PositiveIntegerField(unique=True, blank=True, null=True, help_text='Product code (101-200)')
+    gmt_code = models.CharField(
+        max_length=100,
+        blank=True,
+        db_index=True,
+        help_text='GMT code used to group and filter products',
+    )
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     material_type = models.ForeignKey(MaterialType, on_delete=models.SET_NULL, null=True, related_name='products')
     finish = models.ForeignKey(Finish, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')

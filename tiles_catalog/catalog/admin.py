@@ -8,6 +8,25 @@ class ProductImageInline(admin.TabularInline):
     fields = ['image', 'alt_text', 'is_primary', 'order']
 
 
+class GMTCodeFilter(admin.SimpleListFilter):
+    title = 'GMT Code'
+    parameter_name = 'gmt_code'
+
+    def lookups(self, request, model_admin):
+        codes = (
+            Product.objects.exclude(gmt_code='')
+            .order_by('gmt_code')
+            .values_list('gmt_code', flat=True)
+            .distinct()
+        )
+        return [(code, code) for code in codes]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(gmt_code=self.value())
+        return queryset
+
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'slug', 'is_active', 'product_count', 'created_at']
@@ -31,17 +50,16 @@ class FinishAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['code', 'name', 'category', 'material_type', 'specification_display', 'is_available', 'is_featured', 'created_at']
-    list_filter = ['category', 'material_type', 'finish', 'is_available', 'is_featured']
-    search_fields = ['name', 'description', 'sku', 'code', 'color']
-    prepopulated_fields = {'slug': ('name',)}
+    list_display = ['code', 'gmt_code', 'name', 'category', 'material_type', 'specification_display', 'is_available', 'is_featured', 'created_at']
+    list_filter = [GMTCodeFilter, 'category', 'material_type', 'finish', 'is_available', 'is_featured']
+    search_fields = ['name', 'description', 'sku', 'code', 'color', 'gmt_code']
     inlines = [ProductImageInline]
     list_editable = ['is_available', 'is_featured']
     readonly_fields = ['sku', 'created_at', 'updated_at']
-    
+
     fieldsets = (
         ('Product Information', {
-            'fields': ('name', 'slug', 'code', 'category', 'material_type', 'description')
+            'fields': ('name', 'gmt_code', 'code', 'category', 'material_type', 'description')
         }),
         ('Specifications', {
             'fields': ('weight_kg', 'color', 'finish', 'length_mm', 'width_mm', 'thickness_mm')

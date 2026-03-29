@@ -55,14 +55,14 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="id_slug">Slug</label>
+                            <label for="id_gmt_code">GMT Code</label>
                             <div class="field-shell">
-                                <span class="field-icon"><i class="fas fa-link"></i></span>
-                                {{ form.slug }}
+                                <span class="field-icon"><i class="fas fa-filter"></i></span>
+                                {{ form.gmt_code }}
                             </div>
-                            <span class="field-hint">Leave blank to generate the URL slug automatically.</span>
-                            {% if form.slug.errors %}
-                            <span class="error">{{ form.slug.errors.0 }}</span>
+                            <span class="field-hint">Optional. Use this code to group and filter matching products.</span>
+                            {% if form.gmt_code.errors %}
+                            <span class="error">{{ form.gmt_code.errors.0 }}</span>
                             {% endif %}
                         </div>
 

@@ -1,11 +1,13 @@
 import logging
+import re
 import traceback
 import uuid
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q, Count
+from django.db.models import Q, Count, IntegerField
+from django.db.models.functions import Cast, Trim
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -31,6 +33,34 @@ logger = logging.getLogger(__name__)
 
 CHECKOUT_SESSION_KEY = 'checkout_item'
 CART_SESSION_KEY = 'shopping_cart'
+
+
+def _parse_gmt_code_filter(value):
+    """Parse a single GMT code or numeric range into inclusive bounds."""
+    match = re.fullmatch(r"\s*(\d+)(?:\s*[-–]\s*(\d+))?\s*", value or "")
+    if not match:
+        return None
+
+    lower_bound = int(match.group(1))
+    upper_bound = int(match.group(2) or match.group(1))
+    if lower_bound > upper_bound:
+        lower_bound, upper_bound = upper_bound, lower_bound
+    return lower_bound, upper_bound
+
+
+def _filter_products_by_gmt_code(queryset, value):
+    """Filter products by GMT code, supporting exact values and ranges."""
+    bounds = _parse_gmt_code_filter(value)
+    if not bounds:
+        return queryset
+
+    lower_bound, upper_bound = bounds
+    queryset = queryset.filter(gmt_code__regex=r"^\s*\d+\s*$").annotate(
+        gmt_code_number=Cast(Trim("gmt_code"), IntegerField())
+    )
+    if lower_bound == upper_bound:
+        return queryset.filter(gmt_code_number=lower_bound)
+    return queryset.filter(gmt_code_number__gte=lower_bound, gmt_code_number__lte=upper_bound)
 
 
 def _normalize_quantity(value, default=1):
@@ -279,7 +309,8 @@ def product_list(request):
             Q(name__icontains=search_query) |
             Q(description__icontains=search_query) |
             Q(category__name__icontains=search_query) |
-            Q(material_type__name__icontains=search_query)
+            Q(material_type__name__icontains=search_query) |
+            Q(gmt_code__icontains=search_query)
         ).distinct()
     
     # Filter by category
@@ -307,22 +338,10 @@ def product_list(request):
     if availability == 'available':
         products = products.filter(is_available=True)
     
-    # Filter by code range (e.g., 101-110, 111-120, etc.)
-    # This is now handled via the sort parameter
-    
-    # Sorting (also handles code ranges like 101-110, 111-120, etc.)
+    # GMT code filtering accepts exact values like 111 and ranges like 111-120.
     sort = request.GET.get('sort', 'code')
-    
-    # Check if sort is a code range (e.g., "101-110")
-    if sort and '-' in sort and sort != 'code' and not sort.startswith('-'):
-        try:
-            parts = sort.split('-')
-            if len(parts) == 2:
-                code_min = int(parts[0])
-                code_max = int(parts[1])
-                products = products.filter(code__gte=code_min, code__lte=code_max)
-        except (ValueError, TypeError):
-            pass
+    if sort and sort != 'code':
+        products = _filter_products_by_gmt_code(products, sort)
     
     # Always order by code
     products = products.order_by('code')
@@ -367,19 +386,10 @@ def category_detail(request, slug):
         is_available=True
     ).select_related('category', 'material_type')
     
-    # Sorting (also handles code ranges like 101-110, 111-120, etc.)
+    # GMT code filtering accepts exact values like 111 and ranges like 111-120.
     sort = request.GET.get('sort', 'code')
-    
-    # Check if sort is a code range (e.g., "101-110")
-    if sort and '-' in sort and sort != 'code' and not sort.startswith('-'):
-        try:
-            parts = sort.split('-')
-            if len(parts) == 2:
-                code_min = int(parts[0])
-                code_max = int(parts[1])
-                products = products.filter(code__gte=code_min, code__lte=code_max)
-        except (ValueError, TypeError):
-            pass
+    if sort and sort != 'code':
+        products = _filter_products_by_gmt_code(products, sort)
     
     # Always order by code
     products = products.order_by('code')
@@ -702,7 +712,7 @@ def payment_webhook_view(request):
 def api_products(request):
     """API endpoint for products (for AJAX requests)."""
     products = Product.objects.filter(is_available=True).values(
-        'id', 'name', 'slug', 'category__name', 'material_type__name',
+        'id', 'name', 'slug', 'gmt_code', 'category__name', 'material_type__name',
         'length_mm', 'width_mm', 'price'
     )[:20]
     return JsonResponse({'products': list(products)})
@@ -720,7 +730,8 @@ def api_search(request):
         Q(name__icontains=query) |
         Q(description__icontains=query) |
         Q(category__name__icontains=query) |
-        Q(material_type__name__icontains=query)
+        Q(material_type__name__icontains=query) |
+        Q(gmt_code__icontains=query)
     ).select_related('category', 'material_type').distinct()[:8]
 
     results = [
@@ -729,6 +740,7 @@ def api_search(request):
             'code': product.code,
             'category': product.category.name if product.category else '',
             'material': product.material_type.name if product.material_type else '',
+            'gmt_code': product.gmt_code,
             'url': product.get_absolute_url(),
         }
         for product in products
