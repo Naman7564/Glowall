@@ -31,18 +31,18 @@
             <p class="results-count">{{ products.paginator.count }} products found</p>
             <div class="sort-dropdown">
                 <label>GMT range:</label>
-                <select onchange="location.href='?sort=' + this.value">
-                    <option value="code" {% if current_sort == 'code' %}selected{% endif %}>All GMT codes</option>
-                    <option value="101-110" {% if current_sort == '101-110' %}selected{% endif %}>GMT: 101-110</option>
-                    <option value="111-120" {% if current_sort == '111-120' %}selected{% endif %}>GMT: 111-120</option>
-                    <option value="121-130" {% if current_sort == '121-130' %}selected{% endif %}>GMT: 121-130</option>
-                    <option value="131-140" {% if current_sort == '131-140' %}selected{% endif %}>GMT: 131-140</option>
-                    <option value="141-150" {% if current_sort == '141-150' %}selected{% endif %}>GMT: 141-150</option>
-                    <option value="151-160" {% if current_sort == '151-160' %}selected{% endif %}>GMT: 151-160</option>
-                    <option value="161-170" {% if current_sort == '161-170' %}selected{% endif %}>GMT: 161-170</option>
-                    <option value="171-180" {% if current_sort == '171-180' %}selected{% endif %}>GMT: 171-180</option>
-                    <option value="181-190" {% if current_sort == '181-190' %}selected{% endif %}>GMT: 181-190</option>
-                    <option value="191-200" {% if current_sort == '191-200' %}selected{% endif %}>GMT: 191-200</option>
+                <select onchange="location.href='?gmt_code=' + this.value">
+                    <option value="" {% if not current_gmt_code %}selected{% endif %}>All GMT codes</option>
+                    <option value="101-110" {% if current_gmt_code == '101-110' %}selected{% endif %}>GMT: 101-110</option>
+                    <option value="111-120" {% if current_gmt_code == '111-120' %}selected{% endif %}>GMT: 111-120</option>
+                    <option value="121-130" {% if current_gmt_code == '121-130' %}selected{% endif %}>GMT: 121-130</option>
+                    <option value="131-140" {% if current_gmt_code == '131-140' %}selected{% endif %}>GMT: 131-140</option>
+                    <option value="141-150" {% if current_gmt_code == '141-150' %}selected{% endif %}>GMT: 141-150</option>
+                    <option value="151-160" {% if current_gmt_code == '151-160' %}selected{% endif %}>GMT: 151-160</option>
+                    <option value="161-170" {% if current_gmt_code == '161-170' %}selected{% endif %}>GMT: 161-170</option>
+                    <option value="171-180" {% if current_gmt_code == '171-180' %}selected{% endif %}>GMT: 171-180</option>
+                    <option value="181-190" {% if current_gmt_code == '181-190' %}selected{% endif %}>GMT: 181-190</option>
+                    <option value="191-200" {% if current_gmt_code == '191-200' %}selected{% endif %}>GMT: 191-200</option>
                 </select>
             </div>
         </div>
@@ -87,7 +87,7 @@
         {% if products.has_other_pages %}
         <nav class="pagination">
             {% if products.has_previous %}
-            <a href="?page={{ products.previous_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="page-link prev">
+            <a href="?page={{ products.previous_page_number }}{% if current_gmt_code %}&gmt_code={{ current_gmt_code }}{% endif %}" class="page-link prev">
                 <i class="fas fa-chevron-left"></i> Previous
             </a>
             {% endif %}
@@ -97,13 +97,13 @@
                     {% if products.number == num %}
                     <span class="page-link active">{{ num }}</span>
                     {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
-                    <a href="?page={{ num }}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="page-link">{{ num }}</a>
+                    <a href="?page={{ num }}{% if current_gmt_code %}&gmt_code={{ current_gmt_code }}{% endif %}" class="page-link">{{ num }}</a>
                     {% endif %}
                 {% endfor %}
             </div>
             
             {% if products.has_next %}
-            <a href="?page={{ products.next_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="page-link next">
+            <a href="?page={{ products.next_page_number }}{% if current_gmt_code %}&gmt_code={{ current_gmt_code }}{% endif %}" class="page-link next">
                 Next <i class="fas fa-chevron-right"></i>
             </a>
             {% endif %}

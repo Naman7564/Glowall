@@ -2674,12 +2674,6 @@ select.form-control {
     margin-bottom: 4px;
 }
 
-.product-detail .product-sku {
-    font-size: 12px;
-    color: var(--admin-text-light);
-    margin-bottom: 10px;
-}
-
 /* Summary Card */
 .summary-card .card-body {
     display: flex;

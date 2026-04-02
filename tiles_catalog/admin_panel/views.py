@@ -117,11 +117,8 @@ def product_list(request):
     if search:
         search_filters = (
             Q(name__icontains=search)
-            | Q(sku__icontains=search)
             | Q(gmt_code__icontains=search)
         )
-        if search.isdigit():
-            search_filters |= Q(code=int(search))
         products = products.filter(search_filters)
 
     categories = Category.objects.all()

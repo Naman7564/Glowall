@@ -339,12 +339,11 @@ def product_list(request):
         products = products.filter(is_available=True)
     
     # GMT code filtering accepts exact values like 111 and ranges like 111-120.
-    sort = request.GET.get('sort', 'code')
-    if sort and sort != 'code':
-        products = _filter_products_by_gmt_code(products, sort)
-    
-    # Always order by code
-    products = products.order_by('code')
+    gmt_code_filter = request.GET.get('gmt_code', '').strip()
+    if gmt_code_filter:
+        products = _filter_products_by_gmt_code(products, gmt_code_filter)
+
+    products = products.order_by('gmt_code', 'name')
     
     # Pagination
     paginator = Paginator(products, 12)
@@ -367,7 +366,7 @@ def product_list(request):
         'current_category': category_slug,
         'current_material': material_slug,
         'current_finish': finish_slug,
-        'current_sort': sort,
+        'current_gmt_code': gmt_code_filter,
         'all_categories': all_categories,
         'all_materials': all_materials,
         'all_finishes': all_finishes,
@@ -387,12 +386,11 @@ def category_detail(request, slug):
     ).select_related('category', 'material_type')
     
     # GMT code filtering accepts exact values like 111 and ranges like 111-120.
-    sort = request.GET.get('sort', 'code')
-    if sort and sort != 'code':
-        products = _filter_products_by_gmt_code(products, sort)
-    
-    # Always order by code
-    products = products.order_by('code')
+    gmt_code_filter = request.GET.get('gmt_code', '').strip()
+    if gmt_code_filter:
+        products = _filter_products_by_gmt_code(products, gmt_code_filter)
+
+    products = products.order_by('gmt_code', 'name')
     
     # Pagination
     paginator = Paginator(products, 12)
@@ -407,7 +405,7 @@ def category_detail(request, slug):
     context = {
         'category': category,
         'products': products,
-        'current_sort': sort,
+        'current_gmt_code': gmt_code_filter,
         'page_title': f'{category.name} - Products',
     }
     return render(request, 'catalog/category_detail.html', context)
@@ -415,13 +413,9 @@ def category_detail(request, slug):
 
 def product_detail(request, identifier):
     """Product detail view."""
-    product_lookup = {'slug': identifier}
-    if str(identifier).isdigit():
-        product_lookup = {'code': int(identifier)}
-
     product = get_object_or_404(
         Product.objects.select_related('category', 'material_type', 'finish'),
-        **product_lookup,
+        slug=identifier,
         is_available=True
     )
     
@@ -737,7 +731,6 @@ def api_search(request):
     results = [
         {
             'name': product.name,
-            'code': product.code,
             'category': product.category.name if product.category else '',
             'material': product.material_type.name if product.material_type else '',
             'gmt_code': product.gmt_code,

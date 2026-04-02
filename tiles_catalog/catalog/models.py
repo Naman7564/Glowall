@@ -101,7 +101,6 @@ class Product(models.Model):
     # Product details
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    sku = models.CharField(max_length=50, blank=True, unique=True, help_text='Stock Keeping Unit')
     
     # Status
     is_available = models.BooleanField(default=True)
@@ -116,20 +115,9 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['code']
+        ordering = ['gmt_code', 'name']
 
     def save(self, *args, **kwargs):
-        if self.code is None:
-            max_code = (
-                Product.objects.exclude(pk=self.pk)
-                .exclude(code__isnull=True)
-                .aggregate(max_code=models.Max('code'))['max_code']
-                or 100
-            )
-            next_code = max(101, max_code + 1)
-            while Product.objects.exclude(pk=self.pk).filter(code=next_code).exists():
-                next_code += 1
-            self.code = next_code
         if not self.slug:
             base_slug = slugify(self.name)
             slug = base_slug
@@ -138,23 +126,13 @@ class Product(models.Model):
                 slug = f'{base_slug}-{counter}'
                 counter += 1
             self.slug = slug
-        if not self.sku:
-            # Generate SKU from code
-            if self.code:
-                self.sku = f'GBS-{self.code}'
-            else:
-                # Fallback: Generate SKU from category and material
-                prefix = self.category.slug[:3].upper() if self.category else 'PRD'
-                import random
-                self.sku = f'{prefix}-{random.randint(10000, 99999)}'
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
     def get_absolute_url(self):
-        identifier = self.code if self.code is not None else self.slug
-        return reverse('catalog:product_detail', kwargs={'identifier': identifier})
+        return reverse('catalog:product_detail', kwargs={'identifier': self.slug})
 
     @property
     def size_display(self):

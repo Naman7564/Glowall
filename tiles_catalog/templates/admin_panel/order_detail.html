@@ -107,7 +107,6 @@
                     {% if order.product.material_type %}
                     <p class="product-material">{{ order.product.material_type.name }}</p>
                     {% endif %}
-                    <p class="product-sku">SKU: {{ order.product.sku }}</p>
                     <a href="{{ order.product.get_absolute_url }}" class="btn btn-sm btn-outline" target="_blank">
                         <i class="fas fa-external-link-alt"></i> View Product
                     </a>

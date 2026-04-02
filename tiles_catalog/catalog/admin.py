@@ -50,22 +50,22 @@ class FinishAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['code', 'gmt_code', 'name', 'category', 'material_type', 'specification_display', 'is_available', 'is_featured', 'created_at']
+    list_display = ['gmt_code', 'name', 'category', 'material_type', 'specification_display', 'is_available', 'is_featured', 'created_at']
     list_filter = [GMTCodeFilter, 'category', 'material_type', 'finish', 'is_available', 'is_featured']
-    search_fields = ['name', 'description', 'sku', 'code', 'color', 'gmt_code']
+    search_fields = ['name', 'description', 'color', 'gmt_code']
     inlines = [ProductImageInline]
     list_editable = ['is_available', 'is_featured']
-    readonly_fields = ['sku', 'created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at']
 
     fieldsets = (
         ('Product Information', {
-            'fields': ('name', 'gmt_code', 'code', 'category', 'material_type', 'description')
+            'fields': ('name', 'gmt_code', 'category', 'material_type', 'description')
         }),
         ('Specifications', {
             'fields': ('weight_kg', 'color', 'finish', 'length_mm', 'width_mm', 'thickness_mm')
         }),
-        ('Pricing & SKU', {
-            'fields': ('price', 'sku')
+        ('Pricing', {
+            'fields': ('price',)
         }),
         ('Status', {
             'fields': ('is_available', 'is_featured')
