@@ -336,11 +336,15 @@
 </div>
 {% endblock %}
 
+{{ marble_category_ids|json_script:"marble-category-ids" }}
+
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const formShell = document.querySelector('.product-form-shell');
     const productForm = document.querySelector('.product-dashboard-form');
+    const categorySelect = document.getElementById('id_category');
+    const priceInput = document.getElementById('id_price');
     const seoToggle = document.querySelector('.collapsible-trigger');
     const seoCard = document.querySelector('.collapsible-card');
     const imageContainer = document.getElementById('images-container');
@@ -642,6 +646,27 @@ document.addEventListener('DOMContentLoaded', () => {
             addFiles(event.dataTransfer.files);
         }
     });
+
+    const marbleCategoryIdsNode = document.getElementById('marble-category-ids');
+    const marbleCategoryIds = new Set(marbleCategoryIdsNode ? JSON.parse(marbleCategoryIdsNode.textContent) : []);
+
+    function syncMarbleTexturePrice() {
+        if (!categorySelect || !priceInput) {
+            return;
+        }
+
+        const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+        const selectedLabel = selectedOption ? selectedOption.text.trim().toLowerCase() : '';
+        const selectedValue = categorySelect.value;
+
+        if (marbleCategoryIds.has(Number(selectedValue)) || selectedLabel.includes('marble texture') || selectedLabel.includes('marble') || selectedLabel.includes('marbel')) {
+            priceInput.value = '2300';
+        }
+    }
+
+    categorySelect?.addEventListener('change', syncMarbleTexturePrice);
+    categorySelect?.addEventListener('input', syncMarbleTexturePrice);
+    syncMarbleTexturePrice();
 
     imageContainer.querySelectorAll('.product-image-card').forEach(initImageCard);
     if (hasFormErrors) {
