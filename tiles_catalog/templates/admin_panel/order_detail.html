@@ -104,9 +104,6 @@
                 <div class="product-info">
                     <h4>{{ order.product.name }}</h4>
                     <p class="product-category">{{ order.product.category.name }}</p>
-                    {% if order.product.material_type %}
-                    <p class="product-material">{{ order.product.material_type.name }}</p>
-                    {% endif %}
                     <a href="{{ order.product.get_absolute_url }}" class="btn btn-sm btn-outline" target="_blank">
                         <i class="fas fa-external-link-alt"></i> View Product
                     </a>

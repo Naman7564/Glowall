@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from catalog.models import Product, Category, ProductImage, MaterialType, Finish, CustomerReview, Order, Poster
+from catalog.models import Product, Category, ProductImage, Finish, CustomerReview, Order, Poster
 
 
 class CategoryForm(forms.ModelForm):
@@ -32,7 +32,7 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'name', 'gmt_code', 'category', 'material_type', 'weight_kg', 'color',
+            'name', 'gmt_code', 'category', 'weight_kg', 'color',
             'description', 'price', 'is_available', 'is_featured',
             'meta_title', 'meta_description'
         ]
@@ -46,9 +46,6 @@ class ProductForm(forms.ModelForm):
                 'placeholder': 'Enter GMT code for product filtering'
             }),
             'category': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'material_type': forms.Select(attrs={
                 'class': 'form-control'
             }),
             'color': forms.TextInput(attrs={
@@ -103,20 +100,6 @@ class ProductImageForm(forms.ModelForm):
             'order': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'value': '0'
-            }),
-        }
-
-
-class MaterialTypeForm(forms.ModelForm):
-    """Form for adding/editing material types."""
-    
-    class Meta:
-        model = MaterialType
-        fields = ['name']
-        widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Material Type Name'
             }),
         }
 

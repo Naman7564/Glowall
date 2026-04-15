@@ -35,23 +35,6 @@ class Category(models.Model):
         return self.products.filter(is_available=True).count()
 
 
-class MaterialType(models.Model):
-    """Material types: Tile, Marble, Granite, Stone, etc."""
-    name = models.CharField(max_length=50, unique=True)
-    slug = models.SlugField(max_length=50, unique=True, blank=True)
-
-    class Meta:
-        ordering = ['name']
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
-
 class Finish(models.Model):
     """Finish types: Glossy, Matte, Polish, etc."""
     name = models.CharField(max_length=50, unique=True)
@@ -82,7 +65,6 @@ class Product(models.Model):
         help_text='GMT code used to group and filter products',
     )
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
-    material_type = models.ForeignKey(MaterialType, on_delete=models.SET_NULL, null=True, related_name='products')
     finish = models.ForeignKey(Finish, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
     color = models.CharField(max_length=100, blank=True, help_text='Enter a color name manually')
     

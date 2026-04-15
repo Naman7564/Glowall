@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, MaterialType, Finish, Product, ProductImage, Order, CustomerReview
+from .models import Category, Finish, Product, ProductImage, Order, CustomerReview
 
 
 class ProductImageInline(admin.TabularInline):
@@ -36,11 +36,6 @@ class CategoryAdmin(admin.ModelAdmin):
     list_editable = ['is_active']
 
 
-@admin.register(MaterialType)
-class MaterialTypeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'slug']
-    prepopulated_fields = {'slug': ('name',)}
-
 
 @admin.register(Finish)
 class FinishAdmin(admin.ModelAdmin):
@@ -50,8 +45,8 @@ class FinishAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['gmt_code', 'name', 'category', 'material_type', 'specification_display', 'is_available', 'is_featured', 'created_at']
-    list_filter = [GMTCodeFilter, 'category', 'material_type', 'finish', 'is_available', 'is_featured']
+    list_display = ['gmt_code', 'name', 'category', 'specification_display', 'is_available', 'is_featured', 'created_at']
+    list_filter = [GMTCodeFilter, 'category', 'finish', 'is_available', 'is_featured']
     search_fields = ['name', 'description', 'color', 'gmt_code']
     inlines = [ProductImageInline]
     list_editable = ['is_available', 'is_featured']
@@ -59,7 +54,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Product Information', {
-            'fields': ('name', 'gmt_code', 'category', 'material_type', 'description')
+            'fields': ('name', 'gmt_code', 'category', 'description')
         }),
         ('Specifications', {
             'fields': ('weight_kg', 'color', 'finish', 'length_mm', 'width_mm', 'thickness_mm')

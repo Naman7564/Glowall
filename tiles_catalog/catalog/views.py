@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .models import Category, Product, CustomerReview, Order, MaterialType, Finish, Poster
+from .models import Category, Product, CustomerReview, Order, Finish, Poster
 from .forms import OrderForm
 from .payments import (
     CashfreeGatewayError,
@@ -98,7 +98,7 @@ def _load_checkout_item(request):
     product = Product.objects.filter(
         pk=checkout_data.get('product_id'),
         is_available=True,
-    ).select_related('category', 'material_type', 'finish').first()
+    ).select_related('category', 'finish').first()
 
     if not product:
         request.session.pop(CHECKOUT_SESSION_KEY, None)
@@ -268,12 +268,12 @@ def home(request):
     featured_products = Product.objects.filter(
         is_available=True, 
         is_featured=True
-    ).select_related('category', 'material_type')[:8]
+    ).select_related('category')[:8]
     
     marble_textures = Product.objects.filter(
         is_available=True,
         category__slug='marbels'
-    ).select_related('category', 'material_type')[:4]
+    ).select_related('category')[:4]
     
     featured_categories = Category.objects.filter(
         is_active=True
@@ -300,7 +300,7 @@ def home(request):
 
 def product_list(request):
     """Product listing with filters and search."""
-    products = Product.objects.filter(is_available=True).select_related('category', 'material_type', 'finish')
+    products = Product.objects.filter(is_available=True).select_related('category', 'finish')
     
     # Search
     search_query = request.GET.get('q', '')
@@ -309,7 +309,6 @@ def product_list(request):
             Q(name__icontains=search_query) |
             Q(description__icontains=search_query) |
             Q(category__name__icontains=search_query) |
-            Q(material_type__name__icontains=search_query) |
             Q(gmt_code__icontains=search_query)
         ).distinct()
     
@@ -317,12 +316,7 @@ def product_list(request):
     category_slug = request.GET.get('category', '')
     if category_slug:
         products = products.filter(category__slug=category_slug)
-    
-    # Filter by material type
-    material_slug = request.GET.get('material', '')
-    if material_slug:
-        products = products.filter(material_type__slug=material_slug)
-    
+        
     # Filter by finish
     finish_slug = request.GET.get('finish', '')
     if finish_slug:
@@ -357,18 +351,15 @@ def product_list(request):
     
     # Get all filter options for sidebar
     all_categories = Category.objects.filter(is_active=True).order_by('name')
-    all_materials = MaterialType.objects.all().order_by('name')
     all_finishes = Finish.objects.all().order_by('name')
     
     context = {
         'products': products,
         'search_query': search_query,
         'current_category': category_slug,
-        'current_material': material_slug,
         'current_finish': finish_slug,
         'current_gmt_code': gmt_code_filter,
         'all_categories': all_categories,
-        'all_materials': all_materials,
         'all_finishes': all_finishes,
         'page_title': 'Product Catalog',
     }
@@ -383,7 +374,7 @@ def category_detail(request, slug):
     products = Product.objects.filter(
         category=category,
         is_available=True
-    ).select_related('category', 'material_type')
+    ).select_related('category')
     
     # GMT code filtering accepts exact values like 111 and ranges like 111-120.
     gmt_code_filter = request.GET.get('gmt_code', '').strip()
@@ -414,7 +405,7 @@ def category_detail(request, slug):
 def product_detail(request, identifier):
     """Product detail view."""
     product = get_object_or_404(
-        Product.objects.select_related('category', 'material_type', 'finish'),
+        Product.objects.select_related('category', 'finish'),
         slug=identifier,
         is_available=True
     )
@@ -628,7 +619,7 @@ def place_order_view(request):
 def checkout_success(request, order_id):
     """Status page for an order after payment is attempted."""
     order = get_object_or_404(
-        Order.objects.select_related('product', 'product__category', 'product__material_type'),
+        Order.objects.select_related('product', 'product__category'),
         pk=order_id,
     )
     context = {
@@ -646,7 +637,7 @@ def payment_return_view(request):
         return redirect('catalog:product_list')
 
     order = get_object_or_404(
-        Order.objects.select_related('product', 'product__category', 'product__material_type'),
+        Order.objects.select_related('product', 'product__category'),
         cashfree_order_id=cashfree_order_id,
     )
 
@@ -706,7 +697,7 @@ def payment_webhook_view(request):
 def api_products(request):
     """API endpoint for products (for AJAX requests)."""
     products = Product.objects.filter(is_available=True).values(
-        'id', 'name', 'slug', 'gmt_code', 'category__name', 'material_type__name',
+        'id', 'name', 'slug', 'gmt_code', 'category__name',
         'length_mm', 'width_mm', 'price'
     )[:20]
     return JsonResponse({'products': list(products)})
@@ -724,15 +715,13 @@ def api_search(request):
         Q(name__icontains=query) |
         Q(description__icontains=query) |
         Q(category__name__icontains=query) |
-        Q(material_type__name__icontains=query) |
         Q(gmt_code__icontains=query)
-    ).select_related('category', 'material_type').distinct()[:8]
+    ).select_related('category').distinct()[:8]
 
     results = [
         {
             'name': product.name,
             'category': product.category.name if product.category else '',
-            'material': product.material_type.name if product.material_type else '',
             'gmt_code': product.gmt_code,
             'url': product.get_absolute_url(),
         }

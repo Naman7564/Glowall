@@ -24,13 +24,7 @@ urlpatterns = [
     path('categories/add/', views.category_add, name='category_add'),
     path('categories/<int:pk>/edit/', views.category_edit, name='category_edit'),
     path('categories/<int:pk>/delete/', views.category_delete, name='category_delete'),
-    
-    # Material Types
-    path('materials/', views.material_list, name='material_list'),
-    path('materials/add/', views.material_add, name='material_add'),
-    path('materials/<int:pk>/edit/', views.material_edit, name='material_edit'),
-    path('materials/<int:pk>/delete/', views.material_delete, name='material_delete'),
-    
+        
     # Finishes
     path('finishes/', views.finish_list, name='finish_list'),
     path('finishes/add/', views.finish_add, name='finish_add'),

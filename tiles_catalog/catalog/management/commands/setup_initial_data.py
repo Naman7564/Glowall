@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from catalog.models import Category, MaterialType, Finish
+from catalog.models import Category, Finish
 
 
 class Command(BaseCommand):
@@ -7,14 +7,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write('Setting up initial data...')
-        
-        # Create Material Types
-        materials = ['Tile', 'Marble', 'Granite', 'Natural Stone', 'Vitrified']
-        for name in materials:
-            material, created = MaterialType.objects.get_or_create(name=name)
-            if created:
-                self.stdout.write(self.style.SUCCESS(f'Created material type: {name}'))
-        
+                
         # Create Finishes
         finishes = ['Glossy', 'Matte', 'Polished', 'Honed', 'Textured', 'Satin']
         for name in finishes:

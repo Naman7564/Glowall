@@ -78,17 +78,6 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="id_material_type">Material Type</label>
-                            <div class="field-shell">
-                                <span class="field-icon"><i class="fas fa-cubes"></i></span>
-                                {{ form.material_type }}
-                            </div>
-                            {% if form.material_type.errors %}
-                            <span class="error">{{ form.material_type.errors.0 }}</span>
-                            {% endif %}
-                        </div>
-
-                        <div class="form-group">
                             <label for="id_description">Description <span class="required-indicator">*</span></label>
                             <div class="field-shell field-shell-textarea">
                                 <span class="field-icon"><i class="fas fa-align-left"></i></span>

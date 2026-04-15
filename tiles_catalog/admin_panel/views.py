@@ -11,10 +11,10 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
-from catalog.models import Product, Category, ProductImage, MaterialType, Finish, CustomerReview, Order, Poster
+from catalog.models import Product, Category, ProductImage, Finish, CustomerReview, Order, Poster
 from .forms import (
     ProductForm, CategoryForm, ProductImageFormSet,
-    MaterialTypeForm, FinishForm, CustomerReviewForm, OrderStatusForm, PosterForm
+    FinishForm, CustomerReviewForm, OrderStatusForm, PosterForm
 )
 
 
@@ -93,7 +93,7 @@ def dashboard(request):
 @user_passes_test(is_staff)
 def product_list(request):
     """Admin product list view."""
-    products = Product.objects.select_related('category', 'material_type').all()
+    products = Product.objects.select_related('category').all()
     
     # Filter by category
     category_id = request.GET.get('category')
@@ -311,70 +311,6 @@ def category_delete(request, pk):
     
     context = {'category': category}
     return render(request, 'admin_panel/category_confirm_delete.html', context)
-
-
-# Material Type Management
-@login_required
-@user_passes_test(is_staff)
-def material_list(request):
-    """Material type list view."""
-    materials = MaterialType.objects.annotate(
-        product_count=Count('products')
-    ).all()
-    context = {'materials': materials}
-    return render(request, 'admin_panel/material_list.html', context)
-
-
-@login_required
-@user_passes_test(is_staff)
-def material_add(request):
-    """Add new material type."""
-    if request.method == 'POST':
-        form = MaterialTypeForm(request.POST)
-        if form.is_valid():
-            material = form.save()
-            messages.success(request, f'Material type "{material.name}" has been created.')
-            return redirect('admin_panel:material_list')
-    else:
-        form = MaterialTypeForm()
-    
-    context = {'form': form, 'title': 'Add New Material Type'}
-    return render(request, 'admin_panel/material_form.html', context)
-
-
-@login_required
-@user_passes_test(is_staff)
-def material_edit(request, pk):
-    """Edit material type."""
-    material = get_object_or_404(MaterialType, pk=pk)
-    
-    if request.method == 'POST':
-        form = MaterialTypeForm(request.POST, instance=material)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'Material type "{material.name}" has been updated.')
-            return redirect('admin_panel:material_list')
-    else:
-        form = MaterialTypeForm(instance=material)
-    
-    context = {'form': form, 'material': material, 'title': f'Edit Material: {material.name}'}
-    return render(request, 'admin_panel/material_form.html', context)
-
-
-@login_required
-@user_passes_test(is_staff)
-def material_delete(request, pk):
-    """Delete material type."""
-    material = get_object_or_404(MaterialType, pk=pk)
-    
-    if request.method == 'POST':
-        name = material.name
-        material.delete()
-        messages.success(request, f'Material type "{name}" has been deleted.')
-        return redirect('admin_panel:material_list')
-    
-    context = {'material': material}
-    return render(request, 'admin_panel/material_confirm_delete.html', context)
 
 
 # Finish Management

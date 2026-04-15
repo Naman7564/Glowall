@@ -166,12 +166,6 @@ function initSearch() {
         categoryTag.textContent = result.category || 'Collection';
         resultMeta.appendChild(categoryTag);
 
-        if (result.material) {
-            const materialTag = document.createElement('span');
-            materialTag.textContent = result.material;
-            resultMeta.appendChild(materialTag);
-        }
-
         resultArrow.innerHTML = '<i class="fas fa-arrow-right"></i>';
 
         resultCopy.appendChild(resultTitle);

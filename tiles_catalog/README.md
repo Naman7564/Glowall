@@ -18,7 +18,7 @@ A modern, production-ready web application for a Tiles and Marble showroom catal
 - Dashboard with statistics overview
 - Product management (CRUD operations)
 - Category management with hierarchy support
-- Material types, finishes, and colors management
+- Finishes and colors management
 - Contact message management
 - Multiple image upload support
 
@@ -162,7 +162,7 @@ Uploaded product images are stored in `/media/products/`. In Docker deployment, 
 
 1. Go to Admin Panel → Products → Add Product
 2. Fill in product details:
-   - Name, Category, Material Type
+   - Name, Category
    - Weight, Color
    - Description
    - Price (optional)

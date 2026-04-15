@@ -12,7 +12,6 @@ class ProductSearchForm(forms.Form):
         })
     )
     category = forms.CharField(required=False)
-    material = forms.CharField(required=False)
     finish = forms.CharField(required=False)
     color = forms.CharField(required=False)
 
