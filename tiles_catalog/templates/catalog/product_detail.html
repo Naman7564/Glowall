@@ -133,12 +133,12 @@
 
                         <!-- Quantity Selector -->
                         <div class="pd-quantity-wrapper">
-                            <label class="pd-quantity-label" for="qtyInput">Quantity (sq ft)</label>
+                            <label class="pd-quantity-label" for="qtyInput">Quantity</label>
                             <div class="pd-quantity">
                                 <button class="pd-qty-btn" type="button" onclick="updateQty(-1)" aria-label="Decrease quantity">
                                     <span class="material-symbols-outlined">remove</span>
                                 </button>
-                                <input type="number" class="pd-qty-input" value="10" min="1" id="qtyInput" name="quantity">
+                                <input type="number" class="pd-qty-input" value="1" min="1" id="qtyInput" name="quantity">
                                 <button class="pd-qty-btn" type="button" onclick="updateQty(1)" aria-label="Increase quantity">
                                     <span class="material-symbols-outlined">add</span>
                                 </button>
@@ -158,7 +158,7 @@
                         <form method="post" action="{% url 'catalog:add_to_cart' %}" class="add-to-cart-form" id="addToCartForm">
                             {% csrf_token %}
                             <input type="hidden" name="product_id" value="{{ product.id }}">
-                            <input type="hidden" name="quantity" value="10" id="cartQtyInput">
+                            <input type="hidden" name="quantity" value="1" id="cartQtyInput">
                             <button type="submit" class="pd-btn pd-btn-outline" id="addToCartBtn">
                                 <span class="material-symbols-outlined">add_shopping_cart</span>
                                 <span class="btn-text">Add to Cart</span>
