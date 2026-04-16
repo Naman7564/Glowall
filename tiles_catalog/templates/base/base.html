@@ -170,7 +170,7 @@
                                 <span>Curated designs</span>
                             </div>
                             <div class="footer-highlight">
-                                <strong>20+ Years</strong>
+                                <strong>5+ Years</strong>
                                 <span>Industry experience</span>
                             </div>
                             <div class="footer-highlight">
@@ -188,11 +188,9 @@
                     <div class="footer-link-card">
                         <h4 class="footer-subtitle">Categories</h4>
                         <ul class="footer-links">
-                            <li><a href="{% url 'catalog:product_list' %}?category=floor-tiles">Floor Tiles</a></li>
-                            <li><a href="{% url 'catalog:product_list' %}?category=wall-tiles">Wall Tiles</a></li>
-                            <li><a href="{% url 'catalog:product_list' %}?category=marble">Marble</a></li>
-                            <li><a href="{% url 'catalog:product_list' %}?category=granite">Granite</a></li>
-                            <li><a href="{% url 'catalog:product_list' %}?category=natural-stone">Natural Stone</a></li>
+                            {% for cat in categories %}
+                            <li><a href="{% url 'catalog:category_detail' cat.slug %}">{{ cat.name }}</a></li>
+                            {% endfor %}
                         </ul>
                     </div>
                     
