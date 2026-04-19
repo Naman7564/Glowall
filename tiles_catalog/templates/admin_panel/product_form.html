@@ -104,20 +104,92 @@
                     </div>
 
                     <div class="admin-form-card-body">
-                        <div class="form-row form-row-compact">
-                            <div class="form-group">
-                                <label for="id_weight_kg">Weight (kg)</label>
-                                <div class="field-shell">
-                                    <span class="field-icon"><i class="fas fa-weight-hanging"></i></span>
-                                    {{ form.weight_kg }}
-                                </div>
-                                {% if form.weight_kg.errors %}
-                                <span class="error">{{ form.weight_kg.errors.0 }}</span>
-                                {% endif %}
+                        {{ weight_formset.management_form }}
+
+                        {% if weight_formset.non_form_errors %}
+                        <div class="form-errors-banner" role="alert">
+                            <i class="fas fa-circle-exclamation"></i>
+                            <div>
+                                {% for error in weight_formset.non_form_errors %}
+                                <p>{{ error }}</p>
+                                {% endfor %}
                             </div>
                         </div>
+                        {% endif %}
 
-                        <div class="form-group">
+                        <div id="weight-rows-container">
+                            {% for wf in weight_formset %}
+                            <div class="weight-row{% if wf.DELETE.value %} is-deleted{% endif %}" data-weight-form-prefix="{{ wf.prefix }}" {% if wf.DELETE.value %}hidden{% endif %}>
+                                <div class="weight-row-fields">
+                                    <div class="form-group weight-field-value">
+                                        <label for="{{ wf.value_kg.id_for_label }}">Weight (kg)</label>
+                                        <div class="field-shell">
+                                            <span class="field-icon"><i class="fas fa-weight-hanging"></i></span>
+                                            {{ wf.value_kg }}
+                                        </div>
+                                        {% if wf.value_kg.errors %}
+                                        <span class="error">{{ wf.value_kg.errors.0 }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group weight-field-label">
+                                        <label for="{{ wf.label.id_for_label }}">Label <span class="field-hint-inline">(optional)</span></label>
+                                        <div class="field-shell">
+                                            <span class="field-icon"><i class="fas fa-tag"></i></span>
+                                            {{ wf.label }}
+                                        </div>
+                                        {% if wf.label.errors %}
+                                        <span class="error">{{ wf.label.errors.0 }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <button type="button" class="btn-weight-remove" aria-label="Remove weight" title="Remove">
+                                        <i class="fas fa-times-circle"></i>
+                                    </button>
+                                </div>
+                                <div class="weight-row-meta">
+                                    {{ wf.order }}
+                                    {{ wf.id }}
+                                    {% if weight_formset.can_delete %}{{ wf.DELETE }}{% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <button type="button" id="add-weight-btn" class="btn btn-outline btn-sm weight-add-btn">
+                            <i class="fas fa-plus"></i> Add Weight Option
+                        </button>
+
+                        <template id="weight-row-template">
+                            <div class="weight-row" data-weight-form-prefix="weights-__wprefix__">
+                                <div class="weight-row-fields">
+                                    <div class="form-group weight-field-value">
+                                        <label>Weight (kg)</label>
+                                        <div class="field-shell">
+                                            <span class="field-icon"><i class="fas fa-weight-hanging"></i></span>
+                                            <input type="number" name="weights-__wprefix__-value_kg" class="form-control" placeholder="Weight in kg" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="form-group weight-field-label">
+                                        <label>Label <span class="field-hint-inline">(optional)</span></label>
+                                        <div class="field-shell">
+                                            <span class="field-icon"><i class="fas fa-tag"></i></span>
+                                            <input type="text" name="weights-__wprefix__-label" class="form-control" placeholder="e.g. Per Box, Per Piece (optional)">
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-weight-remove" aria-label="Remove weight" title="Remove">
+                                        <i class="fas fa-times-circle"></i>
+                                    </button>
+                                </div>
+                                <div class="weight-row-meta">
+                                    <input type="hidden" name="weights-__wprefix__-order" value="__wprefix__">
+                                    <input type="hidden" name="weights-__wprefix__-id" value="">
+                                    {% if weight_formset.can_delete %}
+                                    <input type="hidden" name="weights-__wprefix__-DELETE" value="">
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </template>
+
+                        <div class="form-group" style="margin-top: 1.5rem;">
                             <label for="id_color">Color</label>
                             <div class="field-shell">
                                 <span class="field-icon"><i class="fas fa-palette"></i></span>
@@ -670,6 +742,89 @@ document.addEventListener('DOMContentLoaded', () => {
     productForm?.addEventListener('submit', () => {
         savePreviewState();
     });
+
+    // --- Multi-weight manager ---
+    const weightContainer = document.getElementById('weight-rows-container');
+    const addWeightBtn = document.getElementById('add-weight-btn');
+    const weightTemplate = document.getElementById('weight-row-template');
+    const weightTotalForms = document.querySelector('[name="weights-TOTAL_FORMS"]');
+
+    function getWeightCount() {
+        return parseInt(weightTotalForms?.value || '0', 10);
+    }
+
+    function syncWeightOrders() {
+        if (!weightContainer) return;
+        const visibleRows = Array.from(weightContainer.querySelectorAll('.weight-row')).filter(r => !r.hidden && !r.classList.contains('is-deleted'));
+        visibleRows.forEach((row, idx) => {
+            const orderInput = row.querySelector('input[name$="-order"]');
+            if (orderInput) orderInput.value = idx;
+        });
+    }
+
+    function bindWeightRow(row) {
+        const removeBtn = row.querySelector('.btn-weight-remove');
+        if (!removeBtn) return;
+        removeBtn.addEventListener('click', () => {
+            const deleteInput = row.querySelector('input[name$="-DELETE"]');
+            if (deleteInput) {
+                deleteInput.value = 'on';
+            }
+            row.classList.add('is-deleted');
+            row.hidden = true;
+            syncWeightOrders();
+        });
+    }
+
+    if (weightContainer) {
+        weightContainer.querySelectorAll('.weight-row').forEach(bindWeightRow);
+    }
+
+    addWeightBtn?.addEventListener('click', () => {
+        if (!weightTemplate || !weightTotalForms || !weightContainer) return;
+        const index = getWeightCount();
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = weightTemplate.innerHTML.replaceAll('__wprefix__', index);
+        const newRow = wrapper.firstElementChild;
+        weightContainer.appendChild(newRow);
+        weightTotalForms.value = index + 1;
+        bindWeightRow(newRow);
+        syncWeightOrders();
+        newRow.querySelector('input[type="number"]')?.focus();
+    });
+
+    syncWeightOrders();
 });
 </script>
+
+<style>
+/* Weight row layout */
+.weight-row { margin-bottom: 0.75rem; }
+.weight-row.is-deleted { display: none; }
+.weight-row-fields {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+.weight-field-value { flex: 0 0 180px; min-width: 140px; margin-bottom: 0 !important; }
+.weight-field-label { flex: 1 1 200px; margin-bottom: 0 !important; }
+.weight-row-meta { display: none; }
+.btn-weight-remove {
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    color: #e53e3e;
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: 0.3rem 0.4rem;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+    align-self: flex-end;
+    margin-bottom: 0.1rem;
+}
+.btn-weight-remove:hover { background: #fff5f5; color: #c53030; }
+.weight-add-btn { margin-top: 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem; }
+.field-hint-inline { font-size: 0.75em; color: #888; font-weight: 400; }
+</style>
 {% endblock %}

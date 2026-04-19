@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from catalog.models import Product, Category, ProductImage, Finish, CustomerReview, Order, Poster
+from catalog.models import Product, Category, ProductImage, ProductWeight, Finish, CustomerReview, Order, Poster
 
 
 class CategoryForm(forms.ModelForm):
@@ -207,4 +207,35 @@ ProductImageFormSet = inlineformset_factory(
     max_num=12,
     validate_max=True,
     can_delete=True
+)
+
+
+class ProductWeightForm(forms.ModelForm):
+    """Form for a single weight option entry."""
+
+    class Meta:
+        model = ProductWeight
+        fields = ['value_kg', 'label', 'order']
+        widgets = {
+            'value_kg': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Weight in kg',
+                'step': '0.01',
+                'min': '0',
+            }),
+            'label': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g. Per Box, Per Piece (optional)',
+            }),
+            'order': forms.HiddenInput(),
+        }
+
+
+# Formset for multiple weight entries
+ProductWeightFormSet = inlineformset_factory(
+    Product,
+    ProductWeight,
+    form=ProductWeightForm,
+    extra=0,
+    can_delete=True,
 )

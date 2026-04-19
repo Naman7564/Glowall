@@ -1,11 +1,17 @@
 from django.contrib import admin
-from .models import Category, Finish, Product, ProductImage, Order, CustomerReview
+from .models import Category, Finish, Product, ProductImage, ProductWeight, Order, CustomerReview
 
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 1
     fields = ['image', 'alt_text', 'is_primary', 'order']
+
+
+class ProductWeightInline(admin.TabularInline):
+    model = ProductWeight
+    extra = 1
+    fields = ['value_kg', 'label', 'order']
 
 
 class GMTCodeFilter(admin.SimpleListFilter):
@@ -48,7 +54,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ['gmt_code', 'name', 'category', 'specification_display', 'is_available', 'is_featured', 'created_at']
     list_filter = [GMTCodeFilter, 'category', 'finish', 'is_available', 'is_featured']
     search_fields = ['name', 'description', 'color', 'gmt_code']
-    inlines = [ProductImageInline]
+    inlines = [ProductImageInline, ProductWeightInline]
     list_editable = ['is_available', 'is_featured']
     readonly_fields = ['created_at', 'updated_at']
 

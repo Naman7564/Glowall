@@ -14,7 +14,8 @@ from django.utils import timezone
 from catalog.models import Product, Category, ProductImage, Finish, CustomerReview, Order, Poster
 from .forms import (
     ProductForm, CategoryForm, ProductImageFormSet,
-    FinishForm, CustomerReviewForm, OrderStatusForm, PosterForm
+    FinishForm, CustomerReviewForm, OrderStatusForm, PosterForm,
+    ProductWeightFormSet
 )
 
 
@@ -142,23 +143,28 @@ def product_add(request):
         product = Product()
         form = ProductForm(request.POST, instance=product)
         formset = ProductImageFormSet(request.POST, request.FILES, instance=product)
-        if form.is_valid() and formset.is_valid():
+        weight_formset = ProductWeightFormSet(request.POST, instance=product, prefix='weights')
+        if form.is_valid() and formset.is_valid() and weight_formset.is_valid():
             with transaction.atomic():
                 product = form.save()
                 formset.instance = product
                 formset.save()
+                weight_formset.instance = product
+                weight_formset.save()
             messages.success(request, f'Product "{product.name}" has been created.')
             return redirect('admin_panel:product_list')
     else:
         product = Product()
         form = ProductForm(instance=product)
         formset = ProductImageFormSet(instance=product)
+        weight_formset = ProductWeightFormSet(instance=product, prefix='weights')
 
     marble_category_ids = list(Category.objects.filter(Q(name__icontains='marble') | Q(name__icontains='marbel') | Q(slug__icontains='marble') | Q(slug__icontains='marbel')).values_list('id', flat=True))
 
     context = {
         'form': form,
         'formset': formset,
+        'weight_formset': weight_formset,
         'title': 'Add New Product',
         'marble_category_ids': marble_category_ids,
     }
@@ -174,22 +180,27 @@ def product_edit(request, pk):
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=product)
         formset = ProductImageFormSet(request.POST, request.FILES, instance=product)
-        if form.is_valid() and formset.is_valid():
+        weight_formset = ProductWeightFormSet(request.POST, instance=product, prefix='weights')
+        if form.is_valid() and formset.is_valid() and weight_formset.is_valid():
             with transaction.atomic():
                 product = form.save()
                 formset.instance = product
                 formset.save()
+                weight_formset.instance = product
+                weight_formset.save()
             messages.success(request, f'Product "{product.name}" has been updated.')
             return redirect('admin_panel:product_list')
     else:
         form = ProductForm(instance=product)
         formset = ProductImageFormSet(instance=product)
+        weight_formset = ProductWeightFormSet(instance=product, prefix='weights')
 
     marble_category_ids = list(Category.objects.filter(Q(name__icontains='marble') | Q(name__icontains='marbel') | Q(slug__icontains='marble') | Q(slug__icontains='marbel')).values_list('id', flat=True))
 
     context = {
         'form': form,
         'formset': formset,
+        'weight_formset': weight_formset,
         'product': product,
         'title': f'Edit Product: {product.name}',
         'marble_category_ids': marble_category_ids,

@@ -53,6 +53,31 @@ class Finish(models.Model):
         return self.name
 
 
+class ProductWeight(models.Model):
+    """One or more weight variants for a product (e.g. 12 kg, 16 kg)."""
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='weights')
+    value_kg = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        help_text='Weight in kilograms'
+    )
+    label = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text='Optional label, e.g. "Per Box" or "Per Piece"'
+    )
+    order = models.PositiveIntegerField(default=0, help_text='Display order (lower first)')
+
+    class Meta:
+        ordering = ['order', 'value_kg']
+
+    def __str__(self):
+        display = format(self.value_kg, 'f').rstrip('0').rstrip('.')
+        if self.label:
+            return f'{display} kg ({self.label})'
+        return f'{display} kg'
+
+
 class Product(models.Model):
     """Main product model for tiles and marble."""
     name = models.CharField(max_length=200)
@@ -124,6 +149,24 @@ class Product(models.Model):
 
     @property
     def weight_display(self):
+        """Returns a human-friendly weight string from ProductWeight entries,
+        falling back to the legacy weight_kg field."""
+        try:
+            weight_entries = list(self.weights.all())
+        except Exception:
+            weight_entries = []
+
+        if weight_entries:
+            parts = []
+            for w in weight_entries:
+                val = format(w.value_kg, 'f').rstrip('0').rstrip('.')
+                if w.label:
+                    parts.append(f'{val} kg ({w.label})')
+                else:
+                    parts.append(f'{val} kg')
+            return ' / '.join(parts)
+
+        # Fallback to legacy field
         if self.weight_kg is None:
             return ''
         weight_text = format(self.weight_kg, 'f').rstrip('0').rstrip('.')
