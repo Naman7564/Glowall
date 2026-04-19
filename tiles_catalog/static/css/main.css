@@ -1424,13 +1424,34 @@ body.nav-open {
 
 @media (max-width: 600px) {
     .hero {
-        min-height: max(580px, calc(100vh - 100px));
+        min-height: auto;
     }
 
     .hero-split {
-        padding-top: 24px;
-        padding-bottom: 100px;
-        gap: 28px;
+        padding-top: 16px;
+        padding-bottom: 20px;
+        gap: 0;
+    }
+
+    /* Hide the entire text column on mobile */
+    .hero-text-col {
+        display: none;
+    }
+
+    /* Hide scroll indicator on mobile */
+    .hero-scroll {
+        display: none;
+    }
+
+    /* Make poster carousel compact */
+    .hero-posters {
+        max-width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 12px;
+    }
+
+    .hero-showcase-col {
+        order: 0;
     }
 
     .hero-title-serif {
@@ -1490,6 +1511,51 @@ body.nav-open {
 
     .hero-scroll span {
         font-size: 9px;
+    }
+
+    /* Compact featured sections */
+    .section.featured-section {
+        padding: 28px 0;
+    }
+
+    .section.featured-section .section-header {
+        margin-bottom: 20px;
+    }
+
+    .section.featured-section .section-header .section-desc {
+        display: none;
+    }
+
+    .section.featured-section .section-footer {
+        margin-top: 24px;
+    }
+
+    /* Tighter product grid on mobile */
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .product-info {
+        padding: 10px 12px 14px;
+    }
+
+    .product-name {
+        font-size: 14px;
+        margin: 4px 0;
+    }
+
+    .product-category {
+        font-size: 10px;
+    }
+
+    .product-price {
+        font-size: 15px;
+        margin-top: 4px;
+    }
+
+    .product-size {
+        font-size: 12px;
     }
 }
 
@@ -3981,7 +4047,30 @@ body.nav-open {
     }
     
     .hero {
-        min-height: max(560px, calc(100vh - 92px));
+        min-height: auto;
+    }
+
+    /* Hide hero text column on tablet/mobile */
+    .hero-text-col {
+        display: none;
+    }
+
+    /* Hide scroll indicator */
+    .hero-scroll {
+        display: none;
+    }
+
+    .hero-split {
+        padding-top: 16px;
+        padding-bottom: 20px;
+        gap: 0;
+    }
+
+    /* Make poster wider on mobile */
+    .hero-posters {
+        max-width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 12px;
     }
 
     .page-header {
@@ -3995,6 +4084,39 @@ body.nav-open {
 
     .hero-btn {
         width: min(100%, 320px);
+    }
+
+    /* Compact sections on mobile */
+    .section.featured-section {
+        padding: 32px 0;
+    }
+
+    .section.featured-section .section-header {
+        margin-bottom: 24px;
+    }
+
+    .section.featured-section .section-footer {
+        margin-top: 28px;
+    }
+
+    /* Tighter product grid */
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .product-info {
+        padding: 12px 14px 16px;
+    }
+
+    .product-name {
+        font-size: 15px;
+        margin: 5px 0;
+    }
+
+    .product-price {
+        font-size: 16px;
+        margin-top: 6px;
     }
 
     .reviews-carousel-header {
