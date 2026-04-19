@@ -12,7 +12,7 @@
 
 <div
     class="form-card product-form-shell"
-    data-has-form-errors="{% if form.errors or form.non_field_errors or formset.errors or formset.non_form_errors %}true{% else %}false{% endif %}">
+    data-has-form-errors="{% if form.errors or form.non_field_errors or formset.errors or formset.non_form_errors or weight_formset.errors or weight_formset.non_form_errors %}true{% else %}false{% endif %}">
     <form method="post" enctype="multipart/form-data" class="product-form product-dashboard-form" novalidate>
         {% csrf_token %}
 
@@ -766,10 +766,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const removeBtn = row.querySelector('.btn-weight-remove');
         if (!removeBtn) return;
         removeBtn.addEventListener('click', () => {
-            const deleteInput = row.querySelector('input[name$="-DELETE"]');
-            if (deleteInput) {
-                deleteInput.value = 'on';
+            // Determine if this row exists in the DB (has a saved PK in the id field)
+            const idInput = row.querySelector('input[name$="-id"]');
+            const isSaved = idInput && idInput.value.trim() !== '';
+
+            if (isSaved) {
+                // Existing (saved) row: Django's DELETE field is a checkbox — must set .checked
+                const deleteInput = row.querySelector('input[name$="-DELETE"]');
+                if (deleteInput) {
+                    deleteInput.checked = true;
+                }
+            } else {
+                // New (unsaved) row: blank all data inputs so Django treats this as an
+                // "empty extra form" and silently skips it, then shrink TOTAL_FORMS
+                row.querySelectorAll('input[type="number"], input[type="text"]').forEach(inp => {
+                    inp.value = '';
+                });
+                if (weightTotalForms) {
+                    const current = parseInt(weightTotalForms.value || '0', 10);
+                    if (current > 0) weightTotalForms.value = current - 1;
+                }
             }
+
             row.classList.add('is-deleted');
             row.hidden = true;
             syncWeightOrders();
