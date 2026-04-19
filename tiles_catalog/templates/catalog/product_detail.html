@@ -38,6 +38,49 @@
 }
 .add-to-cart-form { width: 100%; }
 .add-to-cart-form .pd-btn { width: 100%; }
+
+/* Weight Selector */
+.pd-weight-wrapper {
+    margin-top: 16px;
+}
+.pd-weight-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+}
+.pd-weight-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+.pd-weight-btn {
+    padding: 7px 16px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 6px;
+    background: #fff;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+.pd-weight-btn:hover {
+    border-color: #b8873a;
+    color: #b8873a;
+    background: #fdf8f0;
+}
+.pd-weight-btn.active {
+    background: #b8873a;
+    border-color: #b8873a;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(184,135,58,0.3);
+}
 </style>
 {% endblock %}
 
@@ -131,18 +174,46 @@
                     <form method="get" action="{% url 'catalog:checkout' %}" class="pd-purchase-form">
                         <input type="hidden" name="product" value="{{ product.id }}">
 
-                        <!-- Quantity Selector -->
-                        <div class="pd-quantity-wrapper">
-                            <label class="pd-quantity-label" for="qtyInput">Quantity</label>
-                            <div class="pd-quantity">
-                                <button class="pd-qty-btn" type="button" onclick="updateQty(-1)" aria-label="Decrease quantity">
-                                    <span class="material-symbols-outlined">remove</span>
-                                </button>
-                                <input type="number" class="pd-qty-input" value="1" min="1" id="qtyInput" name="quantity">
-                                <button class="pd-qty-btn" type="button" onclick="updateQty(1)" aria-label="Increase quantity">
-                                    <span class="material-symbols-outlined">add</span>
-                                </button>
+                        <!-- Quantity & Weight Row -->
+                        <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start;">
+                            <!-- Quantity Selector -->
+                            <div class="pd-quantity-wrapper" style="flex:0 0 auto;">
+                                <label class="pd-quantity-label" for="qtyInput">Quantity</label>
+                                <div class="pd-quantity">
+                                    <button class="pd-qty-btn" type="button" onclick="updateQty(-1)" aria-label="Decrease quantity">
+                                        <span class="material-symbols-outlined">remove</span>
+                                    </button>
+                                    <input type="number" class="pd-qty-input" value="1" min="1" id="qtyInput" name="quantity">
+                                    <button class="pd-qty-btn" type="button" onclick="updateQty(1)" aria-label="Increase quantity">
+                                        <span class="material-symbols-outlined">add</span>
+                                    </button>
+                                </div>
                             </div>
+
+                            {% with weight_options=product.weights.all %}
+                            {% if weight_options %}
+                            <!-- Weight Selector -->
+                            <div class="pd-weight-wrapper" style="flex:1 1 auto;">
+                                <span class="pd-weight-label">Weight</span>
+                                <div class="pd-weight-options" id="weightOptions">
+                                    {% for w in weight_options %}
+                                    <button
+                                        type="button"
+                                        class="pd-weight-btn {% if forloop.first %}active{% endif %}"
+                                        data-weight-id="{{ w.id }}"
+                                        data-weight-label="{% spaceless %}{{ w.value_kg }} kg{% endspaceless %}"
+                                        data-price="{% if w.price %}{{ w.price }}{% endif %}"
+                                        onclick="selectWeight(this)"
+                                        aria-label="Select {{ w.value_kg }} kg"
+                                    >
+                                        {{ w.value_kg|floatformat:"-2" }} kg
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="weight_id" id="selectedWeightId" value="{% with w=weight_options.first %}{{ w.id }}{% endwith %}">
+                            </div>
+                            {% endif %}
+                            {% endwith %}
                         </div>
 
                         <!-- Action Buttons -->
@@ -355,6 +426,42 @@ function updateQty(change) {
     input.value = val;
     if (cartInput) cartInput.value = val;
 }
+
+// Weight Selector — price update
+const BASE_PRICE = {{ product.price|default:'null' }};
+
+function selectWeight(btn) {
+    // Deactivate all, activate clicked
+    document.querySelectorAll('.pd-weight-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Update hidden input
+    const weightIdInput = document.getElementById('selectedWeightId');
+    if (weightIdInput) weightIdInput.value = btn.dataset.weightId;
+
+    // Update displayed price
+    const priceBlock = document.querySelector('.pd-price-block');
+    if (!priceBlock) return;
+
+    const priceSpan = priceBlock.querySelector('.pd-price');
+    if (!priceSpan) return;
+
+    const weightPrice = btn.dataset.price ? parseFloat(btn.dataset.price) : null;
+    const displayPrice = weightPrice !== null ? weightPrice : BASE_PRICE;
+
+    if (displayPrice !== null && displayPrice !== undefined) {
+        priceSpan.textContent = '\u20B9' + parseFloat(displayPrice).toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+}
+
+// Auto-select first weight on page load to sync price
+(function() {
+    const firstBtn = document.querySelector('.pd-weight-btn.active');
+    if (firstBtn) selectWeight(firstBtn);
+})();
 
 // Sync quantity on manual input change
 document.getElementById('qtyInput').addEventListener('change', function() {
