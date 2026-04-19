@@ -11,7 +11,7 @@ class ProductImageInline(admin.TabularInline):
 class ProductWeightInline(admin.TabularInline):
     model = ProductWeight
     extra = 1
-    fields = ['value_kg', 'label', 'order']
+    fields = ['value_kg', 'price', 'order']
 
 
 class GMTCodeFilter(admin.SimpleListFilter):

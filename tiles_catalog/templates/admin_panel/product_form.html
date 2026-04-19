@@ -131,14 +131,14 @@
                                         <span class="error">{{ wf.value_kg.errors.0 }}</span>
                                         {% endif %}
                                     </div>
-                                    <div class="form-group weight-field-label">
-                                        <label for="{{ wf.label.id_for_label }}">Label <span class="field-hint-inline">(optional)</span></label>
+                                    <div class="form-group weight-field-price">
+                                        <label for="{{ wf.price.id_for_label }}">Price <span class="field-hint-inline">(&#8377; optional)</span></label>
                                         <div class="field-shell">
-                                            <span class="field-icon"><i class="fas fa-tag"></i></span>
-                                            {{ wf.label }}
+                                            <span class="field-icon"><i class="fas fa-indian-rupee-sign"></i></span>
+                                            {{ wf.price }}
                                         </div>
-                                        {% if wf.label.errors %}
-                                        <span class="error">{{ wf.label.errors.0 }}</span>
+                                        {% if wf.price.errors %}
+                                        <span class="error">{{ wf.price.errors.0 }}</span>
                                         {% endif %}
                                     </div>
                                     <button type="button" class="btn-weight-remove" aria-label="Remove weight" title="Remove">
@@ -168,11 +168,11 @@
                                             <input type="number" name="weights-__wprefix__-value_kg" class="form-control" placeholder="Weight in kg" step="0.01" min="0">
                                         </div>
                                     </div>
-                                    <div class="form-group weight-field-label">
-                                        <label>Label <span class="field-hint-inline">(optional)</span></label>
+                                    <div class="form-group weight-field-price">
+                                        <label>Price <span class="field-hint-inline">(&#8377; optional)</span></label>
                                         <div class="field-shell">
-                                            <span class="field-icon"><i class="fas fa-tag"></i></span>
-                                            <input type="text" name="weights-__wprefix__-label" class="form-control" placeholder="e.g. Per Box, Per Piece (optional)">
+                                            <span class="field-icon"><i class="fas fa-indian-rupee-sign"></i></span>
+                                            <input type="number" name="weights-__wprefix__-price" class="form-control" placeholder="Price in &#8377; (optional)" step="0.01" min="0">
                                         </div>
                                     </div>
                                     <button type="button" class="btn-weight-remove" aria-label="Remove weight" title="Remove">
@@ -808,7 +808,7 @@ document.addEventListener('DOMContentLoaded', () => {
     flex-wrap: wrap;
 }
 .weight-field-value { flex: 0 0 180px; min-width: 140px; margin-bottom: 0 !important; }
-.weight-field-label { flex: 1 1 200px; margin-bottom: 0 !important; }
+.weight-field-price { flex: 1 1 200px; margin-bottom: 0 !important; }
 .weight-row-meta { display: none; }
 .btn-weight-remove {
     flex: 0 0 auto;

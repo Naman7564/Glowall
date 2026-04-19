@@ -61,10 +61,12 @@ class ProductWeight(models.Model):
         decimal_places=2,
         help_text='Weight in kilograms'
     )
-    label = models.CharField(
-        max_length=100,
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
         blank=True,
-        help_text='Optional label, e.g. "Per Box" or "Per Piece"'
+        null=True,
+        help_text='Price for this weight option (optional)'
     )
     order = models.PositiveIntegerField(default=0, help_text='Display order (lower first)')
 
@@ -73,8 +75,9 @@ class ProductWeight(models.Model):
 
     def __str__(self):
         display = format(self.value_kg, 'f').rstrip('0').rstrip('.')
-        if self.label:
-            return f'{display} kg ({self.label})'
+        if self.price is not None:
+            price_text = format(self.price, 'f').rstrip('0').rstrip('.')
+            return f'{display} kg — ₹{price_text}'
         return f'{display} kg'
 
 
@@ -160,8 +163,9 @@ class Product(models.Model):
             parts = []
             for w in weight_entries:
                 val = format(w.value_kg, 'f').rstrip('0').rstrip('.')
-                if w.label:
-                    parts.append(f'{val} kg ({w.label})')
+                if w.price is not None:
+                    price_text = format(w.price, 'f').rstrip('0').rstrip('.')
+                    parts.append(f'{val} kg \u2014 \u20b9{price_text}')
                 else:
                     parts.append(f'{val} kg')
             return ' / '.join(parts)

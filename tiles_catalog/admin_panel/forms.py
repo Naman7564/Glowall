@@ -215,7 +215,7 @@ class ProductWeightForm(forms.ModelForm):
 
     class Meta:
         model = ProductWeight
-        fields = ['value_kg', 'label', 'order']
+        fields = ['value_kg', 'price', 'order']
         widgets = {
             'value_kg': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -223,9 +223,11 @@ class ProductWeightForm(forms.ModelForm):
                 'step': '0.01',
                 'min': '0',
             }),
-            'label': forms.TextInput(attrs={
+            'price': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'e.g. Per Box, Per Piece (optional)',
+                'placeholder': 'Price in ₹ (optional)',
+                'step': '0.01',
+                'min': '0',
             }),
             'order': forms.HiddenInput(),
         }
