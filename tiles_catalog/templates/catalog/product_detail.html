@@ -78,6 +78,15 @@
     color: #fff;
     box-shadow: 0 2px 8px rgba(184,135,58,0.3);
 }
+
+@media (max-width: 768px) {
+    .pd-in-stock, .pd-stock-note {
+        display: none !important;
+    }
+    .pd-stock:has(.pd-in-stock) {
+        display: none !important;
+    }
+}
 </style>
 {% endblock %}
 
@@ -163,10 +172,7 @@
                         {% endif %}
                     </div>
 
-                    <!-- Short Description -->
-                    <p class="pd-short-desc">
-                        {{ product.description|truncatewords:30 }}
-                    </p>
+                    <!-- Short Description Removed as per requirement -->
                     {% with weight_options=product.weights.all %}
                     <div class="pd-purchase-panel">
                         <!-- Quantity Selector -->
