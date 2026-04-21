@@ -36,9 +36,6 @@
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
-.add-to-cart-form { width: 100%; }
-.add-to-cart-form .pd-btn { width: 100%; }
-
 /* Weight Selector */
 .pd-weight-wrapper {
     margin-top: 16px;
@@ -170,30 +167,25 @@
                     <p class="pd-short-desc">
                         {{ product.description|truncatewords:30 }}
                     </p>
-
-                    <form method="get" action="{% url 'catalog:checkout' %}" class="pd-purchase-form">
-                        <input type="hidden" name="product" value="{{ product.id }}">
-
-                        <!-- Quantity & Weight Row -->
-                        <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start;">
-                            <!-- Quantity Selector -->
-                            <div class="pd-quantity-wrapper" style="flex:0 0 auto;">
+                    {% with weight_options=product.weights.all %}
+                    <div class="pd-purchase-panel">
+                        <!-- Quantity Selector -->
+                            <div class="pd-quantity-wrapper">
                                 <label class="pd-quantity-label" for="qtyInput">Quantity</label>
                                 <div class="pd-quantity">
                                     <button class="pd-qty-btn" type="button" onclick="updateQty(-1)" aria-label="Decrease quantity">
                                         <span class="material-symbols-outlined">remove</span>
                                     </button>
-                                    <input type="number" class="pd-qty-input" value="1" min="1" id="qtyInput" name="quantity">
+                                    <input type="number" class="pd-qty-input" value="1" min="1" id="qtyInput">
                                     <button class="pd-qty-btn" type="button" onclick="updateQty(1)" aria-label="Increase quantity">
                                         <span class="material-symbols-outlined">add</span>
                                     </button>
                                 </div>
                             </div>
 
-                            {% with weight_options=product.weights.all %}
                             {% if weight_options %}
                             <!-- Weight Selector -->
-                            <div class="pd-weight-wrapper" style="flex:1 1 auto;">
+                            <div class="pd-weight-wrapper">
                                 <span class="pd-weight-label">Weight</span>
                                 <div class="pd-weight-options" id="weightOptions">
                                     {% for w in weight_options %}
@@ -210,32 +202,36 @@
                                     </button>
                                     {% endfor %}
                                 </div>
-                                <input type="hidden" name="weight_id" id="selectedWeightId" value="{% with w=weight_options.first %}{{ w.id }}{% endwith %}">
                             </div>
                             {% endif %}
-                            {% endwith %}
-                        </div>
 
                         <!-- Action Buttons -->
-                        <div class="pd-actions">
-                            <button type="submit" class="pd-btn pd-btn-primary" id="buyNowBtn" {% if not product.price %}disabled{% endif %}>
-                                <span class="material-symbols-outlined">shopping_bag</span>
-                                Buy Now
-                            </button>
-                        </div>
-                    </form>
+                        <div class="pd-action-row">
+                            <form method="get" action="{% url 'catalog:checkout' %}" class="pd-action-form pd-buy-form">
+                                <input type="hidden" name="product" value="{{ product.id }}">
+                                <input type="hidden" name="quantity" value="1" id="buyQtyInput">
+                                {% if weight_options %}
+                                <input type="hidden" name="weight_id" id="selectedWeightId" value="{% with w=weight_options.first %}{{ w.id }}{% endwith %}">
+                                {% endif %}
+                                <button type="submit" class="pd-btn pd-btn-primary" id="buyNowBtn" {% if not product.price %}disabled{% endif %}>
+                                    <span class="material-symbols-outlined">shopping_bag</span>
+                                    Buy Now
+                                </button>
+                            </form>
 
-                    <div class="pd-actions pd-actions-secondary">
-                        <form method="post" action="{% url 'catalog:add_to_cart' %}" class="add-to-cart-form" id="addToCartForm">
-                            {% csrf_token %}
-                            <input type="hidden" name="product_id" value="{{ product.id }}">
-                            <input type="hidden" name="quantity" value="1" id="cartQtyInput">
-                            <button type="submit" class="pd-btn pd-btn-outline" id="addToCartBtn">
-                                <span class="material-symbols-outlined">add_shopping_cart</span>
-                                <span class="btn-text">Add to Cart</span>
-                            </button>
-                        </form>
+                            <form method="post" action="{% url 'catalog:add_to_cart' %}" class="add-to-cart-form pd-action-form" id="addToCartForm">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <input type="hidden" name="quantity" value="1" id="cartQtyInput">
+                                <button type="submit" class="pd-btn pd-btn-outline" id="addToCartBtn">
+                                    <span class="material-symbols-outlined">add_shopping_cart</span>
+                                    <span class="btn-text">Add to Cart</span>
+                                </button>
+                            </form>
+                        </div>
                     </div>
+                    {% endwith %}
+
                     <div class="pd-cart-message" id="cartMessage" style="display:none;">
                         <span class="material-symbols-outlined">check_circle</span>
                         <span class="message-text">Added to cart!</span>
@@ -420,10 +416,12 @@ function changeImage(src, thumbBtn) {
 // Quantity Selector
 function updateQty(change) {
     const input = document.getElementById('qtyInput');
+    const buyInput = document.getElementById('buyQtyInput');
     const cartInput = document.getElementById('cartQtyInput');
     let val = parseInt(input.value) || 1;
     val = Math.max(1, val + change);
     input.value = val;
+    if (buyInput) buyInput.value = val;
     if (cartInput) cartInput.value = val;
 }
 
@@ -465,7 +463,9 @@ function selectWeight(btn) {
 
 // Sync quantity on manual input change
 document.getElementById('qtyInput').addEventListener('change', function() {
+    const buyInput = document.getElementById('buyQtyInput');
     const cartInput = document.getElementById('cartQtyInput');
+    if (buyInput) buyInput.value = this.value;
     if (cartInput) cartInput.value = this.value;
 });
 
