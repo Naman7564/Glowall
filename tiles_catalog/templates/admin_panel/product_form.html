@@ -90,117 +90,6 @@
                     </div>
                 </section>
 
-                <section class="admin-form-card form-section">
-                    <div class="admin-form-card-header">
-                        <div class="section-heading">
-                            <span class="section-icon specs">
-                                <i class="fas fa-ruler-combined"></i>
-                            </span>
-                            <div>
-                                <h3>Specifications</h3>
-                                <p>Technical product attributes used in the catalog and filters.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="admin-form-card-body">
-                        {{ weight_formset.management_form }}
-
-                        {% if weight_formset.non_form_errors %}
-                        <div class="form-errors-banner" role="alert">
-                            <i class="fas fa-circle-exclamation"></i>
-                            <div>
-                                {% for error in weight_formset.non_form_errors %}
-                                <p>{{ error }}</p>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        <div id="weight-rows-container">
-                            {% for wf in weight_formset %}
-                            <div class="weight-row{% if wf.DELETE.value %} is-deleted{% endif %}" data-weight-form-prefix="{{ wf.prefix }}" {% if wf.DELETE.value %}hidden{% endif %}>
-                                <div class="weight-row-fields">
-                                    <div class="form-group weight-field-value">
-                                        <label for="{{ wf.value_kg.id_for_label }}">Weight (kg)</label>
-                                        <div class="field-shell">
-                                            <span class="field-icon"><i class="fas fa-weight-hanging"></i></span>
-                                            {{ wf.value_kg }}
-                                        </div>
-                                        {% if wf.value_kg.errors %}
-                                        <span class="error">{{ wf.value_kg.errors.0 }}</span>
-                                        {% endif %}
-                                    </div>
-                                    <div class="form-group weight-field-price">
-                                        <label for="{{ wf.price.id_for_label }}">Price <span class="field-hint-inline">(&#8377; optional)</span></label>
-                                        <div class="field-shell">
-                                            <span class="field-icon"><i class="fas fa-indian-rupee-sign"></i></span>
-                                            {{ wf.price }}
-                                        </div>
-                                        {% if wf.price.errors %}
-                                        <span class="error">{{ wf.price.errors.0 }}</span>
-                                        {% endif %}
-                                    </div>
-                                    <button type="button" class="btn-weight-remove" aria-label="Remove weight" title="Remove">
-                                        <i class="fas fa-times-circle"></i>
-                                    </button>
-                                </div>
-                                <div class="weight-row-meta">
-                                    {{ wf.order }}
-                                    {{ wf.id }}
-                                    {% if weight_formset.can_delete %}{{ wf.DELETE }}{% endif %}
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-
-                        <button type="button" id="add-weight-btn" class="btn btn-outline btn-sm weight-add-btn">
-                            <i class="fas fa-plus"></i> Add Weight Option
-                        </button>
-
-                        <template id="weight-row-template">
-                            <div class="weight-row" data-weight-form-prefix="weights-__wprefix__">
-                                <div class="weight-row-fields">
-                                    <div class="form-group weight-field-value">
-                                        <label>Weight (kg)</label>
-                                        <div class="field-shell">
-                                            <span class="field-icon"><i class="fas fa-weight-hanging"></i></span>
-                                            <input type="number" name="weights-__wprefix__-value_kg" class="form-control" placeholder="Weight in kg" step="0.01" min="0">
-                                        </div>
-                                    </div>
-                                    <div class="form-group weight-field-price">
-                                        <label>Price <span class="field-hint-inline">(&#8377; optional)</span></label>
-                                        <div class="field-shell">
-                                            <span class="field-icon"><i class="fas fa-indian-rupee-sign"></i></span>
-                                            <input type="number" name="weights-__wprefix__-price" class="form-control" placeholder="Price in &#8377; (optional)" step="0.01" min="0">
-                                        </div>
-                                    </div>
-                                    <button type="button" class="btn-weight-remove" aria-label="Remove weight" title="Remove">
-                                        <i class="fas fa-times-circle"></i>
-                                    </button>
-                                </div>
-                                <div class="weight-row-meta">
-                                    <input type="hidden" name="weights-__wprefix__-order" value="__wprefix__">
-                                    <input type="hidden" name="weights-__wprefix__-id" value="">
-                                    {% if weight_formset.can_delete %}
-                                    <input type="hidden" name="weights-__wprefix__-DELETE" value="">
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </template>
-
-                        <div class="form-group" style="margin-top: 1.5rem;">
-                            <label for="id_color">Color</label>
-                            <div class="field-shell">
-                                <span class="field-icon"><i class="fas fa-palette"></i></span>
-                                {{ form.color }}
-                            </div>
-                            {% if form.color.errors %}
-                            <span class="error">{{ form.color.errors.0 }}</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </section>
             </div>
 
             <aside class="product-layout-sidebar">
@@ -252,10 +141,104 @@
                                 </label>
                             </div>
                         </div>
+
+                        <div class="panel-section-divider"></div>
+
+                        <div class="panel-subsection">
+                            <div class="panel-subsection-copy">
+                                <h4>Weight Options</h4>
+                                <p>Add one or more weight-based price options for this product.</p>
+                            </div>
+
+                            {{ weight_formset.management_form }}
+
+                            {% if weight_formset.non_form_errors %}
+                            <div class="form-errors-banner" role="alert">
+                                <i class="fas fa-circle-exclamation"></i>
+                                <div>
+                                    {% for error in weight_formset.non_form_errors %}
+                                    <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div id="weight-rows-container">
+                                {% for wf in weight_formset %}
+                                <div class="weight-row{% if wf.DELETE.value %} is-deleted{% endif %}" data-weight-form-prefix="{{ wf.prefix }}" {% if wf.DELETE.value %}hidden{% endif %}>
+                                    <div class="weight-row-fields">
+                                        <div class="form-group weight-field-value">
+                                            <label for="{{ wf.value_kg.id_for_label }}">Weight (kg)</label>
+                                            <div class="field-shell">
+                                                <span class="field-icon"><i class="fas fa-weight-hanging"></i></span>
+                                                {{ wf.value_kg }}
+                                            </div>
+                                            {% if wf.value_kg.errors %}
+                                            <span class="error">{{ wf.value_kg.errors.0 }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="form-group weight-field-price">
+                                            <label for="{{ wf.price.id_for_label }}">Price <span class="field-hint-inline">(&#8377; optional)</span></label>
+                                            <div class="field-shell">
+                                                <span class="field-icon"><i class="fas fa-indian-rupee-sign"></i></span>
+                                                {{ wf.price }}
+                                            </div>
+                                            {% if wf.price.errors %}
+                                            <span class="error">{{ wf.price.errors.0 }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <button type="button" class="btn-weight-remove" aria-label="Remove weight" title="Remove">
+                                            <i class="fas fa-times-circle"></i>
+                                        </button>
+                                    </div>
+                                    <div class="weight-row-meta">
+                                        {{ wf.order }}
+                                        {{ wf.id }}
+                                        {% if weight_formset.can_delete %}{{ wf.DELETE }}{% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <button type="button" id="add-weight-btn" class="btn btn-outline btn-sm weight-add-btn">
+                                <i class="fas fa-plus"></i> Add Weight Option
+                            </button>
+                        </div>
                     </div>
                 </section>
             </aside>
         </div>
+
+        <template id="weight-row-template">
+            <div class="weight-row" data-weight-form-prefix="weights-__wprefix__">
+                <div class="weight-row-fields">
+                    <div class="form-group weight-field-value">
+                        <label>Weight (kg)</label>
+                        <div class="field-shell">
+                            <span class="field-icon"><i class="fas fa-weight-hanging"></i></span>
+                            <input type="number" name="weights-__wprefix__-value_kg" class="form-control" placeholder="Weight in kg" step="0.01" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group weight-field-price">
+                        <label>Price <span class="field-hint-inline">(&#8377; optional)</span></label>
+                        <div class="field-shell">
+                            <span class="field-icon"><i class="fas fa-indian-rupee-sign"></i></span>
+                            <input type="number" name="weights-__wprefix__-price" class="form-control" placeholder="Price in &#8377; (optional)" step="0.01" min="0">
+                        </div>
+                    </div>
+                    <button type="button" class="btn-weight-remove" aria-label="Remove weight" title="Remove">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                </div>
+                <div class="weight-row-meta">
+                    <input type="hidden" name="weights-__wprefix__-order" value="__wprefix__">
+                    <input type="hidden" name="weights-__wprefix__-id" value="">
+                    {% if weight_formset.can_delete %}
+                    <input type="hidden" name="weights-__wprefix__-DELETE" value="">
+                    {% endif %}
+                </div>
+            </div>
+        </template>
         
         <!-- Product Images -->
         <div class="form-section images-section">
@@ -816,6 +799,25 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <style>
+.panel-section-divider {
+    height: 1px;
+    margin: 1.5rem 0;
+    background: rgba(15, 23, 42, 0.08);
+}
+.panel-subsection-copy {
+    margin-bottom: 1rem;
+}
+.panel-subsection-copy h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+.panel-subsection-copy p {
+    margin: 0.35rem 0 0;
+    font-size: 0.9rem;
+    color: #64748b;
+}
 /* Weight row layout */
 .weight-row { margin-bottom: 0.75rem; }
 .weight-row.is-deleted { display: none; }

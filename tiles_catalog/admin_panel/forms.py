@@ -32,7 +32,7 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'name', 'gmt_code', 'category', 'weight_kg', 'color',
+            'name', 'gmt_code', 'category',
             'description', 'price', 'is_available', 'is_featured',
             'meta_title', 'meta_description'
         ]
@@ -47,16 +47,6 @@ class ProductForm(forms.ModelForm):
             }),
             'category': forms.Select(attrs={
                 'class': 'form-control'
-            }),
-            'color': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'e.g. White, Beige Marble, Dark Grey'
-            }),
-            'weight_kg': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Weight in kg',
-                'step': '0.01',
-                'min': '0'
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
