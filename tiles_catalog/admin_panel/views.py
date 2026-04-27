@@ -11,10 +11,10 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
-from catalog.models import Product, Category, ProductImage, Finish, CustomerReview, Order, Poster
+from catalog.models import Product, Category, ProductImage, CustomerReview, Order, Poster
 from .forms import (
     ProductForm, CategoryForm, ProductImageFormSet,
-    FinishForm, CustomerReviewForm, OrderStatusForm, PosterForm,
+    CustomerReviewForm, OrderStatusForm, PosterForm,
     ProductWeightFormSet
 )
 
@@ -323,69 +323,6 @@ def category_delete(request, pk):
     context = {'category': category}
     return render(request, 'admin_panel/category_confirm_delete.html', context)
 
-
-# Finish Management
-@login_required
-@user_passes_test(is_staff)
-def finish_list(request):
-    """Finish list view."""
-    finishes = Finish.objects.annotate(
-        product_count=Count('products')
-    ).all()
-    context = {'finishes': finishes}
-    return render(request, 'admin_panel/finish_list.html', context)
-
-
-@login_required
-@user_passes_test(is_staff)
-def finish_add(request):
-    """Add new finish."""
-    if request.method == 'POST':
-        form = FinishForm(request.POST)
-        if form.is_valid():
-            finish = form.save()
-            messages.success(request, f'Finish "{finish.name}" has been created.')
-            return redirect('admin_panel:finish_list')
-    else:
-        form = FinishForm()
-    
-    context = {'form': form, 'title': 'Add New Finish'}
-    return render(request, 'admin_panel/finish_form.html', context)
-
-
-@login_required
-@user_passes_test(is_staff)
-def finish_edit(request, pk):
-    """Edit finish."""
-    finish = get_object_or_404(Finish, pk=pk)
-    
-    if request.method == 'POST':
-        form = FinishForm(request.POST, instance=finish)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'Finish "{finish.name}" has been updated.')
-            return redirect('admin_panel:finish_list')
-    else:
-        form = FinishForm(instance=finish)
-    
-    context = {'form': form, 'finish': finish, 'title': f'Edit Finish: {finish.name}'}
-    return render(request, 'admin_panel/finish_form.html', context)
-
-
-@login_required
-@user_passes_test(is_staff)
-def finish_delete(request, pk):
-    """Delete finish."""
-    finish = get_object_or_404(Finish, pk=pk)
-    
-    if request.method == 'POST':
-        name = finish.name
-        finish.delete()
-        messages.success(request, f'Finish "{name}" has been deleted.')
-        return redirect('admin_panel:finish_list')
-    
-    context = {'finish': finish}
-    return render(request, 'admin_panel/finish_confirm_delete.html', context)
 
 # Customer Reviews
 @login_required

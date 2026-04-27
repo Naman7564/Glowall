@@ -52,12 +52,6 @@
                     </li>
                     
                     <li class="nav-item">
-                        <a href="{% url 'admin_panel:finish_list' %}" class="nav-link {% if 'finish' in request.resolver_match.url_name %}active{% endif %}">
-                            <i class="fas fa-paint-brush"></i>
-                            <span>Finishes</span>
-                        </a>
-                    </li>                    
-                    <li class="nav-item">
                         <a href="{% url 'admin_panel:order_list' %}" class="nav-link {% if 'order' in request.resolver_match.url_name %}active{% endif %}">
                             <i class="fas fa-shopping-cart"></i>
                             <span>Orders</span>

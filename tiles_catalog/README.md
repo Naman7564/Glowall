@@ -18,7 +18,7 @@ A modern, production-ready web application for a Tiles and Marble showroom catal
 - Dashboard with statistics overview
 - Product management (CRUD operations)
 - Category management with hierarchy support
-- Finishes and colors management
+- Color management
 - Contact message management
 - Multiple image upload support
 

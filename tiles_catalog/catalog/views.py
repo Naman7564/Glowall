@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .models import Category, Product, CustomerReview, Order, Finish, Poster
+from .models import Category, Product, CustomerReview, Order, Poster
 from .forms import OrderForm
 from .payments import (
     CashfreeGatewayError,
@@ -98,7 +98,7 @@ def _load_checkout_item(request):
     product = Product.objects.filter(
         pk=checkout_data.get('product_id'),
         is_available=True,
-    ).select_related('category', 'finish').first()
+    ).select_related('category').first()
 
     if not product:
         request.session.pop(CHECKOUT_SESSION_KEY, None)
@@ -300,7 +300,7 @@ def home(request):
 
 def product_list(request):
     """Product listing with filters and search."""
-    products = Product.objects.filter(is_available=True).select_related('category', 'finish')
+    products = Product.objects.filter(is_available=True).select_related('category')
     
     # Search
     search_query = request.GET.get('q', '')
@@ -317,11 +317,6 @@ def product_list(request):
     if category_slug:
         products = products.filter(category__slug=category_slug)
         
-    # Filter by finish
-    finish_slug = request.GET.get('finish', '')
-    if finish_slug:
-        products = products.filter(finish__slug=finish_slug)
-    
     # Filter by color
     color_name = request.GET.get('color', '')
     if color_name:
@@ -351,16 +346,12 @@ def product_list(request):
     
     # Get all filter options for sidebar
     all_categories = Category.objects.filter(is_active=True).order_by('name')
-    all_finishes = Finish.objects.all().order_by('name')
-    
     context = {
         'products': products,
         'search_query': search_query,
         'current_category': category_slug,
-        'current_finish': finish_slug,
         'current_gmt_code': gmt_code_filter,
         'all_categories': all_categories,
-        'all_finishes': all_finishes,
         'page_title': 'Product Catalog',
     }
     return render(request, 'catalog/product_list.html', context)
@@ -405,7 +396,7 @@ def category_detail(request, slug):
 def product_detail(request, identifier):
     """Product detail view."""
     product = get_object_or_404(
-        Product.objects.select_related('category', 'finish'),
+        Product.objects.select_related('category'),
         slug=identifier,
         is_available=True
     )

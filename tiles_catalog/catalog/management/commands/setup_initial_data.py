@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from catalog.models import Category, Finish
+from catalog.models import Category
 
 
 class Command(BaseCommand):
@@ -8,13 +8,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write('Setting up initial data...')
                 
-        # Create Finishes
-        finishes = ['Glossy', 'Matte', 'Polished', 'Honed', 'Textured', 'Satin']
-        for name in finishes:
-            finish, created = Finish.objects.get_or_create(name=name)
-            if created:
-                self.stdout.write(self.style.SUCCESS(f'Created finish: {name}'))
-        
         # Create Categories
         categories_data = {
             'Tiles': 'Premium tiles collection for your spaces',
@@ -27,7 +20,7 @@ class Command(BaseCommand):
             'Italian Marble': 'Imported Italian marble collection',
             'Indian Marble': 'Quality Indian marble collection',
             'Granite': 'Premium granite collection for high-traffic areas',
-            'Natural Stone': 'Natural stone collection for timeless finishes',
+            'Natural Stone': 'Natural stone collection for timeless spaces',
             'Sandstone': 'Textured sandstone products for indoor and outdoor use',
             'Limestone': 'Classic limestone options for refined spaces',
             'Slate': 'Slate collection with rich texture and depth',

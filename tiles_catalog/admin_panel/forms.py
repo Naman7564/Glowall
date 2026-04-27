@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from catalog.models import Product, Category, ProductImage, ProductWeight, Finish, CustomerReview, Order, Poster
+from catalog.models import Product, Category, ProductImage, ProductWeight, CustomerReview, Order, Poster
 
 
 class CategoryForm(forms.ModelForm):
@@ -100,20 +100,6 @@ class ProductImageForm(forms.ModelForm):
             'order': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'value': '0'
-            }),
-        }
-
-
-class FinishForm(forms.ModelForm):
-    """Form for adding/editing finishes."""
-    
-    class Meta:
-        model = Finish
-        fields = ['name']
-        widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Finish Name'
             }),
         }
 

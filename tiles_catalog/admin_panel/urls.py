@@ -25,12 +25,6 @@ urlpatterns = [
     path('categories/<int:pk>/edit/', views.category_edit, name='category_edit'),
     path('categories/<int:pk>/delete/', views.category_delete, name='category_delete'),
         
-    # Finishes
-    path('finishes/', views.finish_list, name='finish_list'),
-    path('finishes/add/', views.finish_add, name='finish_add'),
-    path('finishes/<int:pk>/edit/', views.finish_edit, name='finish_edit'),
-    path('finishes/<int:pk>/delete/', views.finish_delete, name='finish_delete'),
-    
     # Customer Reviews
     path('reviews/', views.review_list, name='review_list'),
     path('reviews/add/', views.review_add, name='review_add'),

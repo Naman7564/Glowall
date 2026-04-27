@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Finish, Product, ProductImage, ProductWeight, Order, CustomerReview
+from .models import Category, Product, ProductImage, ProductWeight, Order, CustomerReview
 
 
 class ProductImageInline(admin.TabularInline):
@@ -43,16 +43,10 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 
-@admin.register(Finish)
-class FinishAdmin(admin.ModelAdmin):
-    list_display = ['name', 'slug']
-    prepopulated_fields = {'slug': ('name',)}
-
-
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['gmt_code', 'name', 'category', 'specification_display', 'is_available', 'is_featured', 'created_at']
-    list_filter = [GMTCodeFilter, 'category', 'finish', 'is_available', 'is_featured']
+    list_filter = [GMTCodeFilter, 'category', 'is_available', 'is_featured']
     search_fields = ['name', 'description', 'color', 'gmt_code']
     inlines = [ProductImageInline, ProductWeightInline]
     list_editable = ['is_available', 'is_featured']
@@ -63,7 +57,7 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('name', 'gmt_code', 'category', 'description')
         }),
         ('Specifications', {
-            'fields': ('weight_kg', 'color', 'finish', 'length_mm', 'width_mm', 'thickness_mm')
+            'fields': ('weight_kg', 'color', 'length_mm', 'width_mm', 'thickness_mm')
         }),
         ('Pricing', {
             'fields': ('price',)
