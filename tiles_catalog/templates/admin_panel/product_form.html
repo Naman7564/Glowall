@@ -245,7 +245,7 @@
             <div class="images-section-header">
                 <div>
                     <h3>Product Images</h3>
-                    <p class="images-section-subtitle">Drag to reorder, set a primary image, and add alt text for each upload.</p>
+                    <p class="images-section-subtitle">Drag to reorder your uploads and choose the primary image.</p>
                 </div>
             </div>
 
@@ -293,10 +293,6 @@
                     </div>
 
                     <div class="image-card-body">
-                        <div class="form-group">
-                            <label for="{{ image_form.alt_text.id_for_label }}">Alt text</label>
-                            {{ image_form.alt_text }}
-                        </div>
                         <label class="image-primary-toggle">
                             {{ image_form.is_primary }}
                             <span>Primary image</span>
@@ -350,10 +346,6 @@
                 </div>
 
                 <div class="image-card-body">
-                    <div class="form-group">
-                        <label for="{{ formset.empty_form.alt_text.id_for_label }}">Alt text</label>
-                        {{ formset.empty_form.alt_text }}
-                    </div>
                     <label class="image-primary-toggle">
                         {{ formset.empty_form.is_primary }}
                         <span>Primary image</span>
@@ -846,5 +838,15 @@ document.addEventListener('DOMContentLoaded', () => {
 .btn-weight-remove:hover { background: #fff5f5; color: #c53030; }
 .weight-add-btn { margin-top: 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem; }
 .field-hint-inline { font-size: 0.75em; color: #888; font-weight: 400; }
+/* Hide native file input filename text inside image cards */
+.image-card-preview input[type="file"],
+.image-drop-zone input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
 </style>
 {% endblock %}

@@ -81,12 +81,8 @@ class ProductImageForm(forms.ModelForm):
     
     class Meta:
         model = ProductImage
-        fields = ['image', 'alt_text', 'is_primary', 'order']
+        fields = ['image', 'is_primary', 'order']
         widgets = {
-            'alt_text': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Alt text for image'
-            }),
             'order': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'value': '0'
