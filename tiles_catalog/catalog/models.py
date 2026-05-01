@@ -67,7 +67,7 @@ class Product(models.Model):
     """Main product model for tiles and marble."""
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
-    code = models.PositiveIntegerField(unique=True, blank=True, null=True, help_text='Product code (101-200)')
+    code = models.PositiveIntegerField(unique=True, blank=True, null=True, help_text='Product code (101-400)')
     gmt_code = models.CharField(
         max_length=100,
         blank=True,
