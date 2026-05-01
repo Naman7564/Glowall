@@ -77,58 +77,78 @@ def _print_checkout_exception(label, exc):
     traceback.print_exc()
 
 
-def _load_checkout_item(request):
-    """Resolve the active checkout product and quantity from request/session."""
+def _load_checkout_items(request):
     product_id = request.GET.get('product') or request.POST.get('product_id')
     quantity_value = request.GET.get('quantity') or request.POST.get('quantity')
-    checkout_data = request.session.get(CHECKOUT_SESSION_KEY, {})
+    weight_id = request.GET.get('weight_id') or request.POST.get('weight_id')
+    
+    checkout_data = request.session.get(CHECKOUT_SESSION_KEY, [])
+    if isinstance(checkout_data, dict):
+        checkout_data = [checkout_data]
 
     if product_id:
-        checkout_data = {
+        checkout_data = [{
             'product_id': product_id,
             'quantity': _normalize_quantity(quantity_value, default=1),
-        }
+            'weight_id': weight_id,
+        }]
         request.session[CHECKOUT_SESSION_KEY] = checkout_data
     elif checkout_data:
-        checkout_data['quantity'] = _normalize_quantity(checkout_data.get('quantity'), default=1)
+        for item in checkout_data:
+            item['quantity'] = _normalize_quantity(item.get('quantity'), default=1)
         request.session[CHECKOUT_SESSION_KEY] = checkout_data
     else:
         return None
 
-    product = Product.objects.filter(
-        pk=checkout_data.get('product_id'),
-        is_available=True,
-    ).select_related('category').first()
+    resolved_items = []
+    total_order_price = 0
+    all_pricing_available = True
 
-    if not product:
+    from .models import ProductWeight
+
+    for item_data in checkout_data:
+        product = Product.objects.filter(
+            pk=item_data.get('product_id'),
+            is_available=True,
+        ).select_related('category').first()
+
+        if not product:
+            continue
+
+        weight_id = item_data.get('weight_id')
+        weight_obj = None
+        if weight_id:
+            weight_obj = ProductWeight.objects.filter(id=weight_id, product=product).first()
+            
+        unit_price = product.price
+        if weight_obj and weight_obj.price is not None:
+            unit_price = weight_obj.price
+
+        if unit_price is None:
+            all_pricing_available = False
+            unit_price = 0
+            
+        quantity = item_data['quantity']
+        total_price = unit_price * quantity
+        total_order_price += total_price
+
+        resolved_items.append({
+            'product': product,
+            'weight': weight_obj,
+            'quantity': quantity,
+            'unit_price': unit_price,
+            'total_price': total_price,
+        })
+
+    if not resolved_items:
         request.session.pop(CHECKOUT_SESSION_KEY, None)
         return None
 
-    if product.price is None:
-        request.session.pop(CHECKOUT_SESSION_KEY, None)
-        return {
-            'product': product,
-            'quantity': checkout_data['quantity'],
-            'pricing_available': False,
-        }
-
-    quantity = checkout_data['quantity']
-    unit_price = product.price
-    total_price = unit_price * quantity
-
-    checkout_item = {
-        'product': product,
-        'quantity': quantity,
-        'unit_price': unit_price,
-        'total_price': total_price,
-        'pricing_available': True,
+    return {
+        'items': resolved_items,
+        'total_order_price': total_order_price,
+        'pricing_available': all_pricing_available,
     }
-
-    request.session[CHECKOUT_SESSION_KEY] = {
-        'product_id': product.pk,
-        'quantity': quantity,
-    }
-    return checkout_item
 
 
 def _get_checkout_form_initial(request):
@@ -194,10 +214,11 @@ def _get_profile_snapshot(user):
     }
 
 
-def _render_checkout(request, form, checkout_item, status=200):
+def _render_checkout(request, form, checkout_data, status=200):
     context = {
         'form': form,
-        'checkout_item': checkout_item,
+        'checkout_items': checkout_data['items'],
+        'total_order_price': checkout_data['total_order_price'],
         'page_title': 'Checkout',
     }
     return render(request, 'catalog/checkout.html', context, status=status)
@@ -466,30 +487,30 @@ def checkout_view(request):
     if request.method == 'POST':
         return place_order_view(request)
 
-    checkout_item = _load_checkout_item(request)
-    if not checkout_item:
+    checkout_data = _load_checkout_items(request)
+    if not checkout_data:
         messages.error(request, 'Select a product before proceeding to checkout.')
         return redirect('catalog:product_list')
 
-    if not checkout_item['pricing_available']:
-        messages.error(request, 'This product is not available for direct checkout yet.')
-        return redirect(checkout_item['product'].get_absolute_url())
+    if not checkout_data['pricing_available']:
+        messages.error(request, 'One or more products are not available for direct checkout yet.')
+        return redirect('catalog:cart')
 
     form = OrderForm(initial=_get_checkout_form_initial(request))
-    return _render_checkout(request, form, checkout_item)
+    return _render_checkout(request, form, checkout_data)
 
 
 @require_POST
 def place_order_view(request):
     """Validate checkout input, create an order, and initiate Cashfree payment."""
-    checkout_item = _load_checkout_item(request)
-    if not checkout_item:
+    checkout_data = _load_checkout_items(request)
+    if not checkout_data:
         messages.error(request, 'Select a product before proceeding to checkout.')
         return redirect('catalog:product_list')
 
-    if not checkout_item['pricing_available']:
-        messages.error(request, 'This product is not available for direct checkout yet.')
-        return redirect(checkout_item['product'].get_absolute_url())
+    if not checkout_data['pricing_available']:
+        messages.error(request, 'Some products are not available for checkout.')
+        return redirect('catalog:cart')
 
     form = OrderForm(request.POST)
     missing_fields = [
@@ -500,53 +521,29 @@ def place_order_view(request):
             if field_name not in form.errors:
                 form.add_error(field_name, 'This field is required.')
 
-    missing_checkout_fields = [
-        field_name for field_name in ('product_id', 'quantity') if not request.POST.get(field_name, '').strip()
-    ]
-    invalid_checkout_fields = []
-    product_id = (request.POST.get('product_id') or '').strip()
-    quantity = (request.POST.get('quantity') or '').strip()
-
-    if product_id and not product_id.isdigit():
-        invalid_checkout_fields.append('product_id')
-
-    if quantity:
-        try:
-            if int(quantity) < 1:
-                invalid_checkout_fields.append('quantity')
-        except (TypeError, ValueError):
-            invalid_checkout_fields.append('quantity')
-
-    if missing_checkout_fields or invalid_checkout_fields:
-        logger.error(
-            'Incomplete checkout POST data. Missing=%s Invalid=%s',
-            missing_checkout_fields,
-            invalid_checkout_fields,
-        )
-        print(
-            'Place order validation error: '
-            f'missing={missing_checkout_fields} invalid={invalid_checkout_fields}'
-        )
-        form.add_error(None, 'Checkout request data is incomplete. Please refresh the page and try again.')
-        messages.error(request, 'Checkout request is incomplete. Please review your details and try again.')
-        return _render_checkout(request, form, checkout_item, status=400)
-
     if form.errors or not form.is_valid():
         messages.error(request, 'Enter all required checkout details before continuing to payment.')
-        return _render_checkout(request, form, checkout_item, status=400)
+        return _render_checkout(request, form, checkout_data, status=400)
 
     try:
+        from .models import OrderItem
         order = form.save(commit=False)
         if request.user.is_authenticated:
             order.user = request.user
-        order.product = checkout_item['product']
-        order.quantity = checkout_item['quantity']
-        order.unit_price = checkout_item['unit_price']
-        order.total_price = checkout_item['total_price']
+        order.total_price = checkout_data['total_order_price']
         order.payment_status = Order.PAYMENT_PENDING
-        # Reserve a unique placeholder before the first save to avoid unique-key collisions on blank values.
         order.cashfree_order_id = f'TMP-{uuid.uuid4().hex[:32].upper()}'
         order.save()
+        
+        for item in checkout_data['items']:
+            OrderItem.objects.create(
+                order=order,
+                product=item['product'],
+                weight=item['weight'],
+                quantity=item['quantity'],
+                unit_price=item['unit_price'],
+                total_price=item['total_price']
+            )
 
         order.cashfree_order_id = f'ORD-{order.pk:06d}'
         order.save(update_fields=['cashfree_order_id', 'updated_at'])
@@ -597,20 +594,20 @@ def place_order_view(request):
         if 'order' in locals():
             _update_order_payment_state(order, Order.PAYMENT_FAILED, payment_message=str(exc))
         messages.error(request, 'Payment gateway error. Please try again later.')
-        return _render_checkout(request, form, checkout_item, status=200)
+        return _render_checkout(request, form, checkout_data, status=200)
     except Exception as exc:
         _print_checkout_exception('Place order error', exc)
         logger.exception('Unexpected checkout error while creating order.')
         if 'order' in locals():
             _update_order_payment_state(order, Order.PAYMENT_FAILED, payment_message=str(exc))
         messages.error(request, 'Something went wrong while creating your order. Please try again.')
-        return _render_checkout(request, form, checkout_item, status=200)
+        return _render_checkout(request, form, checkout_data, status=200)
 
 
 def checkout_success(request, order_id):
     """Status page for an order after payment is attempted."""
     order = get_object_or_404(
-        Order.objects.select_related('product', 'product__category'),
+        Order.objects.prefetch_related('items__product', 'items__product__category'),
         pk=order_id,
     )
     context = {
@@ -628,7 +625,7 @@ def payment_return_view(request):
         return redirect('catalog:product_list')
 
     order = get_object_or_404(
-        Order.objects.select_related('product', 'product__category'),
+        Order.objects.prefetch_related('items__product', 'items__product__category'),
         cashfree_order_id=cashfree_order_id,
     )
 
@@ -740,14 +737,27 @@ def cart_view(request):
     cart_items = []
     total = 0
     
-    for product_id, item in cart.items():
+    for product_key, item in cart.items():
+        product_id = item.get('product_id', product_key.split('_')[0])
+        weight_id = item.get('weight_id')
         product = Product.objects.filter(pk=product_id, is_available=True).first()
         if product:
             quantity = item.get('quantity', 1)
-            item_total = (product.price or 0) * quantity
+            unit_price = product.price or 0
+            weight_obj = None
+            if weight_id:
+                from .models import ProductWeight
+                weight_obj = ProductWeight.objects.filter(id=weight_id, product=product).first()
+                if weight_obj and weight_obj.price is not None:
+                    unit_price = weight_obj.price
+            
+            item_total = unit_price * quantity
             cart_items.append({
+                'key': product_key,
                 'product': product,
+                'weight': weight_obj,
                 'quantity': quantity,
+                'unit_price': unit_price,
                 'item_total': item_total,
             })
             total += item_total
@@ -764,6 +774,7 @@ def cart_view(request):
 def add_to_cart(request):
     """Add a product to the cart."""
     product_id = request.POST.get('product_id')
+    weight_id = request.POST.get('weight_id')
     quantity = _normalize_quantity(request.POST.get('quantity'), default=1)
     
     product = Product.objects.filter(pk=product_id, is_available=True).first()
@@ -772,12 +783,12 @@ def add_to_cart(request):
         return redirect('catalog:product_list')
     
     cart = _get_cart(request)
-    product_key = str(product_id)
+    product_key = f"{product_id}_{weight_id}" if weight_id else str(product_id)
     
     if product_key in cart:
         cart[product_key]['quantity'] += quantity
     else:
-        cart[product_key] = {'quantity': quantity}
+        cart[product_key] = {'quantity': quantity, 'product_id': product_id, 'weight_id': weight_id}
     
     _save_cart(request, cart)
     messages.success(request, f'{product.name} added to cart!')
@@ -793,11 +804,10 @@ def add_to_cart(request):
 @require_POST
 def update_cart(request):
     """Update cart item quantity."""
-    product_id = request.POST.get('product_id')
+    product_key = request.POST.get('product_key') or request.POST.get('product_id')
     quantity = _normalize_quantity(request.POST.get('quantity'), default=1)
     
     cart = _get_cart(request)
-    product_key = str(product_id)
     
     if product_key in cart:
         if quantity > 0:
@@ -817,10 +827,9 @@ def update_cart(request):
 @require_POST
 def remove_from_cart(request):
     """Remove a product from the cart."""
-    product_id = request.POST.get('product_id')
+    product_key = request.POST.get('product_key') or request.POST.get('product_id')
     
     cart = _get_cart(request)
-    product_key = str(product_id)
     
     if product_key in cart:
         del cart[product_key]
@@ -835,21 +844,23 @@ def remove_from_cart(request):
 
 
 def cart_checkout(request):
-    """Checkout from cart - redirect to checkout with first item or show cart."""
+    """Checkout from cart - redirect to checkout with all items."""
     cart = _get_cart(request)
     if not cart:
         messages.error(request, 'Your cart is empty.')
         return redirect('catalog:cart')
     
-    # Get first item for checkout (simple approach)
-    first_item = list(cart.items())[0]
-    product_id, item = first_item
-    quantity = item.get('quantity', 1)
+    checkout_items = []
+    for product_key, item in cart.items():
+        product_id = item.get('product_id', product_key.split('_')[0])
+        weight_id = item.get('weight_id')
+        quantity = item.get('quantity', 1)
+        checkout_items.append({
+            'product_id': product_id,
+            'weight_id': weight_id,
+            'quantity': quantity
+        })
     
-    # Clear cart after checkout initiation
-    request.session[CHECKOUT_SESSION_KEY] = {
-        'product_id': product_id,
-        'quantity': quantity,
-    }
+    request.session[CHECKOUT_SESSION_KEY] = checkout_items
     
     return redirect('catalog:checkout')

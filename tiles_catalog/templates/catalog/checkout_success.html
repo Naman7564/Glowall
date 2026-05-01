@@ -60,16 +60,17 @@
                         {% elif order.payment_message %}
                         {{ order.payment_message }}
                         {% else %}
-                        {{ order.total_price|inr }} for {{ order.quantity }} item{{ order.quantity|pluralize }}
+                        {{ order.total_price|inr }}
                         {% endif %}
                     </p>
                 </div>
             </div>
 
-            <div class="checkout-success-product">
-                <div class="checkout-product-media">
-                    {% if order.product.primary_image %}
-                    <img src="{{ order.product.primary_image.image.url }}" alt="{{ order.product.name }}">
+            {% for item in order.items.all %}
+            <div class="checkout-success-product" style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                <div class="checkout-product-media" style="width: 60px; height: 60px;">
+                    {% if item.product.primary_image %}
+                    <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product.name }}">
                     {% else %}
                     <div class="checkout-product-placeholder">
                         <i class="fas fa-image"></i>
@@ -77,17 +78,25 @@
                     {% endif %}
                 </div>
                 <div class="checkout-product-copy">
-                    <p class="checkout-product-category">{{ order.product.category.name }}</p>
-                    <h3>{{ order.product.name }}</h3>
-                    {% if order.product.specification_display %}<p class="checkout-product-meta">{{ order.product.specification_display }}</p>{% endif %}
+                    <p class="checkout-product-category" style="margin-bottom: 2px;">{{ item.product.category.name }}</p>
+                    <h3 style="font-size: 1rem; margin-bottom: 4px;">{{ item.product.name }}</h3>
+                    {% if item.weight %}
+                    <p class="checkout-product-meta">Weight: {{ item.weight.value_kg|floatformat:"-2" }} kg</p>
+                    {% elif item.product.specification_display %}
+                    <p class="checkout-product-meta">{{ item.product.specification_display }}</p>
+                    {% endif %}
+                    <div style="font-size: 0.9rem; margin-top: 5px;">
+                        <span>Qty: {{ item.quantity }}</span> | <span>{{ item.total_price|inr }}</span>
+                    </div>
                 </div>
             </div>
+            {% endfor %}
 
             <div class="checkout-success-actions">
                 {% if order.payment_status != 'SUCCESS' %}
-                <a href="{{ order.product.get_absolute_url }}" class="btn btn-primary">Try Again</a>
+                <a href="{% url 'catalog:cart' %}" class="btn btn-primary">Try Again</a>
                 {% else %}
-                <a href="{{ order.product.get_absolute_url }}" class="btn btn-primary">Back to Product</a>
+                <a href="{% url 'catalog:product_list' %}" class="btn btn-primary">Continue Shopping</a>
                 {% endif %}
                 <a href="{% url 'catalog:product_list' %}" class="btn btn-outline">Continue Shopping</a>
             </div>

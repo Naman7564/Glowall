@@ -228,7 +228,6 @@ class Order(models.Model):
         null=True,
         blank=True,
     )
-    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='orders')
     full_name = models.CharField(max_length=120)
     phone_number = models.CharField(max_length=20)
     email = models.EmailField()
@@ -236,8 +235,6 @@ class Order(models.Model):
     city = models.CharField(max_length=80)
     state = models.CharField(max_length=80)
     pincode = models.CharField(max_length=10)
-    quantity = models.PositiveIntegerField()
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_NEW)
     payment_status = models.CharField(
@@ -259,7 +256,20 @@ class Order(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'Order #{self.pk or "new"} - {self.product.name}'
+        return f'Order #{self.pk} by {self.full_name}'
+
+
+class OrderItem(models.Model):
+    """Items within an order."""
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='order_items')
+    weight = models.ForeignKey(ProductWeight, on_delete=models.SET_NULL, null=True, blank=True)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=12, decimal_places=2)
+
+    def __str__(self):
+        return f'{self.quantity}x {self.product.name} (Order {self.order.pk})'
 
 
 class CustomerReview(models.Model):

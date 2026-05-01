@@ -150,7 +150,7 @@
                     <h1 class="pd-title">{{ product.name }}</h1>
                     <!-- Price -->
                     {% if product.price %}
-                    <div class="pd-price-block">
+                    <div class="pd-price-block" data-base-price="{{ product.price|default:0 }}">
                         <span class="pd-price">{{ product.price|inr }}</span>
                         <span class="pd-price-unit">/per unit</span>
                     </div>
@@ -229,6 +229,9 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="product_id" value="{{ product.id }}">
                                 <input type="hidden" name="quantity" value="1" id="cartQtyInput">
+                                {% if weight_options %}
+                                <input type="hidden" name="weight_id" id="selectedCartWeightId" value="{% with w=weight_options.first %}{{ w.id }}{% endwith %}">
+                                {% endif %}
                                 <button type="submit" class="pd-btn pd-btn-outline" id="addToCartBtn">
                                     <span class="material-symbols-outlined">add_shopping_cart</span>
                                     <span class="btn-text">Add to Cart</span>
@@ -426,7 +429,8 @@ function updateQty(change) {
 }
 
 // Weight Selector — price update
-const BASE_PRICE = {{ product.price|default:'null' }};
+const priceBlockElem = document.querySelector('.pd-price-block');
+const BASE_PRICE = priceBlockElem ? parseFloat(priceBlockElem.dataset.basePrice) || null : null;
 
 function selectWeight(btn) {
     // Deactivate all, activate clicked
@@ -436,6 +440,8 @@ function selectWeight(btn) {
     // Update hidden input
     const weightIdInput = document.getElementById('selectedWeightId');
     if (weightIdInput) weightIdInput.value = btn.dataset.weightId;
+    const cartWeightIdInput = document.getElementById('selectedCartWeightId');
+    if (cartWeightIdInput) cartWeightIdInput.value = btn.dataset.weightId;
 
     // Update displayed price
     const priceBlock = document.querySelector('.pd-price-block');
