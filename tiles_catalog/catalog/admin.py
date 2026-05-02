@@ -5,7 +5,7 @@ from .models import Category, Product, ProductImage, ProductWeight, Order, Order
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 1
-    fields = ['image', 'alt_text', 'is_primary', 'order']
+    fields = ['image', 'is_primary', 'order']
 
 
 class ProductWeightInline(admin.TabularInline):
