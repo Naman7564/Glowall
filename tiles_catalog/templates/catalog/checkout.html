@@ -20,9 +20,6 @@
 
         <form method="post" action="{% url 'catalog:place_order' %}" class="checkout-layout js-checkout-form">
             {% csrf_token %}
-            <input type="hidden" name="product_id" value="{{ checkout_item.product.id }}">
-            <input type="hidden" name="quantity" value="{{ checkout_item.quantity }}">
-
             <section class="checkout-card checkout-form-card" aria-labelledby="checkout-details-heading">
                 <div class="checkout-card-header">
                     <div>
@@ -118,15 +115,15 @@
                     <div class="checkout-card-header checkout-summary-header">
                         <div>
                             <p class="checkout-card-eyebrow">Order Summary</p>
-                            <h2 id="order-summary-heading">Your selection</h2>
+                            <h2 id="order-summary-heading">Your selection ({{ checkout_items|length }} item{{ checkout_items|length|pluralize }})</h2>
                         </div>
-                        <span class="checkout-summary-qty">{{ checkout_item.quantity }} qty</span>
                     </div>
 
-                    <div class="checkout-product">
-                        <div class="checkout-product-media">
-                            {% if checkout_item.product.primary_image %}
-                            <img src="{{ checkout_item.product.primary_image.image.url }}" alt="{{ checkout_item.product.name }}">
+                    {% for item in checkout_items %}
+                    <div class="checkout-product" style="padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; margin-bottom: 15px;">
+                        <div class="checkout-product-media" style="width: 60px; height: 60px;">
+                            {% if item.product.primary_image %}
+                            <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product.name }}">
                             {% else %}
                             <div class="checkout-product-placeholder">
                                 <i class="fas fa-image"></i>
@@ -134,28 +131,25 @@
                             {% endif %}
                         </div>
                         <div class="checkout-product-copy">
-                            <p class="checkout-product-category">{{ checkout_item.product.category.name }}</p>
-                            <h3>{{ checkout_item.product.name }}</h3>
-                            {% if checkout_item.product.specification_display %}<p class="checkout-product-meta">{{ checkout_item.product.specification_display }}</p>{% endif %}
+                            <p class="checkout-product-category" style="margin-bottom: 2px;">{{ item.product.category.name }}</p>
+                            <h3 style="font-size: 1rem; margin-bottom: 4px;">{{ item.product.name }}</h3>
+                            {% if item.weight %}
+                            <p class="checkout-product-meta">Weight: {{ item.weight.value_kg|floatformat:"-2" }} kg</p>
+                            {% elif item.product.specification_display %}
+                            <p class="checkout-product-meta">{{ item.product.specification_display }}</p>
+                            {% endif %}
+                            <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.9rem;">
+                                <span>{{ item.quantity }} x {{ item.unit_price|inr }}</span>
+                                <strong>{{ item.total_price|inr }}</strong>
+                            </div>
                         </div>
                     </div>
+                    {% endfor %}
 
                     <div class="checkout-summary-lines">
-                        <div class="checkout-summary-row">
-                            <span>Unit Price</span>
-                            <strong>{{ checkout_item.unit_price|inr }}</strong>
-                        </div>
-                        <div class="checkout-summary-row">
-                            <span>Quantity</span>
-                            <strong>{{ checkout_item.quantity }}</strong>
-                        </div>
-                        <div class="checkout-summary-row checkout-summary-row-muted">
-                            <span>Subtotal</span>
-                            <strong>{{ checkout_item.unit_price|inr }} x {{ checkout_item.quantity }} = {{ checkout_item.total_price|inr }}</strong>
-                        </div>
                         <div class="checkout-summary-total">
                             <span>Total</span>
-                            <strong>{{ checkout_item.total_price|inr }}</strong>
+                            <strong>{{ total_order_price|inr }}</strong>
                         </div>
                     </div>
 

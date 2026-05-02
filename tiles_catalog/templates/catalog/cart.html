@@ -500,15 +500,18 @@
                     <div class="cart-item-body">
                         <div class="cart-item-info">
                             <h3><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></h3>
-                            <p class="cart-item-category">{{ item.product.category.name }}</p>
-                            {% if item.product.price %}
-                            <p class="cart-item-price">{{ item.product.price|inr }} <span>/unit</span></p>
+                            <p class="cart-item-category">
+                                {{ item.product.category.name }}
+                                {% if item.weight %} | Weight: {{ item.weight.value_kg|floatformat:"-2" }} kg{% endif %}
+                            </p>
+                            {% if item.unit_price %}
+                            <p class="cart-item-price">{{ item.unit_price|inr }} <span>/unit</span></p>
                             {% endif %}
                         </div>
                         <div class="cart-item-actions">
                             <form method="post" action="{% url 'catalog:update_cart' %}" class="qty-form">
                                 {% csrf_token %}
-                                <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                                <input type="hidden" name="product_key" value="{{ item.key }}">
                                 <div class="qty-control">
                                     <button type="button" onclick="changeQty(this, -1)">
                                         <span class="material-symbols-outlined">remove</span>
@@ -522,7 +525,7 @@
                             
                             <form method="post" action="{% url 'catalog:remove_from_cart' %}">
                                 {% csrf_token %}
-                                <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                                <input type="hidden" name="product_key" value="{{ item.key }}">
                                 <button type="submit" class="remove-btn">
                                     <span class="material-symbols-outlined">delete</span>
                                     Remove

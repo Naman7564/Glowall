@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage, ProductWeight, Order, CustomerReview
+from .models import Category, Product, ProductImage, ProductWeight, Order, OrderItem, CustomerReview
 
 
 class ProductImageInline(admin.TabularInline):
@@ -82,35 +82,36 @@ class ProductImageAdmin(admin.ModelAdmin):
     list_filter = ['is_primary', 'product__category']
 
 
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+    readonly_fields = ['product', 'weight', 'quantity', 'unit_price', 'total_price']
+    can_delete = False
+
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
         'id',
         'user',
-        'product',
         'full_name',
         'phone_number',
-        'quantity',
         'total_price',
         'payment_status',
         'status',
         'created_at',
     ]
-    list_filter = ['payment_status', 'status', 'created_at', 'product__category']
+    list_filter = ['payment_status', 'status', 'created_at']
     search_fields = [
         'full_name',
         'phone_number',
         'email',
         'user__email',
         'user__username',
-        'product__name',
         'cashfree_order_id',
         'cashfree_payment_id',
     ]
     readonly_fields = [
-        'product',
-        'quantity',
-        'unit_price',
         'total_price',
         'cashfree_order_id',
         'cashfree_cf_order_id',
@@ -120,6 +121,7 @@ class OrderAdmin(admin.ModelAdmin):
         'created_at',
         'updated_at',
     ]
+    inlines = [OrderItemInline]
 
 
 @admin.register(CustomerReview)
