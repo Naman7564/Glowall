@@ -502,10 +502,13 @@
                             <h3><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></h3>
                             <p class="cart-item-category">
                                 {{ item.product.category.name }}
-                                {% if item.weight %} | Weight: {{ item.weight.value_kg|floatformat:"-2" }} kg{% endif %}
+                                {% if item.weight %} | {{ item.weight.display_label }}{% endif %}
                             </p>
                             {% if item.unit_price %}
-                            <p class="cart-item-price">{{ item.unit_price|inr }} <span>/unit</span></p>
+                            <p class="cart-item-price">
+                                {{ item.unit_price|inr }}
+                                {% if item.weight %}<span>{{ item.weight.display_label }}</span>{% endif %}
+                            </p>
                             {% endif %}
                         </div>
                         <div class="cart-item-actions">

@@ -134,12 +134,15 @@
                             <p class="checkout-product-category" style="margin-bottom: 2px;">{{ item.product.category.name }}</p>
                             <h3 style="font-size: 1rem; margin-bottom: 4px;">{{ item.product.name }}</h3>
                             {% if item.weight %}
-                            <p class="checkout-product-meta">Weight: {{ item.weight.value_kg|floatformat:"-2" }} kg</p>
+                            <p class="checkout-product-meta">{{ item.weight.display_label }}</p>
                             {% elif item.product.specification_display %}
                             <p class="checkout-product-meta">{{ item.product.specification_display }}</p>
                             {% endif %}
                             <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.9rem;">
-                                <span>{{ item.quantity }} x {{ item.unit_price|inr }}</span>
+                                <span>
+                                    {{ item.quantity }} x {{ item.unit_price|inr }}
+                                    {% if item.weight %} · {{ item.weight.display_label }}{% endif %}
+                                </span>
                                 <strong>{{ item.total_price|inr }}</strong>
                             </div>
                         </div>

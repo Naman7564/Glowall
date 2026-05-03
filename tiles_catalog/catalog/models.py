@@ -1,8 +1,26 @@
+from decimal import Decimal
+
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
 from PIL import Image, ImageOps
+
+
+MARBLE_TEXTURE_CATEGORY_SLUGS = {'marbels', 'marble-texture'}
+MARBLE_TEXTURE_WEIGHT_OPTIONS = (
+    {'value_kg': Decimal('30'), 'price': Decimal('2399'), 'kind': 'Dry'},
+    {'value_kg': Decimal('25'), 'price': Decimal('1899'), 'kind': 'Wet'},
+)
+
+
+def is_marble_texture_category(category):
+    if not category:
+        return False
+
+    slug = (getattr(category, 'slug', '') or '').strip().lower()
+    name = (getattr(category, 'name', '') or '').strip().lower()
+    return slug in MARBLE_TEXTURE_CATEGORY_SLUGS or name == 'marble texture'
 
 
 class Category(models.Model):
@@ -61,6 +79,35 @@ class ProductWeight(models.Model):
             price_text = format(self.price, 'f').rstrip('0').rstrip('.')
             return f'{display} kg — ₹{price_text}'
         return f'{display} kg'
+
+    @property
+    def compact_value_display(self):
+        return f"{format(self.value_kg, 'f').rstrip('0').rstrip('.')}kg"
+
+    @property
+    def marble_texture_kind(self):
+        product = getattr(self, 'product', None)
+        if not product or not product.is_marble_texture:
+            return ''
+
+        weight_value = Decimal(str(self.value_kg))
+        for option in MARBLE_TEXTURE_WEIGHT_OPTIONS:
+            if weight_value == option['value_kg']:
+                return option['kind']
+        return ''
+
+    @property
+    def display_label(self):
+        if self.marble_texture_kind:
+            return f'{self.compact_value_display} ({self.marble_texture_kind})'
+        display = format(self.value_kg, 'f').rstrip('0').rstrip('.')
+        return f'{display} kg'
+
+    @property
+    def button_label(self):
+        if self.marble_texture_kind:
+            return f'{self.compact_value_display} {self.marble_texture_kind}'
+        return self.display_label
 
 
 class Product(models.Model):
@@ -126,6 +173,67 @@ class Product(models.Model):
         return reverse('catalog:product_detail', kwargs={'identifier': self.slug})
 
     @property
+    def is_marble_texture(self):
+        return is_marble_texture_category(self.category)
+
+    def sync_marble_texture_weight_pricing(self):
+        if not self.pk or not self.is_marble_texture:
+            return
+
+        existing_weights = {
+            Decimal(str(weight.value_kg)): weight
+            for weight in self.weights.all()
+        }
+
+        for order, option in enumerate(MARBLE_TEXTURE_WEIGHT_OPTIONS):
+            weight = existing_weights.get(option['value_kg'])
+            if weight is None:
+                self.weights.create(
+                    value_kg=option['value_kg'],
+                    price=option['price'],
+                    order=order,
+                )
+                continue
+
+            update_fields = []
+            if weight.price != option['price']:
+                weight.price = option['price']
+                update_fields.append('price')
+            if weight.order != order:
+                weight.order = order
+                update_fields.append('order')
+            if update_fields:
+                weight.save(update_fields=update_fields)
+
+        default_price = MARBLE_TEXTURE_WEIGHT_OPTIONS[0]['price']
+        if self.price != default_price:
+            self.price = default_price
+            self.save(update_fields=['price', 'updated_at'])
+
+    @property
+    def storefront_weight_options(self):
+        weight_entries = list(self.weights.all())
+        if not self.is_marble_texture:
+            return weight_entries
+
+        weight_map = {
+            Decimal(str(weight.value_kg)): weight
+            for weight in weight_entries
+        }
+        marble_weights = []
+        for option in MARBLE_TEXTURE_WEIGHT_OPTIONS:
+            weight = weight_map.get(option['value_kg'])
+            if weight is None:
+                return weight_entries
+            marble_weights.append(weight)
+        return marble_weights
+
+    @property
+    def default_storefront_weight(self):
+        weight_options = self.storefront_weight_options
+        return weight_options[0] if weight_options else None
+
+    @property
     def size_display(self):
         if self.length_mm and self.width_mm:
             return f'{self.length_mm}x{self.width_mm} mm'
@@ -136,11 +244,14 @@ class Product(models.Model):
         """Returns a human-friendly weight string from ProductWeight entries,
         falling back to the legacy weight_kg field."""
         try:
-            weight_entries = list(self.weights.all())
+            weight_entries = list(self.storefront_weight_options)
         except Exception:
             weight_entries = []
 
         if weight_entries:
+            if self.is_marble_texture:
+                return ' / '.join(weight.display_label for weight in weight_entries)
+
             parts = []
             for w in weight_entries:
                 val = format(w.value_kg, 'f').rstrip('0').rstrip('.')

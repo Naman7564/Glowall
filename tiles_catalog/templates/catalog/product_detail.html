@@ -148,11 +148,23 @@
 
                     <!-- Product Title -->
                     <h1 class="pd-title">{{ product.name }}</h1>
+                    {% with weight_options=product.storefront_weight_options default_weight=product.default_storefront_weight %}
                     <!-- Price -->
-                    {% if product.price %}
-                    <div class="pd-price-block" data-base-price="{{ product.price|default:0 }}">
-                        <span class="pd-price">{{ product.price|inr }}</span>
-                        <span class="pd-price-unit">/per unit</span>
+                    {% if product.price or default_weight.price %}
+                    <div
+                        class="pd-price-block"
+                        data-base-price="{{ product.price|default_if_none:'' }}"
+                    >
+                        <span class="pd-price">
+                            {% if default_weight and default_weight.price %}
+                            {{ default_weight.price|inr }}
+                            {% else %}
+                            {{ product.price|inr }}
+                            {% endif %}
+                        </span>
+                        {% if default_weight %}
+                        <span class="pd-price-unit">&ndash; {{ default_weight.display_label }}</span>
+                        {% endif %}
                     </div>
                     {% endif %}
 
@@ -173,7 +185,6 @@
                     </div>
 
                     <!-- Short Description Removed as per requirement -->
-                    {% with weight_options=product.weights.all %}
                     <div class="pd-purchase-panel">
                         <!-- Quantity Selector -->
                             <div class="pd-quantity-wrapper">
@@ -199,12 +210,12 @@
                                         type="button"
                                         class="pd-weight-btn {% if forloop.first %}active{% endif %}"
                                         data-weight-id="{{ w.id }}"
-                                        data-weight-label="{% spaceless %}{{ w.value_kg }} kg{% endspaceless %}"
+                                        data-weight-label="{{ w.display_label }}"
                                         data-price="{% if w.price %}{{ w.price }}{% endif %}"
                                         onclick="selectWeight(this)"
-                                        aria-label="Select {{ w.value_kg }} kg"
+                                        aria-label="Select {{ w.display_label }}"
                                     >
-                                        {{ w.value_kg|floatformat:"-2" }} kg
+                                        {{ w.button_label }}
                                     </button>
                                     {% endfor %}
                                 </div>
@@ -217,9 +228,9 @@
                                 <input type="hidden" name="product" value="{{ product.id }}">
                                 <input type="hidden" name="quantity" value="1" id="buyQtyInput">
                                 {% if weight_options %}
-                                <input type="hidden" name="weight_id" id="selectedWeightId" value="{% with w=weight_options.first %}{{ w.id }}{% endwith %}">
+                                <input type="hidden" name="weight_id" id="selectedWeightId" value="{% if default_weight %}{{ default_weight.id }}{% endif %}">
                                 {% endif %}
-                                <button type="submit" class="pd-btn pd-btn-primary" id="buyNowBtn" {% if not product.price %}disabled{% endif %}>
+                                <button type="submit" class="pd-btn pd-btn-primary" id="buyNowBtn" {% if not product.price and not default_weight.price %}disabled{% endif %}>
                                     <span class="material-symbols-outlined">shopping_bag</span>
                                     Buy Now
                                 </button>
@@ -230,7 +241,7 @@
                                 <input type="hidden" name="product_id" value="{{ product.id }}">
                                 <input type="hidden" name="quantity" value="1" id="cartQtyInput">
                                 {% if weight_options %}
-                                <input type="hidden" name="weight_id" id="selectedCartWeightId" value="{% with w=weight_options.first %}{{ w.id }}{% endwith %}">
+                                <input type="hidden" name="weight_id" id="selectedCartWeightId" value="{% if default_weight %}{{ default_weight.id }}{% endif %}">
                                 {% endif %}
                                 <button type="submit" class="pd-btn pd-btn-outline" id="addToCartBtn">
                                     <span class="material-symbols-outlined">add_shopping_cart</span>
@@ -386,8 +397,17 @@
                             <span class="pd-related-category">{{ related.category.name }}</span>
                             <h3 class="pd-related-name">{{ related.name }}</h3>
                             {% if related.specification_display %}<p class="pd-related-size">{{ related.specification_display }}</p>{% endif %}
-                            {% if related.price %}
-                            <p class="pd-related-price">{{ related.price|inr }} <span>/unit</span></p>
+                            {% if related.price or related.default_storefront_weight.price %}
+                            <p class="pd-related-price">
+                                {% if related.default_storefront_weight and related.default_storefront_weight.price %}
+                                {{ related.default_storefront_weight.price|inr }}
+                                {% else %}
+                                {{ related.price|inr }}
+                                {% endif %}
+                                {% if related.default_storefront_weight %}
+                                <span>{{ related.default_storefront_weight.display_label }}</span>
+                                {% endif %}
+                            </p>
                             {% endif %}
                         </div>
                     </a>
@@ -448,6 +468,7 @@ function selectWeight(btn) {
     if (!priceBlock) return;
 
     const priceSpan = priceBlock.querySelector('.pd-price');
+    const priceUnitSpan = priceBlock.querySelector('.pd-price-unit');
     if (!priceSpan) return;
 
     const weightPrice = btn.dataset.price ? parseFloat(btn.dataset.price) : null;
@@ -458,6 +479,10 @@ function selectWeight(btn) {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
+    }
+
+    if (priceUnitSpan) {
+        priceUnitSpan.textContent = btn.dataset.weightLabel ? '\u2013 ' + btn.dataset.weightLabel : '';
     }
 }
 

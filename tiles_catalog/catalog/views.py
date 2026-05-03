@@ -118,7 +118,11 @@ def _load_checkout_items(request):
         weight_id = item_data.get('weight_id')
         weight_obj = None
         if weight_id:
-            weight_obj = ProductWeight.objects.filter(id=weight_id, product=product).first()
+            weight_obj = (
+                ProductWeight.objects.select_related('product__category')
+                .filter(id=weight_id, product=product)
+                .first()
+            )
             
         unit_price = product.price
         if weight_obj and weight_obj.price is not None:
@@ -289,12 +293,12 @@ def home(request):
     featured_products = Product.objects.filter(
         is_available=True, 
         is_featured=True
-    ).select_related('category')[:8]
+    ).select_related('category').prefetch_related('weights')[:8]
     
     marble_textures = Product.objects.filter(
         is_available=True,
         category__slug='marbels'
-    ).select_related('category')[:4]
+    ).select_related('category').prefetch_related('weights')[:4]
     
     featured_categories = Category.objects.filter(
         is_active=True
@@ -321,7 +325,7 @@ def home(request):
 
 def product_list(request):
     """Product listing with filters and search."""
-    products = Product.objects.filter(is_available=True).select_related('category')
+    products = Product.objects.filter(is_available=True).select_related('category').prefetch_related('weights')
     
     # Search
     search_query = request.GET.get('q', '')
@@ -386,7 +390,7 @@ def category_detail(request, slug):
     products = Product.objects.filter(
         category=category,
         is_available=True
-    ).select_related('category')
+    ).select_related('category').prefetch_related('weights')
     
     # GMT code filtering accepts exact values like 111 and ranges like 111-120.
     gmt_code_filter = request.GET.get('gmt_code', '').strip()
@@ -417,7 +421,7 @@ def category_detail(request, slug):
 def product_detail(request, identifier):
     """Product detail view."""
     product = get_object_or_404(
-        Product.objects.select_related('category'),
+        Product.objects.select_related('category').prefetch_related('weights', 'images'),
         slug=identifier,
         is_available=True
     )
@@ -426,7 +430,7 @@ def product_detail(request, identifier):
     related_products = Product.objects.filter(
         category=product.category,
         is_available=True
-    ).exclude(pk=product.pk).select_related('category')[:4]
+    ).exclude(pk=product.pk).select_related('category').prefetch_related('weights', 'images')[:4]
     
     context = {
         'product': product,
@@ -607,7 +611,11 @@ def place_order_view(request):
 def checkout_success(request, order_id):
     """Status page for an order after payment is attempted."""
     order = get_object_or_404(
-        Order.objects.prefetch_related('items__product', 'items__product__category'),
+        Order.objects.prefetch_related(
+            'items__product',
+            'items__product__category',
+            'items__weight__product__category',
+        ),
         pk=order_id,
     )
     context = {
@@ -625,7 +633,11 @@ def payment_return_view(request):
         return redirect('catalog:product_list')
 
     order = get_object_or_404(
-        Order.objects.prefetch_related('items__product', 'items__product__category'),
+        Order.objects.prefetch_related(
+            'items__product',
+            'items__product__category',
+            'items__weight__product__category',
+        ),
         cashfree_order_id=cashfree_order_id,
     )
 
@@ -747,7 +759,11 @@ def cart_view(request):
             weight_obj = None
             if weight_id:
                 from .models import ProductWeight
-                weight_obj = ProductWeight.objects.filter(id=weight_id, product=product).first()
+                weight_obj = (
+                    ProductWeight.objects.select_related('product__category')
+                    .filter(id=weight_id, product=product)
+                    .first()
+                )
                 if weight_obj and weight_obj.price is not None:
                     unit_price = weight_obj.price
             

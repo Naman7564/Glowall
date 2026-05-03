@@ -70,7 +70,7 @@ def dashboard(request):
     available_products = Product.objects.filter(is_available=True).count()
     featured_products = Product.objects.filter(is_featured=True).count()
     total_orders = Order.objects.count()
-    recent_products = Product.objects.select_related('category')[:5]
+    recent_products = Product.objects.select_related('category').prefetch_related('weights')[:5]
     
     # Products by category
     categories_with_count = Category.objects.annotate(
@@ -94,7 +94,7 @@ def dashboard(request):
 @user_passes_test(is_staff)
 def product_list(request):
     """Admin product list view."""
-    products = Product.objects.select_related('category').all()
+    products = Product.objects.select_related('category').prefetch_related('weights').all()
     
     # Filter by category
     category_id = request.GET.get('category')
@@ -151,6 +151,7 @@ def product_add(request):
                 formset.save()
                 weight_formset.instance = product
                 weight_formset.save()
+                product.sync_marble_texture_weight_pricing()
             messages.success(request, f'Product "{product.name}" has been created.')
             return redirect('admin_panel:product_list')
     else:
@@ -188,6 +189,7 @@ def product_edit(request, pk):
                 formset.save()
                 weight_formset.instance = product
                 weight_formset.save()
+                product.sync_marble_texture_weight_pricing()
             messages.success(request, f'Product "{product.name}" has been updated.')
             return redirect('admin_panel:product_list')
     else:

@@ -75,6 +75,10 @@ class ProductAdmin(admin.ModelAdmin):
         }),
     )
 
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        form.instance.sync_marble_texture_weight_pricing()
+
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
