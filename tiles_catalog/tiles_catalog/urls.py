@@ -1,5 +1,5 @@
 """
-URL configuration for tiles_catalog project.
+URL configuration for marble_catalog project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.0/topics/http/urls/

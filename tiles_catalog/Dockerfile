@@ -1,4 +1,4 @@
-# Glowall Tiles & Marble Catalog
+# Glowall Marble & Stone Catalog
 # Production-ready Dockerfile
 
 # Use Python 3.11 slim image

@@ -1,1 +1,1 @@
-# Tiles Catalog Package
+# Marble & Stone Catalog Package

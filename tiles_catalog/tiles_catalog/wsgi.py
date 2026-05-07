@@ -1,5 +1,5 @@
 """
-WSGI config for tiles_catalog project.
+WSGI config for marble_catalog project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

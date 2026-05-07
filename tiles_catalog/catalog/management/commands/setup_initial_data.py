@@ -3,19 +3,13 @@ from catalog.models import Category
 
 
 class Command(BaseCommand):
-    help = 'Set up initial data for the Tiles & Marble catalog'
+    help = 'Set up initial data for the Marble & Stone catalog'
 
     def handle(self, *args, **options):
         self.stdout.write('Setting up initial data...')
                 
         # Create Categories
         categories_data = {
-            'Tiles': 'Premium tiles collection for your spaces',
-            'Floor Tiles': 'Durable floor tiles for residential and commercial use',
-            'Wall Tiles': 'Decorative wall tiles for interior accents',
-            'Bathroom Tiles': 'Water-resistant tiles designed for bathrooms',
-            'Kitchen Tiles': 'Stylish and practical tiles for kitchen surfaces',
-            'Vitrified Tiles': 'Low-porosity vitrified tile collection',
             'Marble': 'Premium marble collection for elegant interiors',
             'Italian Marble': 'Imported Italian marble collection',
             'Indian Marble': 'Quality Indian marble collection',

@@ -1,6 +1,6 @@
-# Glowall - Tiles & Marble Catalog
+# Glowall - Marble & Stone Catalog
 
-A modern, production-ready web application for a Tiles and Marble showroom catalog where customers can browse products and admins can manage the catalog.
+A modern, production-ready web application for a Marble and Stone showroom catalog where customers can browse products and admins can manage the catalog.
 
 ## Features
 
@@ -171,16 +171,14 @@ Uploaded product images are stored in `/media/products/`. In Docker deployment, 
 ### Managing Categories
 
 Categories support hierarchy (parent-child relationships):
-- Tiles
-  - Floor Tiles
-  - Wall Tiles
-  - Bathroom Tiles
-  - Kitchen Tiles
 - Marble
   - Italian Marble
   - Indian Marble
 - Granite
 - Natural Stone
+- Sandstone
+- Limestone
+- Slate
 
 ## API Endpoints
 

@@ -22,7 +22,7 @@ class OrderViewsRegressionTests(TestCase):
             password='password',
         )
 
-        self.category = Category.objects.create(name='Tiles')
+        self.category = Category.objects.create(name='Marble')
         self.product = Product.objects.create(
             name='Silver Mist',
             gmt_code='111',

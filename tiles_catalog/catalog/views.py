@@ -318,7 +318,7 @@ def home(request):
         'featured_categories': featured_categories,
         'customer_reviews': customer_reviews,
         'posters': posters,
-        'page_title': 'Premium Tiles & Marble Showroom',
+        'page_title': 'Premium Marble & Stone Showroom',
     }
     return render(request, 'catalog/home.html', context)
 

@@ -25,7 +25,7 @@ def is_marble_texture_category(category):
 
 
 class Category(models.Model):
-    """Product categories for tiles, marble, granite, etc."""
+    """Product categories for marble, granite, and natural stone."""
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
     description = models.TextField(blank=True)

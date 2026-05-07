@@ -1,6 +1,6 @@
 /**
  * Glowall - Main JavaScript
- * Premium Tiles & Marble Showroom
+ * Premium Marble & Stone Showroom
  */
 
 document.addEventListener('DOMContentLoaded', function() {
