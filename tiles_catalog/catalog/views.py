@@ -476,7 +476,7 @@ def orders(request):
     """Order history for the authenticated customer."""
     user_orders = (
         Order.objects.filter(user=request.user)
-        .select_related('product', 'product__category')
+        .prefetch_related('items__product__category', 'items__weight')
         .order_by('-created_at')
     )
     context = {

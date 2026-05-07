@@ -45,7 +45,7 @@
                 <div class="order-meta-grid">
                     <div class="order-meta-item">
                         <span class="order-meta-item-label">Product Name</span>
-                        <span class="order-meta-item-value">{{ order.product.name }}</span>
+                        <span class="order-meta-item-value">{{ order.product_summary|default:"-" }}</span>
                     </div>
                     <div class="order-meta-item">
                         <span class="order-meta-item-label">Quantity</span>

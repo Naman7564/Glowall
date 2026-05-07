@@ -95,20 +95,28 @@
             <h3><i class="fas fa-box"></i> Product Information</h3>
         </div>
         <div class="card-body">
+            {% for item in order.line_items %}
             <div class="product-detail">
-                {% if order.product.primary_image %}
+                {% if item.product.primary_image %}
                 <div class="product-image">
-                    <img src="{{ order.product.primary_image.image.url }}" alt="{{ order.product.name }}">
+                    <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product.name }}">
                 </div>
                 {% endif %}
                 <div class="product-info">
-                    <h4>{{ order.product.name }}</h4>
-                    <p class="product-category">{{ order.product.category.name }}</p>
-                    <a href="{{ order.product.get_absolute_url }}" class="btn btn-sm btn-outline" target="_blank">
+                    <h4>{{ item.product.name }}</h4>
+                    <p class="product-category">{{ item.product.category.name }}</p>
+                    {% if item.weight %}
+                    <p class="product-category">{{ item.weight.display_label }}</p>
+                    {% endif %}
+                    <p class="product-category">Qty: {{ item.quantity }} | {{ item.total_price|currency }}</p>
+                    <a href="{{ item.product.get_absolute_url }}" class="btn btn-sm btn-outline" target="_blank">
                         <i class="fas fa-external-link-alt"></i> View Product
                     </a>
                 </div>
             </div>
+            {% empty %}
+            <p>No order items are attached to this order.</p>
+            {% endfor %}
         </div>
     </div>
 
@@ -123,8 +131,8 @@
                 <span>{{ order.quantity }} unit(s)</span>
             </div>
             <div class="summary-row">
-                <span>Unit Price</span>
-                <span>{{ order.unit_price|currency }}</span>
+                <span>Line Items</span>
+                <span>{{ order.line_items|length }}</span>
             </div>
             <div class="summary-row total-row">
                 <span>Total Amount</span>

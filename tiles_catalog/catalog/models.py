@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils.text import slugify
 from PIL import Image, ImageOps
 
@@ -367,6 +368,37 @@ class Order(models.Model):
 
     def __str__(self):
         return f'Order #{self.pk} by {self.full_name}'
+
+    @cached_property
+    def line_items(self):
+        """Materialize order items once so legacy template access stays cheap."""
+        return list(self.items.all())
+
+    @property
+    def primary_item(self):
+        return self.line_items[0] if self.line_items else None
+
+    @property
+    def product(self):
+        item = self.primary_item
+        return item.product if item else None
+
+    @property
+    def quantity(self):
+        return sum(item.quantity for item in self.line_items)
+
+    @property
+    def unit_price(self):
+        item = self.primary_item
+        return item.unit_price if item else None
+
+    @property
+    def product_summary(self):
+        if not self.line_items:
+            return ''
+        if len(self.line_items) == 1:
+            return self.line_items[0].product.name
+        return f'{self.line_items[0].product.name} +{len(self.line_items) - 1} more'
 
 
 class OrderItem(models.Model):

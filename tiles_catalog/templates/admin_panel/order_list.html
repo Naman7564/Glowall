@@ -100,7 +100,7 @@
                             <span class="customer-email">{{ order.email }}</span>
                         </div>
                     </td>
-                    <td data-label="Product">{{ order.product.name|truncatechars:30 }}</td>
+                    <td data-label="Product">{{ order.product_summary|truncatechars:30|default:"-" }}</td>
                     <td data-label="Qty">{{ order.quantity }}</td>
                     <td data-label="Total">{{ order.total_price|currency }}</td>
                     <td data-label="Status">

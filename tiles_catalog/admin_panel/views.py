@@ -433,7 +433,11 @@ def review_toggle_active(request, pk):
 @user_passes_test(is_staff)
 def order_list(request):
     """Admin order list view."""
-    orders = Order.objects.select_related('product', 'user').all()
+    orders = (
+        Order.objects.select_related('user')
+        .prefetch_related('items__product__category', 'items__weight')
+        .all()
+    )
     
     # Calculate order statistics
     total_orders = Order.objects.count()
@@ -461,13 +465,16 @@ def order_list(request):
     # Search by customer name, email, phone, or order ID
     search = request.GET.get('q', '')
     if search:
-        orders = orders.filter(
+        search_filters = (
             Q(full_name__icontains=search) |
             Q(email__icontains=search) |
             Q(phone_number__icontains=search) |
-            Q(pk__icontains=search) |
-            Q(product__name__icontains=search)
+            Q(cashfree_order_id__icontains=search) |
+            Q(items__product__name__icontains=search)
         )
+        if search.isdigit():
+            search_filters |= Q(pk=int(search))
+        orders = orders.filter(search_filters).distinct()
     
     context = {
         'orders': orders,
@@ -488,7 +495,10 @@ def order_list(request):
 @user_passes_test(is_staff)
 def order_detail(request, pk):
     """View order detail."""
-    order = get_object_or_404(Order.objects.select_related('product', 'user'), pk=pk)
+    order = get_object_or_404(
+        Order.objects.select_related('user').prefetch_related('items__product__category', 'items__weight'),
+        pk=pk,
+    )
     
     if request.method == 'POST':
         form = OrderStatusForm(request.POST, instance=order)
