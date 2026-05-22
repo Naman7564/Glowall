@@ -8,7 +8,7 @@ class CategoryForm(forms.ModelForm):
     
     class Meta:
         model = Category
-        fields = ['name', 'slug', 'description', 'image', 'is_active']
+        fields = ['name', 'slug', 'description', 'default_price', 'image', 'is_active']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -22,6 +22,12 @@ class CategoryForm(forms.ModelForm):
                 'class': 'form-control',
                 'rows': 3,
                 'placeholder': 'Category description'
+            }),
+            'default_price': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Default price in INR',
+                'step': '0.01',
+                'min': '0',
             }),
         }
 

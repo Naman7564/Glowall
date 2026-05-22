@@ -113,6 +113,7 @@
                                 <span class="field-icon"><i class="fas fa-wallet"></i></span>
                                 {{ form.price }}
                             </div>
+                            <span class="field-hint">Leave blank to use the category default price, if one is set.</span>
                             {% if form.price.errors %}
                             <span class="error">{{ form.price.errors.0 }}</span>
                             {% endif %}

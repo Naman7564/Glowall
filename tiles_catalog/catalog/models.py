@@ -5,6 +5,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.text import slugify
+from django.utils import timezone
 from PIL import Image, ImageOps
 
 
@@ -29,6 +30,7 @@ class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
     description = models.TextField(blank=True)
+    default_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     image = models.ImageField(upload_to='categories/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -39,9 +41,24 @@ class Category(models.Model):
         ordering = ['name']
 
     def save(self, *args, **kwargs):
+        previous_default_price = None
+        if self.pk:
+            previous_default_price = (
+                Category.objects
+                .filter(pk=self.pk)
+                .values_list('default_price', flat=True)
+                .first()
+            )
+
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
+
+        if previous_default_price != self.default_price and self.default_price is not None:
+            self.products.filter(is_available=True).update(
+                price=self.default_price,
+                updated_at=timezone.now(),
+            )
 
     def __str__(self):
         return self.name
@@ -157,6 +174,27 @@ class Product(models.Model):
         ordering = ['gmt_code', 'name']
 
     def save(self, *args, **kwargs):
+        if self.price is None and self.category_id:
+            used_category_default_price = False
+            category_default_price = (
+                getattr(self.category, 'default_price', None)
+                if hasattr(self, 'category')
+                else None
+            )
+            if category_default_price is None:
+                category_default_price = (
+                    Category.objects
+                    .filter(pk=self.category_id)
+                    .values_list('default_price', flat=True)
+                    .first()
+                )
+            if category_default_price is not None:
+                self.price = category_default_price
+                used_category_default_price = True
+
+            if used_category_default_price and kwargs.get('update_fields') is not None:
+                kwargs['update_fields'] = set(kwargs['update_fields']) | {'price'}
+
         if not self.slug:
             base_slug = slugify(self.name)
             slug = base_slug

@@ -17,6 +17,7 @@
                 <tr>
                     <th>Image</th>
                     <th>Category Name</th>
+                    <th>Default Price</th>
                     <th>Products</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -35,6 +36,7 @@
                         {% endif %}
                     </td>
                     <td data-label="Category Name"><strong>{{ category.name }}</strong></td>
+                    <td data-label="Default Price">{% if category.default_price %}₹{{ category.default_price }}{% else %}-{% endif %}</td>
                     <td data-label="Products">{{ category.total_product_count }}</td>
                     <td data-label="Status">
                         {% if category.is_active %}
@@ -59,7 +61,7 @@
                 </tr>
                 {% empty %}
                 <tr class="category-empty">
-                    <td colspan="5" class="text-center">
+                    <td colspan="6" class="text-center">
                         <div class="empty-state">
                             <i class="fas fa-folder-open"></i>
                             <h3>No categories found</h3>

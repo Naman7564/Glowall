@@ -32,6 +32,15 @@
                 <label for="id_description">Description</label>
                 {{ form.description }}
             </div>
+
+            <div class="form-group">
+                <label for="id_default_price">Default Price</label>
+                {{ form.default_price }}
+                <span class="field-hint">When you change this value, all available products in this category are updated to match.</span>
+                {% if form.default_price.errors %}
+                <span class="error">{{ form.default_price.errors.0 }}</span>
+                {% endif %}
+            </div>
             
             <div class="form-group">
                 <label for="id_image">Category Image</label>
