@@ -72,15 +72,41 @@ def _normalize_quantity(value, default=1):
     return max(1, quantity)
 
 
+def _normalize_bool(value, default=False):
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
 def _print_checkout_exception(label, exc):
     print(f'{label}: {exc.__class__.__name__}: {exc}')
     traceback.print_exc()
+
+
+def _resolve_item_pricing(product, weight_id=None, weight_selected=False):
+    weight_obj = None
+    use_weight_price = _normalize_bool(weight_selected)
+
+    if use_weight_price and weight_id:
+        from .models import ProductWeight
+
+        weight_obj = (
+            ProductWeight.objects.select_related('product__category')
+            .filter(id=weight_id, product=product)
+            .first()
+        )
+
+    unit_price = product.resolve_unit_price(weight=weight_obj, use_weight_price=use_weight_price)
+    return weight_obj, unit_price
 
 
 def _load_checkout_items(request):
     product_id = request.GET.get('product') or request.POST.get('product_id')
     quantity_value = request.GET.get('quantity') or request.POST.get('quantity')
     weight_id = request.GET.get('weight_id') or request.POST.get('weight_id')
+    weight_selected = request.GET.get('weight_selected') or request.POST.get('weight_selected')
     
     checkout_data = request.session.get(CHECKOUT_SESSION_KEY, [])
     if isinstance(checkout_data, dict):
@@ -91,11 +117,13 @@ def _load_checkout_items(request):
             'product_id': product_id,
             'quantity': _normalize_quantity(quantity_value, default=1),
             'weight_id': weight_id,
+            'weight_selected': _normalize_bool(weight_selected),
         }]
         request.session[CHECKOUT_SESSION_KEY] = checkout_data
     elif checkout_data:
         for item in checkout_data:
             item['quantity'] = _normalize_quantity(item.get('quantity'), default=1)
+            item['weight_selected'] = _normalize_bool(item.get('weight_selected'))
         request.session[CHECKOUT_SESSION_KEY] = checkout_data
     else:
         return None
@@ -103,8 +131,6 @@ def _load_checkout_items(request):
     resolved_items = []
     total_order_price = 0
     all_pricing_available = True
-
-    from .models import ProductWeight
 
     for item_data in checkout_data:
         product = Product.objects.filter(
@@ -115,18 +141,11 @@ def _load_checkout_items(request):
         if not product:
             continue
 
-        weight_id = item_data.get('weight_id')
-        weight_obj = None
-        if weight_id:
-            weight_obj = (
-                ProductWeight.objects.select_related('product__category')
-                .filter(id=weight_id, product=product)
-                .first()
-            )
-            
-        unit_price = product.price
-        if weight_obj and weight_obj.price is not None:
-            unit_price = weight_obj.price
+        weight_obj, unit_price = _resolve_item_pricing(
+            product,
+            weight_id=item_data.get('weight_id'),
+            weight_selected=item_data.get('weight_selected'),
+        )
 
         if unit_price is None:
             all_pricing_available = False
@@ -139,6 +158,7 @@ def _load_checkout_items(request):
         resolved_items.append({
             'product': product,
             'weight': weight_obj,
+            'weight_selected': _normalize_bool(item_data.get('weight_selected')),
             'quantity': quantity,
             'unit_price': unit_price,
             'total_price': total_price,
@@ -751,27 +771,23 @@ def cart_view(request):
     
     for product_key, item in cart.items():
         product_id = item.get('product_id', product_key.split('_')[0])
-        weight_id = item.get('weight_id')
         product = Product.objects.filter(pk=product_id, is_available=True).first()
         if product:
             quantity = item.get('quantity', 1)
-            unit_price = product.price or 0
-            weight_obj = None
-            if weight_id:
-                from .models import ProductWeight
-                weight_obj = (
-                    ProductWeight.objects.select_related('product__category')
-                    .filter(id=weight_id, product=product)
-                    .first()
-                )
-                if weight_obj and weight_obj.price is not None:
-                    unit_price = weight_obj.price
+            weight_obj, unit_price = _resolve_item_pricing(
+                product,
+                weight_id=item.get('weight_id'),
+                weight_selected=item.get('weight_selected'),
+            )
+            if unit_price is None:
+                unit_price = 0
             
             item_total = unit_price * quantity
             cart_items.append({
                 'key': product_key,
                 'product': product,
                 'weight': weight_obj,
+                'weight_selected': _normalize_bool(item.get('weight_selected')),
                 'quantity': quantity,
                 'unit_price': unit_price,
                 'item_total': item_total,
@@ -791,6 +807,7 @@ def add_to_cart(request):
     """Add a product to the cart."""
     product_id = request.POST.get('product_id')
     weight_id = request.POST.get('weight_id')
+    weight_selected = _normalize_bool(request.POST.get('weight_selected'))
     quantity = _normalize_quantity(request.POST.get('quantity'), default=1)
     
     product = Product.objects.filter(pk=product_id, is_available=True).first()
@@ -799,12 +816,17 @@ def add_to_cart(request):
         return redirect('catalog:product_list')
     
     cart = _get_cart(request)
-    product_key = f"{product_id}_{weight_id}" if weight_id else str(product_id)
+    product_key = f"{product_id}_{weight_id}" if weight_selected and weight_id else str(product_id)
     
     if product_key in cart:
         cart[product_key]['quantity'] += quantity
     else:
-        cart[product_key] = {'quantity': quantity, 'product_id': product_id, 'weight_id': weight_id}
+        cart[product_key] = {
+            'quantity': quantity,
+            'product_id': product_id,
+            'weight_id': weight_id if weight_selected else '',
+            'weight_selected': weight_selected,
+        }
     
     _save_cart(request, cart)
     messages.success(request, f'{product.name} added to cart!')
@@ -874,6 +896,7 @@ def cart_checkout(request):
         checkout_items.append({
             'product_id': product_id,
             'weight_id': weight_id,
+            'weight_selected': _normalize_bool(item.get('weight_selected')),
             'quantity': quantity
         })
     

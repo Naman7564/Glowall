@@ -160,14 +160,11 @@ def product_add(request):
         formset = ProductImageFormSet(instance=product)
         weight_formset = ProductWeightFormSet(instance=product, prefix='weights')
 
-    marble_category_ids = list(Category.objects.filter(Q(name__icontains='marble') | Q(name__icontains='marbel') | Q(slug__icontains='marble') | Q(slug__icontains='marbel')).values_list('id', flat=True))
-
     context = {
         'form': form,
         'formset': formset,
         'weight_formset': weight_formset,
         'title': 'Add New Product',
-        'marble_category_ids': marble_category_ids,
     }
     return render(request, 'admin_panel/product_form.html', context)
 
@@ -197,15 +194,12 @@ def product_edit(request, pk):
         formset = ProductImageFormSet(instance=product)
         weight_formset = ProductWeightFormSet(instance=product, prefix='weights')
 
-    marble_category_ids = list(Category.objects.filter(Q(name__icontains='marble') | Q(name__icontains='marbel') | Q(slug__icontains='marble') | Q(slug__icontains='marbel')).values_list('id', flat=True))
-
     context = {
         'form': form,
         'formset': formset,
         'weight_formset': weight_formset,
         'product': product,
         'title': f'Edit Product: {product.name}',
-        'marble_category_ids': marble_category_ids,
     }
     return render(request, 'admin_panel/product_form.html', context)
 

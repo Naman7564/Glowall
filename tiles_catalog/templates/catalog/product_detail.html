@@ -148,23 +148,15 @@
 
                     <!-- Product Title -->
                     <h1 class="pd-title">{{ product.name }}</h1>
-                    {% with weight_options=product.storefront_weight_options default_weight=product.default_storefront_weight %}
+                    {% with weight_options=product.storefront_weight_options %}
                     <!-- Price -->
-                    {% if product.price or default_weight.price %}
+                    {% if product.configured_price %}
                     <div
                         class="pd-price-block"
-                        data-base-price="{{ product.price|default_if_none:'' }}"
+                        data-base-price="{{ product.configured_price|default_if_none:'' }}"
                     >
-                        <span class="pd-price">
-                            {% if default_weight and default_weight.price %}
-                            {{ default_weight.price|inr }}
-                            {% else %}
-                            {{ product.price|inr }}
-                            {% endif %}
-                        </span>
-                        {% if default_weight %}
-                        <span class="pd-price-unit">&ndash; {{ default_weight.display_label }}</span>
-                        {% endif %}
+                        <span class="pd-price">{{ product.configured_price|inr }}</span>
+                        <span class="pd-price-unit"></span>
                     </div>
                     {% endif %}
 
@@ -208,7 +200,7 @@
                                     {% for w in weight_options %}
                                     <button
                                         type="button"
-                                        class="pd-weight-btn {% if forloop.first %}active{% endif %}"
+                                        class="pd-weight-btn"
                                         data-weight-id="{{ w.id }}"
                                         data-weight-label="{{ w.display_label }}"
                                         data-price="{% if w.price %}{{ w.price }}{% endif %}"
@@ -228,9 +220,10 @@
                                 <input type="hidden" name="product" value="{{ product.id }}">
                                 <input type="hidden" name="quantity" value="1" id="buyQtyInput">
                                 {% if weight_options %}
-                                <input type="hidden" name="weight_id" id="selectedWeightId" value="{% if default_weight %}{{ default_weight.id }}{% endif %}">
+                                <input type="hidden" name="weight_id" id="selectedWeightId" value="">
+                                <input type="hidden" name="weight_selected" id="selectedWeightFlag" value="0">
                                 {% endif %}
-                                <button type="submit" class="pd-btn pd-btn-primary" id="buyNowBtn" {% if not product.price and not default_weight.price %}disabled{% endif %}>
+                                <button type="submit" class="pd-btn pd-btn-primary" id="buyNowBtn" {% if not product.configured_price %}disabled{% endif %}>
                                     <span class="material-symbols-outlined">shopping_bag</span>
                                     Buy Now
                                 </button>
@@ -241,7 +234,8 @@
                                 <input type="hidden" name="product_id" value="{{ product.id }}">
                                 <input type="hidden" name="quantity" value="1" id="cartQtyInput">
                                 {% if weight_options %}
-                                <input type="hidden" name="weight_id" id="selectedCartWeightId" value="{% if default_weight %}{{ default_weight.id }}{% endif %}">
+                                <input type="hidden" name="weight_id" id="selectedCartWeightId" value="">
+                                <input type="hidden" name="weight_selected" id="selectedCartWeightFlag" value="0">
                                 {% endif %}
                                 <button type="submit" class="pd-btn pd-btn-outline" id="addToCartBtn">
                                     <span class="material-symbols-outlined">add_shopping_cart</span>
@@ -397,16 +391,9 @@
                             <span class="pd-related-category">{{ related.category.name }}</span>
                             <h3 class="pd-related-name">{{ related.name }}</h3>
                             {% if related.specification_display %}<p class="pd-related-size">{{ related.specification_display }}</p>{% endif %}
-                            {% if related.price or related.default_storefront_weight.price %}
+                            {% if related.configured_price %}
                             <p class="pd-related-price">
-                                {% if related.default_storefront_weight and related.default_storefront_weight.price %}
-                                {{ related.default_storefront_weight.price|inr }}
-                                {% else %}
-                                {{ related.price|inr }}
-                                {% endif %}
-                                {% if related.default_storefront_weight %}
-                                <span>{{ related.default_storefront_weight.display_label }}</span>
-                                {% endif %}
+                                {{ related.configured_price|inr }}
                             </p>
                             {% endif %}
                         </div>
@@ -452,6 +439,19 @@ function updateQty(change) {
 const priceBlockElem = document.querySelector('.pd-price-block');
 const BASE_PRICE = priceBlockElem ? parseFloat(priceBlockElem.dataset.basePrice) || null : null;
 
+function syncPurchaseButtons(displayPrice) {
+    const buyNowBtn = document.getElementById('buyNowBtn');
+    const addToCartBtn = document.getElementById('addToCartBtn');
+    const hasPrice = displayPrice !== null && displayPrice !== undefined && !Number.isNaN(displayPrice);
+
+    if (buyNowBtn) {
+        buyNowBtn.disabled = !hasPrice;
+    }
+    if (addToCartBtn) {
+        addToCartBtn.disabled = !hasPrice;
+    }
+}
+
 function selectWeight(btn) {
     // Deactivate all, activate clicked
     document.querySelectorAll('.pd-weight-btn').forEach(b => b.classList.remove('active'));
@@ -460,8 +460,12 @@ function selectWeight(btn) {
     // Update hidden input
     const weightIdInput = document.getElementById('selectedWeightId');
     if (weightIdInput) weightIdInput.value = btn.dataset.weightId;
+    const weightFlagInput = document.getElementById('selectedWeightFlag');
+    if (weightFlagInput) weightFlagInput.value = '1';
     const cartWeightIdInput = document.getElementById('selectedCartWeightId');
     if (cartWeightIdInput) cartWeightIdInput.value = btn.dataset.weightId;
+    const cartWeightFlagInput = document.getElementById('selectedCartWeightFlag');
+    if (cartWeightFlagInput) cartWeightFlagInput.value = '1';
 
     // Update displayed price
     const priceBlock = document.querySelector('.pd-price-block');
@@ -480,17 +484,14 @@ function selectWeight(btn) {
             maximumFractionDigits: 2
         });
     }
+    syncPurchaseButtons(displayPrice);
 
     if (priceUnitSpan) {
         priceUnitSpan.textContent = btn.dataset.weightLabel ? '\u2013 ' + btn.dataset.weightLabel : '';
     }
 }
 
-// Auto-select first weight on page load to sync price
-(function() {
-    const firstBtn = document.querySelector('.pd-weight-btn.active');
-    if (firstBtn) selectWeight(firstBtn);
-})();
+syncPurchaseButtons(BASE_PRICE);
 
 // Sync quantity on manual input change
 document.getElementById('qtyInput').addEventListener('change', function() {

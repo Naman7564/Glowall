@@ -11,7 +11,7 @@ from PIL import Image, ImageOps
 
 MARBLE_TEXTURE_CATEGORY_SLUGS = {'marbels', 'marble-texture'}
 MARBLE_TEXTURE_WEIGHT_OPTIONS = (
-    {'value_kg': Decimal('30'), 'price': Decimal('2399'), 'kind': 'Dry'},
+    {'value_kg': Decimal('30'), 'price': None, 'kind': 'Dry'},
     {'value_kg': Decimal('25'), 'price': Decimal('1899'), 'kind': 'Wet'},
 )
 
@@ -212,6 +212,30 @@ class Product(models.Model):
         return reverse('catalog:product_detail', kwargs={'identifier': self.slug})
 
     @property
+    def configured_price(self):
+        if self.price is not None:
+            return self.price
+
+        category = getattr(self, 'category', None)
+        if category and category.default_price is not None:
+            return category.default_price
+
+        if self.category_id:
+            return (
+                Category.objects
+                .filter(pk=self.category_id)
+                .values_list('default_price', flat=True)
+                .first()
+            )
+
+        return None
+
+    def resolve_unit_price(self, weight=None, use_weight_price=False):
+        if use_weight_price and weight and weight.price is not None:
+            return weight.price
+        return self.configured_price
+
+    @property
     def is_marble_texture(self):
         return is_marble_texture_category(self.category)
 
@@ -243,11 +267,6 @@ class Product(models.Model):
                 update_fields.append('order')
             if update_fields:
                 weight.save(update_fields=update_fields)
-
-        default_price = MARBLE_TEXTURE_WEIGHT_OPTIONS[0]['price']
-        if self.price != default_price:
-            self.price = default_price
-            self.save(update_fields=['price', 'updated_at'])
 
     @property
     def storefront_weight_options(self):

@@ -154,8 +154,8 @@
                         <span class="product-category">{{ product.category.name }}</span>
                         <h3 class="product-name">{{ product.name }}</h3>
                         {% if product.specification_display %}<p class="product-size">{{ product.specification_display }}</p>{% endif %}
-                        {% if product.price %}
-                        <p class="product-price">{{ product.price|inr }}</p>
+                        {% if product.configured_price %}
+                        <p class="product-price">{{ product.configured_price|inr }}</p>
                         {% endif %}
                     </div>
                 </a>
@@ -200,8 +200,8 @@
                         <span class="product-category">{{ product.category.name }}</span>
                         <h3 class="product-name">{{ product.name }}</h3>
                         {% if product.specification_display %}<p class="product-size">{{ product.specification_display }}</p>{% endif %}
-                        {% if product.price %}
-                        <p class="product-price">{{ product.price|inr }}</p>
+                        {% if product.configured_price %}
+                        <p class="product-price">{{ product.configured_price|inr }}</p>
                         {% endif %}
                     </div>
                 </a>

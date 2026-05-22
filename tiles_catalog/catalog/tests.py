@@ -1,4 +1,5 @@
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -175,3 +176,95 @@ class CategoryDefaultPriceTests(TestCase):
         )
 
         self.assertEqual(product.price, Decimal('950.00'))
+
+
+class StorefrontPriceConsistencyTests(TestCase):
+    def setUp(self):
+        self.category = Category.objects.create(
+            name='Marble Texture',
+            slug='marbels',
+            default_price=Decimal('2299.00'),
+        )
+        self.product = Product.objects.create(
+            name='Classic Marble Texture',
+            gmt_code='310',
+            category=self.category,
+            description='Marble texture product',
+            price=Decimal('2299.00'),
+            is_available=True,
+            is_featured=True,
+        )
+        self.weight = ProductWeight.objects.create(
+            product=self.product,
+            value_kg=Decimal('30.00'),
+            price=Decimal('2399.00'),
+            order=0,
+        )
+
+    def test_marble_weight_sync_does_not_override_configured_base_price(self):
+        self.product.sync_marble_texture_weight_pricing()
+        self.product.refresh_from_db()
+        self.weight.refresh_from_db()
+
+        self.assertEqual(self.product.price, Decimal('2299.00'))
+        self.assertIsNone(self.weight.price)
+
+    def test_product_detail_uses_configured_base_price_before_weight_selection(self):
+        response = self.client.get(self.product.get_absolute_url())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<span class="pd-price">₹2,299.00</span>', html=True)
+        self.assertNotContains(response, 'pd-weight-btn active')
+
+    @patch('catalog.views.create_cashfree_order')
+    def test_checkout_and_order_use_base_price_without_explicit_weight_selection(self, mock_create_cashfree_order):
+        mock_create_cashfree_order.return_value = {
+            'cashfree_order_id': 'ORD-TEST-0001',
+            'cashfree_cf_order_id': 'CF-TEST-0001',
+            'payment_session_id': 'session-123',
+            'payment_link': 'https://example.com/pay',
+        }
+
+        session = self.client.session
+        session['shopping_cart'] = {
+            f'{self.product.pk}_{self.weight.pk}': {
+                'product_id': str(self.product.pk),
+                'weight_id': str(self.weight.pk),
+                'quantity': 2,
+            }
+        }
+        session.save()
+
+        cart_response = self.client.get(reverse('catalog:cart'))
+        self.assertEqual(cart_response.status_code, 200)
+        self.assertEqual(cart_response.context['cart_items'][0]['unit_price'], Decimal('2299.00'))
+        self.assertEqual(cart_response.context['cart_total'], Decimal('4598.00'))
+
+        checkout_redirect = self.client.get(reverse('catalog:cart_checkout'))
+        self.assertEqual(checkout_redirect.status_code, 302)
+
+        checkout_response = self.client.get(reverse('catalog:checkout'))
+        self.assertEqual(checkout_response.status_code, 200)
+        self.assertEqual(checkout_response.context['total_order_price'], Decimal('4598.00'))
+        self.assertEqual(checkout_response.context['checkout_items'][0]['unit_price'], Decimal('2299.00'))
+
+        place_order_response = self.client.post(
+            reverse('catalog:place_order'),
+            {
+                'full_name': 'Buyer Name',
+                'phone_number': '9999999999',
+                'email': 'buyer@example.com',
+                'address': '1 Test Street',
+                'city': 'Test City',
+                'state': 'Test State',
+                'pincode': '123456',
+            },
+        )
+
+        self.assertEqual(place_order_response.status_code, 302)
+
+        order = Order.objects.latest('id')
+        order_item = order.items.get()
+        self.assertEqual(order_item.unit_price, Decimal('2299.00'))
+        self.assertEqual(order_item.total_price, Decimal('4598.00'))
+        self.assertEqual(order.total_price, Decimal('4598.00'))

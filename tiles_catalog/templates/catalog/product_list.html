@@ -277,9 +277,9 @@
                                     {{ product.specification_display }}
                                 </p>
                                 {% endif %}
-                                {% if product.price %}
+                                {% if product.configured_price %}
                                 <div class="product-card-price">
-                                    <span class="price-amount">{{ product.price|inr }}</span>
+                                    <span class="price-amount">{{ product.configured_price|inr }}</span>
                                 </div>
                                 {% endif %}
                             </div>
