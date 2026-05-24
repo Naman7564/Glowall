@@ -3223,3 +3223,588 @@ select.form-control {
         content: none;
     }
 }
+
+/* ==========================================
+   Modern Redesigned Order Section Styles
+   ========================================== */
+
+/* Modern Stat Cards */
+.orders-stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.order-stat-card {
+    background: var(--admin-card);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.order-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+}
+
+.order-stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.order-stat-icon.total {
+    background: rgba(201, 169, 98, 0.1);
+    color: var(--admin-secondary);
+}
+
+.order-stat-icon.today {
+    background: rgba(5, 150, 105, 0.1);
+    color: var(--admin-success);
+}
+
+.order-stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.order-stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--admin-text);
+    line-height: 1.2;
+}
+
+.order-stat-desc {
+    font-size: 13px;
+    color: var(--admin-text-light);
+    margin-top: 4px;
+}
+
+/* Elegant Order Search and Filter Section */
+.modern-filter-container {
+    background: var(--admin-card);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.modern-filter-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--admin-border);
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+}
+
+/* Beautiful Status Pill Tabs */
+.status-pill-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.status-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--admin-text-light);
+    background: var(--admin-bg);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.status-pill-btn:hover {
+    color: var(--admin-text);
+    background: var(--admin-border);
+}
+
+.status-pill-btn.active {
+    color: white;
+    background: var(--admin-primary);
+}
+
+.status-pill-btn .badge-count {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.status-pill-btn.active .badge-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Input elements in modern filters */
+.filter-fields-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+}
+
+.filter-input-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 150px;
+}
+
+.filter-input-field.search-field {
+    flex: 2;
+    min-width: 200px;
+}
+
+.filter-input-field label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--admin-text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-input-field .form-control {
+    width: 100%;
+    height: 42px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--admin-border);
+    font-size: 13px;
+    color: var(--admin-text);
+    background-color: var(--admin-card);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-input-field .form-control:focus {
+    border-color: var(--admin-secondary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.15);
+}
+
+.filter-action-btns {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Beautiful Modern Table styling */
+.modern-table-card {
+    background: var(--admin-card);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.customer-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(201, 169, 98, 0.15);
+    color: var(--admin-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.customer-cell-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Premium Badges */
+.modern-dot-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.modern-dot-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* New (violet) */
+.dot-badge-new {
+    background-color: #f5f3ff;
+    color: #5b21b6;
+}
+.dot-badge-new::before {
+    background-color: #7c3aed;
+}
+
+/* Processing (amber) */
+.dot-badge-processing {
+    background-color: #fffbeb;
+    color: #92400e;
+}
+.dot-badge-processing::before {
+    background-color: #d97706;
+}
+
+/* Completed (green) */
+.dot-badge-completed {
+    background-color: #ecfdf5;
+    color: #065f46;
+}
+.dot-badge-completed::before {
+    background-color: #059669;
+}
+
+/* Cancelled (red) */
+.dot-badge-cancelled {
+    background-color: #fef2f2;
+    color: #991b1b;
+}
+.dot-badge-cancelled::before {
+    background-color: #dc2626;
+}
+
+/* Payment Status Badges */
+.payment-tag {
+    display: inline-flex;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.payment-tag.pending {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+
+.payment-tag.success {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+.payment-tag.failed {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+}
+
+/* Two-column Order Details Redesign */
+.order-details-wrapper {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .order-details-wrapper {
+        grid-template-columns: 1fr;
+    }
+}
+
+.order-detail-main-card {
+    background: var(--admin-card);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.order-detail-main-card .card-heading {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--admin-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fafafa;
+}
+
+.order-detail-main-card .card-heading h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--admin-text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.order-detail-main-card .card-heading h3 i {
+    color: var(--admin-secondary);
+}
+
+.order-detail-main-card .card-body {
+    padding: 24px;
+}
+
+/* Item List in Detail page */
+.detail-item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.detail-item-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.detail-item-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.detail-item-thumb {
+    width: 72px;
+    height: 72px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: var(--admin-bg);
+    border: 1px solid var(--admin-border);
+}
+
+.detail-item-info {
+    flex: 1;
+}
+
+.detail-item-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--admin-text);
+    margin-bottom: 4px;
+}
+
+.detail-item-meta {
+    font-size: 13px;
+    color: var(--admin-text-light);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.detail-item-math {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--admin-text);
+    text-align: right;
+}
+
+.detail-item-math span {
+    display: block;
+    font-size: 12px;
+    color: var(--admin-text-light);
+    font-weight: 400;
+}
+
+/* Shipping and customer addresses in detail page */
+.customer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+}
+
+.customer-detail-block {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.customer-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.customer-detail-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--admin-text-light);
+}
+
+.customer-detail-value {
+    font-size: 14px;
+    color: var(--admin-text);
+    font-weight: 500;
+}
+
+.customer-detail-value a {
+    color: var(--admin-secondary);
+}
+
+.customer-detail-value a:hover {
+    text-decoration: underline;
+}
+
+.shipping-address-badge {
+    background: var(--admin-bg);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px dashed var(--admin-border);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--admin-text);
+}
+
+/* Timeline */
+.timeline-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.timeline-item {
+    display: flex;
+    gap: 14px;
+}
+
+.timeline-bullet {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--admin-secondary);
+    margin-top: 6px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.timeline-bullet::after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    top: 8px;
+    bottom: -24px;
+    left: 3px;
+    background: var(--admin-border);
+}
+
+.timeline-item:last-child .timeline-bullet::after {
+    display: none;
+}
+
+.timeline-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.timeline-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--admin-text);
+}
+
+.timeline-time {
+    font-size: 12px;
+    color: var(--admin-text-light);
+}
+
+/* Status control panel side bar card */
+.control-sidebar-card {
+    background: var(--admin-card);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.control-sidebar-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    color: var(--admin-text);
+    border-bottom: 1px solid var(--admin-border);
+    padding-bottom: 12px;
+}
+
+.control-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 18px;
+}
+
+.control-form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--admin-text-light);
+}
+
+.control-form-group select {
+    height: 42px;
+    border-radius: 8px;
+    border: 1px solid var(--admin-border);
+    padding: 8px 12px;
+    font-size: 13px;
+    background: var(--admin-card);
+    color: var(--admin-text);
+    width: 100%;
+}
+
+.control-form-group select:focus {
+    border-color: var(--admin-secondary);
+    outline: none;
+}
+
+.btn-update-status {
+    width: 100%;
+    height: 42px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    font-size: 13px;
+    background: var(--admin-primary);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: var(--transition);
+}
+
+.btn-update-status:hover {
+    background: var(--admin-sidebar-hover);
+}
+
