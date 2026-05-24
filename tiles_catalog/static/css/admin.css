@@ -2834,84 +2834,182 @@ select.form-control {
     .order-list-table th,
     .order-list-table td,
     .order-list-table tr {
-        display: block;
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     .order-list-table thead {
-        display: none;
+        display: none !important;
     }
 
     .order-list-table tbody {
-        display: grid;
-        gap: 16px;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 16px !important;
+        padding: 4px 0 !important;
     }
 
     .order-list-table .order-row {
-        display: grid;
-        gap: 10px;
-        padding: 16px;
-        border: 1px solid var(--admin-border);
-        border-radius: 12px;
-        background: var(--admin-card);
-        box-shadow: var(--shadow-sm);
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 20px !important;
+        border: 1px solid var(--admin-border) !important;
+        border-radius: 16px !important;
+        background: var(--admin-card) !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01) !important;
+        margin-bottom: 0 !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     }
 
     .order-list-table .order-row:hover {
-        background: var(--admin-card);
+        transform: translateY(-2px) !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
     }
 
-    .order-list-table td,
-    .order-list-table td:first-child,
+    .order-list-table td {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        padding: 12px 0 !important;
+        border: none !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+        background: transparent !important;
+        text-align: right !important;
+    }
+
     .order-list-table td:last-child {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 0;
-        border: none;
-        background: transparent;
+        border-bottom: none !important;
+        padding-bottom: 0 !important;
     }
 
     .order-list-table td::before {
-        content: attr(data-label);
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--admin-text-light);
-        flex-shrink: 0;
-        min-width: 70px;
+        content: attr(data-label) !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+        color: var(--admin-text-light) !important;
+        flex-shrink: 0 !important;
+        text-align: left !important;
+        min-width: 90px !important;
     }
 
+    /* Column Specific Styles for Mobile alignment */
     .order-list-table td[data-label="Order ID"] {
-        padding-bottom: 8px;
-        border-bottom: 1px solid var(--admin-border);
-        margin-bottom: 4px;
+        padding-top: 0 !important;
     }
 
-    .order-list-table td[data-label="Order ID"] strong {
-        font-size: 16px;
+    .order-list-table td[data-label="Order ID"] span {
+        font-size: 15px !important;
+        color: var(--admin-primary) !important;
+    }
+
+    .order-list-table .customer-cell-wrap {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 10px !important;
+        max-width: 70% !important;
+        text-align: right !important;
     }
 
     .order-list-table .customer-info {
-        align-items: flex-end;
-        text-align: right;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-end !important;
+        gap: 2px !important;
     }
 
     .order-list-table .customer-name {
-        font-weight: 600;
+        font-size: 13.5px !important;
+        font-weight: 600 !important;
+        color: var(--admin-text) !important;
+        word-break: break-word !important;
+        line-height: 1.3 !important;
     }
 
-    .order-actions {
-        justify-content: flex-end;
+    .order-list-table .customer-email {
+        font-size: 11.5px !important;
+        color: var(--admin-text-light) !important;
+        word-break: break-all !important;
+    }
+
+    .order-list-table .customer-avatar {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 12px !important;
+    }
+
+    .order-list-table td[data-label="Product"] span {
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        color: var(--admin-text) !important;
+        word-break: break-word !important;
+        max-width: 65% !important;
+        display: inline-block !important;
+        line-height: 1.4 !important;
+    }
+
+    .order-list-table td[data-label="Qty"] {
+        font-size: 13.5px !important;
+        font-weight: 600 !important;
+        color: var(--admin-text) !important;
+    }
+
+    .order-list-table td[data-label="Total"] {
+        font-size: 14.5px !important;
+        font-weight: 700 !important;
+        color: var(--admin-primary) !important;
+    }
+
+    .order-list-table .modern-dot-badge {
+        font-size: 11.5px !important;
+        padding: 4px 10px !important;
+    }
+
+    .order-list-table .payment-tag {
+        font-size: 10px !important;
+        padding: 3px 8px !important;
+    }
+
+    .order-list-table td[data-label="Date"] {
+        font-size: 12.5px !important;
+        font-weight: 500 !important;
+        color: var(--admin-text-light) !important;
+    }
+
+    .order-list-table .order-actions {
+        display: flex !important;
+        justify-content: flex-end !important;
+        width: 100% !important;
+        gap: 8px !important;
+        margin: 0 !important;
+    }
+
+    .order-list-table .order-actions a {
+        margin: 0 !important;
+        border: 1px solid var(--admin-border) !important;
+        background: #f8fafc !important;
+        width: 38px !important;
+        height: 38px !important;
+    }
+
+    .order-list-table .order-actions a:hover {
+        background: #e2e8f0 !important;
+        border-color: #cbd5e1 !important;
     }
 
     .order-list-table .order-empty td {
-        display: block;
+        display: block !important;
+        text-align: center !important;
+        padding: 32px 0 !important;
+        border: none !important;
     }
 
     .order-list-table .order-empty td::before {
-        content: none;
+        display: none !important;
     }
 }
 
