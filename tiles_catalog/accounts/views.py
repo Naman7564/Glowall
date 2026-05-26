@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.utils.http import url_has_allowed_host_and_scheme

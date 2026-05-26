@@ -2,19 +2,6 @@ from django import forms
 from .models import Order
 
 
-class ProductSearchForm(forms.Form):
-    """Product search form."""
-    q = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Search products...'
-        })
-    )
-    category = forms.CharField(required=False)
-    color = forms.CharField(required=False)
-
-
 class OrderForm(forms.ModelForm):
     """Checkout form for direct product orders."""
 
