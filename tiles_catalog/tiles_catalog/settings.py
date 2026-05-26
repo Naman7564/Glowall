@@ -172,3 +172,25 @@ CASHFREE_ENVIRONMENT = CASHFREE_ENV
 CASHFREE_API_VERSION = os.getenv('CASHFREE_API_VERSION', '2023-08-01')
 CASHFREE_CURRENCY = os.getenv('CASHFREE_CURRENCY', 'INR')
 CASHFREE_CUSTOMER_PHONE_FALLBACK = os.getenv('CASHFREE_CUSTOMER_PHONE_FALLBACK', '9999999999')
+
+# Redis Cache Configuration
+REDIS_URL = os.getenv('REDIS_URL', 'redis://redis:6379/1')
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {
+                "max_connections": 50,
+                "retry_on_timeout": True,
+            }
+        }
+    }
+}
+
+# Use Redis cache for session storage (highly optimized session retrieval)
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+

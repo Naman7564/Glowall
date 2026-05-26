@@ -18,11 +18,24 @@ services:
       - static_volume:/app/static_root
       - media_volume:/app/media
       - db_data:/app/data
-    depends_on: []
+    depends_on:
+      - redis
     networks:
       - glowall_network
     expose:
       - "3000"
+
+  # Redis Cache Broker
+  redis:
+    image: redis:7-alpine
+    container_name: glowall_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - glowall_network
 
   # Nginx Reverse Proxy
   nginx:
@@ -64,3 +77,4 @@ volumes:
   db_data:
   certbot_www:
   certbot_conf:
+  redis_data:
