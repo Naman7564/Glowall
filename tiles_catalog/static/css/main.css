@@ -5898,24 +5898,36 @@ body.nav-open {
 
 .checkout-coupon-heading {
     display: grid;
-    grid-template-columns: 42px minmax(0, 1fr);
+    grid-template-columns: 36px minmax(0, 1fr);
     gap: 12px;
     align-items: center;
 }
 
 .checkout-coupon-icon {
-    width: 42px;
-    height: 42px;
-    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    max-width: 36px;
+    max-height: 36px;
+    display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    border-radius: 14px;
+    border-radius: 10px;
     background: rgba(16, 185, 129, 0.12);
     color: #047857;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.checkout-coupon-icon svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
 }
 
 .checkout-coupon-heading strong,
-.checkout-coupon-heading span {
+.checkout-coupon-heading > div > span {
     display: block;
 }
 
