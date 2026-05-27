@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage, ProductWeight, Order, OrderItem, CustomerReview
+from .models import Category, Product, ProductImage, ProductWeight, Order, OrderItem, CustomerReview, Discount
 
 
 class ProductImageInline(admin.TabularInline):
@@ -86,6 +86,14 @@ class ProductImageAdmin(admin.ModelAdmin):
     list_filter = ['is_primary', 'product__category']
 
 
+@admin.register(Discount)
+class DiscountAdmin(admin.ModelAdmin):
+    list_display = ['code', 'name', 'discount_type', 'value', 'applies_to', 'is_active', 'usage_count', 'usage_limit', 'expiry_date']
+    list_filter = ['is_active', 'discount_type', 'applies_to', 'expiry_date']
+    search_fields = ['code', 'name']
+    filter_horizontal = ['products', 'categories']
+
+
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
@@ -117,6 +125,10 @@ class OrderAdmin(admin.ModelAdmin):
     ]
     readonly_fields = [
         'total_price',
+        'original_price',
+        'discount',
+        'coupon_code',
+        'discount_amount',
         'cashfree_order_id',
         'cashfree_cf_order_id',
         'cashfree_payment_session_id',

@@ -1,0 +1,148 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load currency_tags %}
+
+{% block title %}Discounts - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Discounts</h1>
+    <a href="{% url 'admin_panel:discount_add' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Discount
+    </a>
+</div>
+
+<div class="filters-bar">
+    <form method="get" class="filters-form">
+        <div class="filter-group">
+            <input type="text" name="q" placeholder="Search code or name..." value="{{ search_query }}" class="form-control">
+        </div>
+        <div class="filter-group">
+            <select name="status" class="form-control">
+                <option value="">All Status</option>
+                <option value="active" {% if current_status == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if current_status == 'inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <select name="scope" class="form-control">
+                <option value="">All Scopes</option>
+                {% for value, label in scope_choices %}
+                <option value="{{ value }}" {% if current_scope == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-secondary"><i class="fas fa-filter"></i> Filter</button>
+        <a href="{% url 'admin_panel:discount_list' %}" class="btn btn-outline">Clear</a>
+    </form>
+</div>
+
+<div class="data-card discount-table-card">
+    <div class="table-responsive">
+        <table class="data-table discount-list-table">
+            <thead>
+                <tr>
+                    <th>Coupon</th>
+                    <th>Offer</th>
+                    <th>Scope</th>
+                    <th>Rules</th>
+                    <th>Usage</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for discount in discounts %}
+                <tr class="discount-row">
+                    <td data-label="Coupon">
+                        <span class="discount-code-pill">{{ discount.code }}</span>
+                        <br><small class="text-muted">{{ discount.name }}</small>
+                    </td>
+                    <td data-label="Offer">
+                        <strong>{{ discount.display_value }}</strong>
+                        <br><small class="text-muted">{{ discount.get_discount_type_display }}</small>
+                    </td>
+                    <td data-label="Scope">
+                        {{ discount.get_applies_to_display }}
+                        {% if discount.applies_to == 'products' %}
+                        <br><small class="text-muted">{{ discount.products.count }} product(s)</small>
+                        {% elif discount.applies_to == 'categories' %}
+                        <br><small class="text-muted">{{ discount.categories.count }} categor{{ discount.categories.count|pluralize:"y,ies" }}</small>
+                        {% endif %}
+                    </td>
+                    <td data-label="Rules">
+                        <div class="discount-rule-stack">
+                            <span>Min: {{ discount.minimum_order_amount|currency }}</span>
+                            <span>Expiry: {% if discount.expiry_date %}{{ discount.expiry_date|date:"M d, Y" }}{% else %}No expiry{% endif %}</span>
+                        </div>
+                    </td>
+                    <td data-label="Usage">
+                        {{ discount.usage_count }} / {% if discount.usage_limit %}{{ discount.usage_limit }}{% else %}Unlimited{% endif %}
+                    </td>
+                    <td data-label="Status">
+                        <button class="badge badge-toggle {% if discount.is_currently_usable %}badge-success{% elif discount.is_active %}badge-warning{% else %}badge-danger{% endif %}"
+                                onclick="toggleDiscount({{ discount.pk }})">
+                            {% if discount.is_currently_usable %}Active{% elif discount.is_active %}Limited{% else %}Disabled{% endif %}
+                        </button>
+                    </td>
+                    <td data-label="Actions">
+                        <div class="action-buttons">
+                            <a href="{% url 'admin_panel:discount_edit' discount.pk %}" class="btn btn-sm btn-outline" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:discount_delete' discount.pk %}" class="btn btn-sm btn-danger" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="discount-empty">
+                    <td colspan="7" class="text-center">
+                        <div class="empty-state">
+                            <i class="fas fa-tags"></i>
+                            <h3>No discounts found</h3>
+                            <p>Create coupons such as GLOW10 or MARBLE500 for checkout offers.</p>
+                            <a href="{% url 'admin_panel:discount_add' %}" class="btn btn-primary">Add Discount</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleDiscount(discountId) {
+    fetch(`/admin/discounts/${discountId}/toggle-active/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

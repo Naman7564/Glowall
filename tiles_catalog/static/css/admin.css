@@ -3906,3 +3906,149 @@ select.form-control {
     background: var(--admin-sidebar-hover);
 }
 
+/* Discount management */
+.discount-code-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+}
+
+.discount-rule-stack {
+    display: grid;
+    gap: 4px;
+    color: var(--admin-text-light);
+    font-size: 13px;
+}
+
+.discount-form-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 24px;
+    align-items: start;
+}
+
+.discount-form-main,
+.discount-form-side {
+    display: grid;
+    gap: 24px;
+}
+
+.discount-two-column,
+.discount-target-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.discount-offer-card {
+    border-color: rgba(16, 185, 129, 0.18);
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+}
+
+.discount-toggle-panel {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    background: #f8fafc;
+}
+
+.discount-toggle-panel strong,
+.discount-toggle-panel span {
+    display: block;
+}
+
+.discount-toggle-panel strong {
+    color: var(--admin-text);
+    font-size: 14px;
+}
+
+.discount-toggle-panel span {
+    margin-top: 3px;
+    color: var(--admin-text-light);
+    font-size: 12px;
+}
+
+.discount-multi-select {
+    min-height: 190px;
+}
+
+@media (max-width: 1024px) {
+    .discount-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .discount-two-column,
+    .discount-target-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .discount-list-table,
+    .discount-list-table thead,
+    .discount-list-table tbody,
+    .discount-list-table th,
+    .discount-list-table td,
+    .discount-list-table tr {
+        display: block;
+    }
+
+    .discount-list-table thead {
+        display: none;
+    }
+
+    .discount-list-table tbody {
+        display: grid;
+        gap: 14px;
+        padding: 14px;
+    }
+
+    .discount-list-table .discount-row {
+        border: 1px solid var(--admin-border);
+        border-radius: 14px;
+        background: var(--admin-card);
+        overflow: hidden;
+    }
+
+    .discount-list-table td {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--admin-border);
+        text-align: right;
+    }
+
+    .discount-list-table td:last-child {
+        border-bottom: none;
+    }
+
+    .discount-list-table td::before {
+        content: attr(data-label);
+        flex: 0 0 110px;
+        color: var(--admin-text-light);
+        font-weight: 700;
+        text-align: left;
+    }
+
+    .discount-list-table .discount-empty td {
+        display: block;
+        text-align: center;
+    }
+
+    .discount-list-table .discount-empty td::before {
+        display: none;
+    }
+}

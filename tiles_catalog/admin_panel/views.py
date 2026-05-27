@@ -11,11 +11,11 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
-from catalog.models import Product, Category, ProductImage, CustomerReview, Order, Poster
+from catalog.models import Product, Category, ProductImage, CustomerReview, Order, Poster, Discount
 from .forms import (
     ProductForm, CategoryForm, ProductImageFormSet,
     CustomerReviewForm, OrderStatusForm, PosterForm,
-    ProductWeightFormSet
+    ProductWeightFormSet, DiscountForm
 )
 
 
@@ -70,6 +70,7 @@ def dashboard(request):
     available_products = Product.objects.filter(is_available=True).count()
     featured_products = Product.objects.filter(is_featured=True).count()
     total_orders = Order.objects.count()
+    active_discounts = Discount.objects.filter(is_active=True).count()
     recent_products = Product.objects.select_related('category').prefetch_related('weights')[:5]
     
     # Products by category
@@ -83,6 +84,7 @@ def dashboard(request):
         'available_products': available_products,
         'featured_products': featured_products,
         'total_orders': total_orders,
+        'active_discounts': active_discounts,
         'recent_products': recent_products,
         'categories_with_count': categories_with_count,
     }
@@ -245,6 +247,110 @@ def product_toggle_available(request, pk):
     return JsonResponse({
         'success': True,
         'is_available': product.is_available
+    })
+
+
+# Discount Management
+@login_required
+@user_passes_test(is_staff)
+def discount_list(request):
+    """Admin discount list view."""
+    discounts = Discount.objects.prefetch_related('products', 'categories').all()
+
+    status = request.GET.get('status')
+    if status == 'active':
+        discounts = discounts.filter(is_active=True)
+    elif status == 'inactive':
+        discounts = discounts.filter(is_active=False)
+
+    scope = request.GET.get('scope')
+    if scope:
+        discounts = discounts.filter(applies_to=scope)
+
+    search = request.GET.get('q', '').strip()
+    if search:
+        discounts = discounts.filter(Q(name__icontains=search) | Q(code__icontains=search))
+
+    context = {
+        'discounts': discounts,
+        'current_status': status,
+        'current_scope': scope,
+        'search_query': search,
+        'scope_choices': Discount.APPLY_CHOICES,
+    }
+    return render(request, 'admin_panel/discount_list.html', context)
+
+
+@login_required
+@user_passes_test(is_staff)
+def discount_add(request):
+    """Create a discount offer."""
+    if request.method == 'POST':
+        form = DiscountForm(request.POST)
+        if form.is_valid():
+            discount = form.save()
+            messages.success(request, f'Discount "{discount.code}" has been created.')
+            return redirect('admin_panel:discount_list')
+    else:
+        form = DiscountForm()
+
+    context = {
+        'form': form,
+        'title': 'Add Discount',
+    }
+    return render(request, 'admin_panel/discount_form.html', context)
+
+
+@login_required
+@user_passes_test(is_staff)
+def discount_edit(request, pk):
+    """Edit an existing discount offer."""
+    discount = get_object_or_404(Discount, pk=pk)
+
+    if request.method == 'POST':
+        form = DiscountForm(request.POST, instance=discount)
+        if form.is_valid():
+            discount = form.save()
+            messages.success(request, f'Discount "{discount.code}" has been updated.')
+            return redirect('admin_panel:discount_list')
+    else:
+        form = DiscountForm(instance=discount)
+
+    context = {
+        'form': form,
+        'discount': discount,
+        'title': f'Edit Discount: {discount.code}',
+    }
+    return render(request, 'admin_panel/discount_form.html', context)
+
+
+@login_required
+@user_passes_test(is_staff)
+def discount_delete(request, pk):
+    """Delete a discount offer."""
+    discount = get_object_or_404(Discount, pk=pk)
+
+    if request.method == 'POST':
+        code = discount.code
+        discount.delete()
+        messages.success(request, f'Discount "{code}" has been deleted.')
+        return redirect('admin_panel:discount_list')
+
+    context = {'discount': discount}
+    return render(request, 'admin_panel/discount_confirm_delete.html', context)
+
+
+@login_required
+@user_passes_test(is_staff)
+@require_POST
+def discount_toggle_active(request, pk):
+    """Toggle discount active status."""
+    discount = get_object_or_404(Discount, pk=pk)
+    discount.is_active = not discount.is_active
+    discount.save(update_fields=['is_active', 'updated_at'])
+    return JsonResponse({
+        'success': True,
+        'is_active': discount.is_active,
     })
 
 

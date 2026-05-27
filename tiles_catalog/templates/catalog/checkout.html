@@ -149,10 +149,57 @@
                     </div>
                     {% endfor %}
 
+                    <div class="checkout-coupon-card">
+                        <div class="checkout-coupon-heading">
+                            <span class="checkout-coupon-icon"><i class="fas fa-ticket"></i></span>
+                            <div>
+                                <strong>Apply Coupon</strong>
+                                <span>Use a valid offer code before payment.</span>
+                            </div>
+                        </div>
+                        <div class="checkout-coupon-controls">
+                            <input
+                                type="text"
+                                name="coupon_code"
+                                value="{{ coupon_code }}"
+                                class="checkout-coupon-input"
+                                placeholder="GLOW10"
+                                autocomplete="off"
+                            >
+                            <button
+                                type="submit"
+                                class="checkout-coupon-btn"
+                                formaction="{% url 'catalog:apply_coupon' %}"
+                                formnovalidate
+                            >
+                                Apply
+                            </button>
+                        </div>
+                        {% if applied_coupon %}
+                        <div class="checkout-coupon-message success" role="status">
+                            <i class="fas fa-circle-check"></i>
+                            <span>{{ applied_coupon.code }} applied. You saved {{ checkout_totals.discount_amount|inr }}.</span>
+                        </div>
+                        {% elif checkout_totals.coupon_error %}
+                        <div class="checkout-coupon-message error" role="alert">
+                            <i class="fas fa-circle-exclamation"></i>
+                            <span>{{ checkout_totals.coupon_error }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
                     <div class="checkout-summary-lines">
+                        <div class="checkout-summary-row">
+                            <span>Original Price</span>
+                            <strong>{{ checkout_totals.original_price|inr }}</strong>
+                        </div>
+                        <div class="checkout-summary-row checkout-summary-discount">
+                            <span>Discount Amount</span>
+                            <strong>-{{ checkout_totals.discount_amount|inr }}</strong>
+                        </div>
                         <div class="checkout-summary-total">
-                            <span>Total</span>
-                            <strong>{{ total_order_price|inr }}</strong>
+                            <span>Final Total</span>
+                            <strong>{{ checkout_totals.final_total|inr }}</strong>
                         </div>
                     </div>
 
@@ -196,7 +243,12 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    form.addEventListener('submit', function () {
+    form.addEventListener('submit', function (event) {
+        const submitter = event.submitter;
+        if (submitter !== submitButton) {
+            return;
+        }
+
         if (!form.checkValidity() || submitButton.disabled) {
             return;
         }

@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from catalog.models import Product, Category, ProductImage, ProductWeight, CustomerReview, Order, Poster
+from catalog.models import Product, Category, ProductImage, ProductWeight, CustomerReview, Order, Poster, Discount
 
 
 class CategoryForm(forms.ModelForm):
@@ -94,6 +94,85 @@ class ProductImageForm(forms.ModelForm):
                 'value': '0'
             }),
         }
+
+
+class DiscountForm(forms.ModelForm):
+    """Form for creating and editing coupon discounts."""
+
+    class Meta:
+        model = Discount
+        fields = [
+            'name', 'code', 'discount_type', 'value', 'is_active',
+            'expiry_date', 'usage_limit', 'minimum_order_amount',
+            'applies_to', 'products', 'categories',
+        ]
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Festive sale, Marble offer, etc.',
+            }),
+            'code': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'GLOW10',
+            }),
+            'discount_type': forms.Select(attrs={'class': 'form-control'}),
+            'value': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': '10 or 500',
+                'step': '0.01',
+                'min': '0',
+            }),
+            'expiry_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+            }),
+            'usage_limit': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Leave blank for unlimited',
+                'min': '1',
+            }),
+            'minimum_order_amount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': '0.00',
+                'step': '0.01',
+                'min': '0',
+            }),
+            'applies_to': forms.Select(attrs={'class': 'form-control'}),
+            'products': forms.SelectMultiple(attrs={
+                'class': 'form-control discount-multi-select',
+                'size': 8,
+            }),
+            'categories': forms.SelectMultiple(attrs={
+                'class': 'form-control discount-multi-select',
+                'size': 8,
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['products'].queryset = Product.objects.select_related('category').order_by('name')
+        self.fields['categories'].queryset = Category.objects.order_by('name')
+
+    def clean_code(self):
+        return self.cleaned_data['code'].strip().upper()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        discount_type = cleaned_data.get('discount_type')
+        value = cleaned_data.get('value')
+        applies_to = cleaned_data.get('applies_to')
+        products = cleaned_data.get('products')
+        categories = cleaned_data.get('categories')
+
+        if value is not None and value <= 0:
+            self.add_error('value', 'Enter a discount value greater than zero.')
+        if discount_type == Discount.TYPE_PERCENTAGE and value is not None and value > 100:
+            self.add_error('value', 'Percentage discounts cannot be more than 100.')
+        if applies_to == Discount.APPLY_PRODUCTS and not products:
+            self.add_error('products', 'Select at least one product for this discount.')
+        if applies_to == Discount.APPLY_CATEGORIES and not categories:
+            self.add_error('categories', 'Select at least one category for this discount.')
+        return cleaned_data
 
 
 class CustomerReviewForm(forms.ModelForm):

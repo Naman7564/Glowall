@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 from django.conf import settings
 from django.db import models
@@ -366,6 +366,132 @@ class ProductImage(models.Model):
         super().save(*args, **kwargs)
 
 
+class Discount(models.Model):
+    """Coupon-backed discounts for checkout."""
+
+    TYPE_FIXED = 'fixed'
+    TYPE_PERCENTAGE = 'percentage'
+    TYPE_CHOICES = [
+        (TYPE_FIXED, 'Fixed amount'),
+        (TYPE_PERCENTAGE, 'Percentage'),
+    ]
+
+    APPLY_ORDER = 'order'
+    APPLY_PRODUCTS = 'products'
+    APPLY_CATEGORIES = 'categories'
+    APPLY_CHOICES = [
+        (APPLY_ORDER, 'Entire order'),
+        (APPLY_PRODUCTS, 'Specific products'),
+        (APPLY_CATEGORIES, 'Specific categories'),
+    ]
+
+    name = models.CharField(max_length=120)
+    code = models.CharField(max_length=40, unique=True, db_index=True)
+    discount_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    value = models.DecimalField(max_digits=10, decimal_places=2)
+    is_active = models.BooleanField(default=True)
+    expiry_date = models.DateField(blank=True, null=True)
+    usage_limit = models.PositiveIntegerField(blank=True, null=True)
+    usage_count = models.PositiveIntegerField(default=0)
+    minimum_order_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    applies_to = models.CharField(max_length=20, choices=APPLY_CHOICES, default=APPLY_ORDER)
+    products = models.ManyToManyField(Product, blank=True, related_name='discounts')
+    categories = models.ManyToManyField(Category, blank=True, related_name='discounts')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at', 'code']
+
+    def save(self, *args, **kwargs):
+        self.code = (self.code or '').strip().upper()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.code} - {self.name}'
+
+    @property
+    def is_expired(self):
+        return bool(self.expiry_date and self.expiry_date < timezone.localdate())
+
+    @property
+    def has_usage_remaining(self):
+        return self.usage_limit is None or self.usage_count < self.usage_limit
+
+    @property
+    def is_currently_usable(self):
+        return self.is_active and not self.is_expired and self.has_usage_remaining
+
+    @property
+    def display_value(self):
+        if self.discount_type == self.TYPE_PERCENTAGE:
+            return f'{self.value}%'
+        return f'Rs. {self.value}'
+
+    def _item_product(self, item):
+        if isinstance(item, dict):
+            return item.get('product')
+        return getattr(item, 'product', None)
+
+    def _item_total(self, item):
+        total = item.get('total_price') if isinstance(item, dict) else getattr(item, 'total_price', Decimal('0.00'))
+        return Decimal(total or 0)
+
+    def eligible_subtotal(self, items):
+        product_ids = None
+        category_ids = None
+        if self.applies_to == self.APPLY_PRODUCTS:
+            product_ids = set(self.products.values_list('id', flat=True))
+        elif self.applies_to == self.APPLY_CATEGORIES:
+            category_ids = set(self.categories.values_list('id', flat=True))
+
+        subtotal = Decimal('0.00')
+        for item in items:
+            product = self._item_product(item)
+            if not product:
+                continue
+            if product_ids is not None and product.id not in product_ids:
+                continue
+            if category_ids is not None and product.category_id not in category_ids:
+                continue
+            subtotal += self._item_total(item)
+        return subtotal
+
+    def validate_for_items(self, items, order_subtotal):
+        if not self.is_active:
+            return False, 'This coupon is not active.'
+        if self.is_expired:
+            return False, 'This coupon has expired.'
+        if not self.has_usage_remaining:
+            return False, 'This coupon usage limit has been reached.'
+
+        order_subtotal = Decimal(order_subtotal or 0)
+        if order_subtotal < self.minimum_order_amount:
+            return False, f'Minimum order amount for this coupon is Rs. {self.minimum_order_amount}.'
+
+        if self.applies_to == self.APPLY_PRODUCTS and not self.products.exists():
+            return False, 'This coupon is not assigned to any product.'
+        if self.applies_to == self.APPLY_CATEGORIES and not self.categories.exists():
+            return False, 'This coupon is not assigned to any category.'
+        if self.eligible_subtotal(items) <= 0:
+            return False, 'This coupon is not valid for the selected products.'
+        return True, ''
+
+    def calculate_discount(self, items, order_subtotal):
+        is_valid, _ = self.validate_for_items(items, order_subtotal)
+        if not is_valid:
+            return Decimal('0.00')
+
+        eligible_subtotal = self.eligible_subtotal(items)
+        if self.discount_type == self.TYPE_PERCENTAGE:
+            amount = eligible_subtotal * (self.value / Decimal('100'))
+        else:
+            amount = self.value
+
+        amount = min(amount, eligible_subtotal, Decimal(order_subtotal or 0))
+        return amount.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+
 class Order(models.Model):
     """Direct checkout orders submitted from the storefront."""
 
@@ -403,6 +529,16 @@ class Order(models.Model):
     city = models.CharField(max_length=80)
     state = models.CharField(max_length=80)
     pincode = models.CharField(max_length=10)
+    original_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    discount = models.ForeignKey(
+        Discount,
+        on_delete=models.SET_NULL,
+        related_name='orders',
+        null=True,
+        blank=True,
+    )
+    coupon_code = models.CharField(max_length=40, blank=True)
+    discount_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
     total_price = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_NEW)
     payment_status = models.CharField(
@@ -456,6 +592,10 @@ class Order(models.Model):
         if len(self.line_items) == 1:
             return self.line_items[0].product.name
         return f'{self.line_items[0].product.name} +{len(self.line_items) - 1} more'
+
+    @property
+    def subtotal_price(self):
+        return self.original_price or sum(item.total_price for item in self.line_items)
 
 
 class OrderItem(models.Model):

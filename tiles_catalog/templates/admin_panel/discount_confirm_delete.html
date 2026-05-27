@@ -1,0 +1,26 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Delete Discount - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Delete Discount</h1>
+    <a href="{% url 'admin_panel:discount_list' %}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Back to Discounts
+    </a>
+</div>
+
+<div class="confirm-card">
+    <div class="confirm-icon danger">
+        <i class="fas fa-trash"></i>
+    </div>
+    <h2>Delete coupon {{ discount.code }}?</h2>
+    <p>This removes the discount from future checkout use. Existing orders keep their saved coupon code and discount amount.</p>
+
+    <form method="post" class="confirm-form">
+        {% csrf_token %}
+        <a href="{% url 'admin_panel:discount_list' %}" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-danger">Delete Discount</button>
+    </form>
+</div>
+{% endblock %}

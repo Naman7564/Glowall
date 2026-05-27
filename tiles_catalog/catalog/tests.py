@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from catalog.models import Category, Order, OrderItem, Product, ProductWeight
+from catalog.models import Category, Discount, Order, OrderItem, Product, ProductWeight
 
 
 class OrderViewsRegressionTests(TestCase):
@@ -268,3 +268,86 @@ class StorefrontPriceConsistencyTests(TestCase):
         self.assertEqual(order_item.unit_price, Decimal('2299.00'))
         self.assertEqual(order_item.total_price, Decimal('4598.00'))
         self.assertEqual(order.total_price, Decimal('4598.00'))
+
+
+class DiscountCheckoutTests(TestCase):
+    def setUp(self):
+        self.category = Category.objects.create(name='Premium Marble')
+        self.product = Product.objects.create(
+            name='White Pearl',
+            gmt_code='410',
+            category=self.category,
+            description='Discountable product',
+            price=Decimal('1000.00'),
+            is_available=True,
+        )
+        self.discount = Discount.objects.create(
+            name='Glow launch',
+            code='glow10',
+            discount_type=Discount.TYPE_PERCENTAGE,
+            value=Decimal('10.00'),
+            applies_to=Discount.APPLY_CATEGORIES,
+            minimum_order_amount=Decimal('1500.00'),
+            usage_limit=2,
+        )
+        self.discount.categories.add(self.category)
+
+        session = self.client.session
+        session['checkout_item'] = [{
+            'product_id': str(self.product.pk),
+            'quantity': 2,
+            'weight_id': '',
+            'weight_selected': False,
+        }]
+        session.save()
+
+    def test_checkout_applies_valid_coupon_to_summary(self):
+        response = self.client.post(reverse('catalog:apply_coupon'), {'coupon_code': 'GLOW10'})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.client.session['checkout_coupon_code'], 'GLOW10')
+
+        checkout_response = self.client.get(reverse('catalog:checkout'))
+        totals = checkout_response.context['checkout_totals']
+        self.assertEqual(totals['original_price'], Decimal('2000.00'))
+        self.assertEqual(totals['discount_amount'], Decimal('200.00'))
+        self.assertEqual(totals['final_total'], Decimal('1800.00'))
+
+    @patch('catalog.views.create_cashfree_order')
+    def test_place_order_persists_discounted_total_and_usage(self, mock_create_cashfree_order):
+        mock_create_cashfree_order.return_value = {
+            'cashfree_order_id': 'ORD-DISCOUNT-0001',
+            'cashfree_cf_order_id': 'CF-DISCOUNT-0001',
+            'payment_session_id': 'session-456',
+            'payment_link': 'https://example.com/pay',
+        }
+
+        response = self.client.post(
+            reverse('catalog:place_order'),
+            {
+                'full_name': 'Coupon Buyer',
+                'phone_number': '9999999999',
+                'email': 'coupon@example.com',
+                'address': '10 Coupon Street',
+                'city': 'Test City',
+                'state': 'Test State',
+                'pincode': '123456',
+                'coupon_code': 'GLOW10',
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        order = Order.objects.latest('id')
+        self.assertEqual(order.original_price, Decimal('2000.00'))
+        self.assertEqual(order.discount_amount, Decimal('200.00'))
+        self.assertEqual(order.total_price, Decimal('1800.00'))
+        self.assertEqual(order.coupon_code, 'GLOW10')
+
+        self.discount.refresh_from_db()
+        self.assertEqual(self.discount.usage_count, 1)
+
+    def test_invalid_coupon_does_not_store_checkout_coupon(self):
+        response = self.client.post(reverse('catalog:apply_coupon'), {'coupon_code': 'NOPE'})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertNotIn('checkout_coupon_code', self.client.session)

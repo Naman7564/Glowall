@@ -5877,10 +5877,113 @@ body.nav-open {
     color: #6b7280;
 }
 
+.checkout-summary-discount {
+    color: #047857;
+}
+
 .checkout-summary-total {
     font-size: 18px;
     font-weight: 700;
     color: #111827;
+}
+
+.checkout-coupon-card {
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 18px;
+    background: #f8fbf8;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.checkout-coupon-heading {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+}
+
+.checkout-coupon-icon {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+}
+
+.checkout-coupon-heading strong,
+.checkout-coupon-heading span {
+    display: block;
+}
+
+.checkout-coupon-heading strong {
+    color: #111827;
+    font-size: 15px;
+}
+
+.checkout-coupon-heading span {
+    margin-top: 3px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.checkout-coupon-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+}
+
+.checkout-coupon-input {
+    min-width: 0;
+    height: 46px;
+    padding: 0 14px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 14px;
+    background: #ffffff;
+    color: #111827;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.checkout-coupon-input:focus {
+    outline: none;
+    border-color: rgba(16, 185, 129, 0.75);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+}
+
+.checkout-coupon-btn {
+    height: 46px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 14px;
+    background: #047857;
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.checkout-coupon-message {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.checkout-coupon-message.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.checkout-coupon-message.error {
+    background: #fee2e2;
+    color: #991b1b;
 }
 
 .checkout-delivery-notice {
@@ -6052,6 +6155,14 @@ body.nav-open {
     background: rgba(255, 250, 240, 0.72);
 }
 
+.checkout-success-totals {
+    max-width: 520px;
+    margin: 24px auto 0;
+    padding: 18px;
+    border-radius: 20px;
+    background: #ffffff;
+}
+
 .checkout-success-actions {
     display: flex;
     justify-content: center;
@@ -6113,6 +6224,14 @@ body.nav-open {
 
     .checkout-product-copy h3 {
         font-size: 18px;
+    }
+
+    .checkout-coupon-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .checkout-coupon-btn {
+        width: 100%;
     }
 
     .checkout-success-actions {

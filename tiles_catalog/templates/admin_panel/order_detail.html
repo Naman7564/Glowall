@@ -69,8 +69,18 @@
                         <span>Total Items</span>
                         <span>{{ order.line_items|length }} items ({{ order.quantity }} units total)</span>
                     </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 13.5px; color: var(--admin-text-light);">
+                        <span>Original Price</span>
+                        <span>{{ order.subtotal_price|currency }}</span>
+                    </div>
+                    {% if order.discount_amount %}
+                    <div style="display: flex; justify-content: space-between; font-size: 13.5px; color: var(--admin-success);">
+                        <span>Discount{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}</span>
+                        <span>-{{ order.discount_amount|currency }}</span>
+                    </div>
+                    {% endif %}
                     <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; color: var(--admin-text); padding-top: 6px;">
-                        <span>Total Order Amount</span>
+                        <span>Final Payable Amount</span>
                         <span style="font-size: 18px; color: var(--admin-text);">{{ order.total_price|currency }}</span>
                     </div>
                 </div>

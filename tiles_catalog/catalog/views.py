@@ -2,11 +2,13 @@ import logging
 import re
 import traceback
 import uuid
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q, Count, IntegerField
+from django.db import transaction
+from django.db.models import Q, Count, IntegerField, F
 from django.db.models.functions import Cast, Trim
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -14,7 +16,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .models import Category, Product, CustomerReview, Order, Poster
+from .models import Category, Product, CustomerReview, Order, Poster, Discount
 from .forms import OrderForm
 from .payments import (
     CashfreeGatewayError,
@@ -33,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 CHECKOUT_SESSION_KEY = 'checkout_item'
 CART_SESSION_KEY = 'shopping_cart'
+CHECKOUT_COUPON_SESSION_KEY = 'checkout_coupon_code'
 
 
 def _parse_gmt_code_filter(value):
@@ -175,6 +178,44 @@ def _load_checkout_items(request):
     }
 
 
+def _normalize_coupon_code(value):
+    return (value or '').strip().upper()
+
+
+def _calculate_checkout_totals(checkout_data, coupon_code=''):
+    subtotal = Decimal(checkout_data['total_order_price'] or 0)
+    coupon_code = _normalize_coupon_code(coupon_code)
+    discount = None
+    discount_amount = Decimal('0.00')
+    coupon_error = ''
+
+    if coupon_code:
+        discount = (
+            Discount.objects
+            .prefetch_related('products', 'categories')
+            .filter(code=coupon_code)
+            .first()
+        )
+        if discount:
+            is_valid, coupon_error = discount.validate_for_items(checkout_data['items'], subtotal)
+            if is_valid:
+                discount_amount = discount.calculate_discount(checkout_data['items'], subtotal)
+            else:
+                discount = None
+        else:
+            coupon_error = 'Invalid coupon code.'
+
+    final_total = max(subtotal - discount_amount, Decimal('0.00'))
+    return {
+        'original_price': subtotal,
+        'discount': discount,
+        'coupon_code': coupon_code if discount else '',
+        'coupon_error': coupon_error,
+        'discount_amount': discount_amount,
+        'final_total': final_total,
+    }
+
+
 def _get_checkout_form_initial(request):
     initial = {}
     if request.user.is_authenticated:
@@ -238,11 +279,19 @@ def _get_profile_snapshot(user):
     }
 
 
-def _render_checkout(request, form, checkout_data, status=200):
+def _render_checkout(request, form, checkout_data, status=200, coupon_code=None, coupon_error=''):
+    if coupon_code is None:
+        coupon_code = request.session.get(CHECKOUT_COUPON_SESSION_KEY, '')
+    totals = _calculate_checkout_totals(checkout_data, coupon_code)
+    if coupon_error:
+        totals['coupon_error'] = coupon_error
     context = {
         'form': form,
         'checkout_items': checkout_data['items'],
         'total_order_price': checkout_data['total_order_price'],
+        'checkout_totals': totals,
+        'applied_coupon': totals['discount'],
+        'coupon_code': coupon_code or totals['coupon_code'],
         'page_title': 'Checkout',
     }
     return render(request, 'catalog/checkout.html', context, status=status)
@@ -525,6 +574,32 @@ def checkout_view(request):
 
 
 @require_POST
+def apply_coupon_view(request):
+    """Validate a coupon against the current checkout selection."""
+    checkout_data = _load_checkout_items(request)
+    if not checkout_data:
+        messages.error(request, 'Select a product before applying a coupon.')
+        return redirect('catalog:product_list')
+
+    coupon_code = _normalize_coupon_code(request.POST.get('coupon_code'))
+    if not coupon_code:
+        request.session.pop(CHECKOUT_COUPON_SESSION_KEY, None)
+        messages.info(request, 'Coupon removed from this checkout.')
+        return redirect('catalog:checkout')
+
+    totals = _calculate_checkout_totals(checkout_data, coupon_code)
+    if totals['discount']:
+        request.session[CHECKOUT_COUPON_SESSION_KEY] = coupon_code
+        request.session.modified = True
+        messages.success(request, f'Coupon {coupon_code} applied successfully.')
+    else:
+        request.session.pop(CHECKOUT_COUPON_SESSION_KEY, None)
+        messages.error(request, totals['coupon_error'] or 'Invalid coupon code.')
+
+    return redirect('catalog:checkout')
+
+
+@require_POST
 def place_order_view(request):
     """Validate checkout input, create an order, and initiate Cashfree payment."""
     checkout_data = _load_checkout_items(request)
@@ -549,28 +624,85 @@ def place_order_view(request):
         messages.error(request, 'Enter all required checkout details before continuing to payment.')
         return _render_checkout(request, form, checkout_data, status=400)
 
+    coupon_code = _normalize_coupon_code(
+        request.POST.get('coupon_code') or request.session.get(CHECKOUT_COUPON_SESSION_KEY, '')
+    )
+    preview_totals = _calculate_checkout_totals(checkout_data, coupon_code)
+    if coupon_code and not preview_totals['discount']:
+        messages.error(request, preview_totals['coupon_error'] or 'Invalid coupon code.')
+        return _render_checkout(request, form, checkout_data, status=400, coupon_code=coupon_code)
+
     try:
         from .models import OrderItem
-        order = form.save(commit=False)
-        if request.user.is_authenticated:
-            order.user = request.user
-        order.total_price = checkout_data['total_order_price']
-        order.payment_status = Order.PAYMENT_PENDING
-        order.cashfree_order_id = f'TMP-{uuid.uuid4().hex[:32].upper()}'
-        order.save()
-        
-        for item in checkout_data['items']:
-            OrderItem.objects.create(
-                order=order,
-                product=item['product'],
-                weight=item['weight'],
-                quantity=item['quantity'],
-                unit_price=item['unit_price'],
-                total_price=item['total_price']
-            )
 
-        order.cashfree_order_id = f'ORD-{order.pk:06d}'
-        order.save(update_fields=['cashfree_order_id', 'updated_at'])
+        with transaction.atomic():
+            discount = None
+            discount_amount = Decimal('0.00')
+            original_price = Decimal(checkout_data['total_order_price'] or 0)
+
+            if coupon_code:
+                discount = (
+                    Discount.objects
+                    .select_for_update()
+                    .prefetch_related('products', 'categories')
+                    .filter(code=coupon_code)
+                    .first()
+                )
+                if not discount:
+                    messages.error(request, 'Invalid coupon code.')
+                    return _render_checkout(request, form, checkout_data, status=400, coupon_code=coupon_code)
+
+                is_valid, coupon_error = discount.validate_for_items(checkout_data['items'], original_price)
+                if not is_valid:
+                    messages.error(request, coupon_error or 'Invalid coupon code.')
+                    return _render_checkout(
+                        request,
+                        form,
+                        checkout_data,
+                        status=400,
+                        coupon_code=coupon_code,
+                        coupon_error=coupon_error,
+                    )
+                discount_amount = discount.calculate_discount(checkout_data['items'], original_price)
+
+            final_total = max(original_price - discount_amount, Decimal('0.00'))
+
+            order = form.save(commit=False)
+            if request.user.is_authenticated:
+                order.user = request.user
+            order.original_price = original_price
+            order.discount = discount
+            order.coupon_code = coupon_code if discount else ''
+            order.discount_amount = discount_amount
+            order.total_price = final_total
+            order.payment_status = Order.PAYMENT_PENDING
+            order.cashfree_order_id = f'TMP-{uuid.uuid4().hex[:32].upper()}'
+            order.save()
+
+            for item in checkout_data['items']:
+                OrderItem.objects.create(
+                    order=order,
+                    product=item['product'],
+                    weight=item['weight'],
+                    quantity=item['quantity'],
+                    unit_price=item['unit_price'],
+                    total_price=item['total_price']
+                )
+
+            if discount:
+                Discount.objects.filter(pk=discount.pk).update(usage_count=F('usage_count') + 1)
+
+            if order.total_price <= 0:
+                order.payment_status = Order.PAYMENT_SUCCESS
+                order.status = Order.STATUS_PROCESSING
+
+            order.cashfree_order_id = f'ORD-{order.pk:06d}'
+            order.save(update_fields=['cashfree_order_id', 'payment_status', 'status', 'updated_at'])
+
+        if order.total_price <= 0:
+            request.session.pop(CHECKOUT_SESSION_KEY, None)
+            request.session.pop(CHECKOUT_COUPON_SESSION_KEY, None)
+            return redirect('catalog:checkout_success', order_id=order.pk)
 
         cashfree_urls = _build_cashfree_urls(request)
         gateway_order = create_cashfree_order(
@@ -596,6 +728,7 @@ def place_order_view(request):
         )
 
         request.session.pop(CHECKOUT_SESSION_KEY, None)
+        request.session.pop(CHECKOUT_COUPON_SESSION_KEY, None)
         if gateway_order.get('payment_link'):
             return redirect(gateway_order['payment_link'])
 

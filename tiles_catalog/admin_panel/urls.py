@@ -18,6 +18,13 @@ urlpatterns = [
     path('products/<int:pk>/delete/', views.product_delete, name='product_delete'),
     path('products/<int:pk>/toggle-featured/', views.product_toggle_featured, name='product_toggle_featured'),
     path('products/<int:pk>/toggle-available/', views.product_toggle_available, name='product_toggle_available'),
+
+    # Discounts
+    path('discounts/', views.discount_list, name='discount_list'),
+    path('discounts/add/', views.discount_add, name='discount_add'),
+    path('discounts/<int:pk>/edit/', views.discount_edit, name='discount_edit'),
+    path('discounts/<int:pk>/delete/', views.discount_delete, name='discount_delete'),
+    path('discounts/<int:pk>/toggle-active/', views.discount_toggle_active, name='discount_toggle_active'),
     
     # Categories
     path('categories/', views.category_list, name='category_list'),

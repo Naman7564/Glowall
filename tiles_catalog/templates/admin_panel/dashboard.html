@@ -58,6 +58,16 @@
             <span class="stat-label">Total Orders</span>
         </div>
     </div>
+
+    <div class="stat-card">
+        <div class="stat-icon available">
+            <i class="fas fa-tags"></i>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">{{ active_discounts }}</span>
+            <span class="stat-label">Active Discounts</span>
+        </div>
+    </div>
 </div>
 
 <div class="dashboard-grid">
@@ -174,6 +184,10 @@
         <a href="{% url 'admin_panel:order_list' %}" class="action-card">
             <i class="fas fa-shopping-bag"></i>
             <span>View Orders</span>
+        </a>
+        <a href="{% url 'admin_panel:discount_add' %}" class="action-card">
+            <i class="fas fa-ticket"></i>
+            <span>Add Discount</span>
         </a>
         <a href="{% url 'catalog:home' %}" class="action-card">
             <i class="fas fa-external-link-alt"></i>

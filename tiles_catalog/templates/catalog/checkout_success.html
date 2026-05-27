@@ -92,6 +92,21 @@
             </div>
             {% endfor %}
 
+            <div class="checkout-summary-lines checkout-success-totals">
+                <div class="checkout-summary-row">
+                    <span>Original Price</span>
+                    <strong>{{ order.subtotal_price|inr }}</strong>
+                </div>
+                <div class="checkout-summary-row checkout-summary-discount">
+                    <span>Discount{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}</span>
+                    <strong>-{{ order.discount_amount|inr }}</strong>
+                </div>
+                <div class="checkout-summary-total">
+                    <span>Final Total</span>
+                    <strong>{{ order.total_price|inr }}</strong>
+                </div>
+            </div>
+
             <div class="checkout-success-actions">
                 {% if order.payment_status != 'SUCCESS' %}
                 <a href="{% url 'catalog:cart' %}" class="btn btn-primary">Try Again</a>
