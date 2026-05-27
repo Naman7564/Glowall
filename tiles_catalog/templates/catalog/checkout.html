@@ -161,31 +161,33 @@
                             <input
                                 type="text"
                                 name="coupon_code"
+                                id="coupon-input"
                                 value="{{ coupon_code }}"
                                 class="checkout-coupon-input"
                                 placeholder="GLOW10"
                                 autocomplete="off"
                             >
                             <button
-                                type="submit"
+                                type="button"
+                                id="coupon-apply-btn"
                                 class="checkout-coupon-btn"
-                                formaction="{% url 'catalog:apply_coupon' %}"
-                                formnovalidate
                             >
                                 Apply
                             </button>
                         </div>
-                        {% if applied_coupon %}
-                        <div class="checkout-coupon-message success" role="status">
-                            <i class="fas fa-circle-check"></i>
-                            <span>{{ applied_coupon.code }} applied. You saved {{ checkout_totals.discount_amount|inr }}.</span>
+                        <div id="coupon-message">
+                            {% if applied_coupon %}
+                            <div class="checkout-coupon-message success" role="status">
+                                <i class="fas fa-circle-check"></i>
+                                <span>{{ applied_coupon.code }} applied. You saved {{ checkout_totals.discount_amount|inr }}.</span>
+                            </div>
+                            {% elif checkout_totals.coupon_error %}
+                            <div class="checkout-coupon-message error" role="alert">
+                                <i class="fas fa-circle-exclamation"></i>
+                                <span>{{ checkout_totals.coupon_error }}</span>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% elif checkout_totals.coupon_error %}
-                        <div class="checkout-coupon-message error" role="alert">
-                            <i class="fas fa-circle-exclamation"></i>
-                            <span>{{ checkout_totals.coupon_error }}</span>
-                        </div>
-                        {% endif %}
                     </div>
 
                     <div class="checkout-summary-lines">
@@ -193,13 +195,13 @@
                             <span>Original Price</span>
                             <strong>{{ checkout_totals.original_price|inr }}</strong>
                         </div>
-                        <div class="checkout-summary-row checkout-summary-discount">
+                        <div class="checkout-summary-row checkout-summary-discount" id="discount-row"{% if checkout_totals.discount_amount == 0 %} style="display:none"{% endif %}>
                             <span>Discount Amount</span>
-                            <strong>-{{ checkout_totals.discount_amount|inr }}</strong>
+                            <strong id="discount-amount">-{{ checkout_totals.discount_amount|inr }}</strong>
                         </div>
                         <div class="checkout-summary-total">
                             <span>Final Total</span>
-                            <strong>{{ checkout_totals.final_total|inr }}</strong>
+                            <strong id="final-total">{{ checkout_totals.final_total|inr }}</strong>
                         </div>
                     </div>
 
@@ -263,6 +265,124 @@ document.addEventListener('DOMContentLoaded', function () {
             loadingLabel.hidden = false;
         }
     });
+
+    // --- Coupon AJAX ---
+    const couponInput = document.getElementById('coupon-input');
+    const couponBtn = document.getElementById('coupon-apply-btn');
+    const couponMessage = document.getElementById('coupon-message');
+    const discountRow = document.getElementById('discount-row');
+    const discountAmountEl = document.getElementById('discount-amount');
+    const finalTotalEl = document.getElementById('final-total');
+
+    function getCSRFToken() {
+        const csrfInput = form.querySelector('[name=csrfmiddlewaretoken]');
+        return csrfInput ? csrfInput.value : '';
+    }
+
+    function formatINR(amount) {
+        const num = parseFloat(amount);
+        if (isNaN(num)) return '₹0.00';
+        return '₹' + num.toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function showCouponMessage(html, type) {
+        if (!couponMessage) return;
+        couponMessage.innerHTML = html;
+        // Auto-dismiss after 6 seconds
+        setTimeout(function () {
+            const msg = couponMessage.querySelector('.checkout-coupon-message');
+            if (msg) {
+                msg.style.transition = 'opacity 0.3s ease';
+                msg.style.opacity = '0';
+                setTimeout(function () { msg.remove(); }, 300);
+            }
+        }, 6000);
+    }
+
+    function updateTotals(data) {
+        const discountAmount = parseFloat(data.discount_amount) || 0;
+        const finalTotal = parseFloat(data.final_total) || 0;
+
+        // Update discount row
+        if (discountAmount > 0) {
+            if (discountRow) discountRow.style.display = '';
+            if (discountAmountEl) discountAmountEl.textContent = '-' + formatINR(data.discount_amount);
+        } else {
+            if (discountRow) discountRow.style.display = 'none';
+        }
+
+        // Update final total
+        if (finalTotalEl) finalTotalEl.textContent = formatINR(data.final_total);
+    }
+
+    if (couponBtn && couponInput) {
+        couponBtn.addEventListener('click', function () {
+            // Prevent duplicate submissions
+            if (couponBtn.disabled) return;
+            couponBtn.disabled = true;
+            couponBtn.textContent = 'Applying...';
+
+            const code = couponInput.value.trim();
+
+            fetch('{% url "catalog:apply_coupon" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: new URLSearchParams({
+                    'coupon_code': code
+                })
+            })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    return { status: response.status, data: data };
+                });
+            })
+            .then(function (result) {
+                const data = result.data;
+
+                if (data.success) {
+                    // Update coupon input value
+                    couponInput.value = data.coupon_code || '';
+
+                    // Show success message
+                    let msgHtml = '<div class="checkout-coupon-message success" role="status"><i class="fas fa-circle-check"></i><span>' + data.message + '</span></div>';
+                    showCouponMessage(msgHtml, 'success');
+
+                    // Update totals
+                    updateTotals(data);
+                } else {
+                    // Show error message
+                    let errHtml = '<div class="checkout-coupon-message error" role="alert"><i class="fas fa-circle-exclamation"></i><span>' + data.message + '</span></div>';
+                    showCouponMessage(errHtml, 'error');
+
+                    // Update totals with the returned values (discount removed)
+                    updateTotals(data);
+                }
+            })
+            .catch(function (error) {
+                let errHtml = '<div class="checkout-coupon-message error" role="alert"><i class="fas fa-circle-exclamation"></i><span>Something went wrong. Please try again.</span></div>';
+                showCouponMessage(errHtml, 'error');
+            })
+            .finally(function () {
+                couponBtn.disabled = false;
+                couponBtn.textContent = 'Apply';
+            });
+        });
+
+        // Allow pressing Enter in the coupon input
+        couponInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                couponBtn.click();
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

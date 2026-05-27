@@ -578,12 +578,26 @@ def apply_coupon_view(request):
     """Validate a coupon against the current checkout selection."""
     checkout_data = _load_checkout_items(request)
     if not checkout_data:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'Select a product before applying a coupon.'}, status=400)
         messages.error(request, 'Select a product before applying a coupon.')
         return redirect('catalog:product_list')
 
     coupon_code = _normalize_coupon_code(request.POST.get('coupon_code'))
+
     if not coupon_code:
         request.session.pop(CHECKOUT_COUPON_SESSION_KEY, None)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            totals = _calculate_checkout_totals(checkout_data, '')
+            return JsonResponse({
+                'success': True,
+                'message': 'Coupon removed.',
+                'coupon_removed': True,
+                'coupon_code': '',
+                'discount_amount': '0.00',
+                'original_price': str(totals['original_price']),
+                'final_total': str(totals['final_total']),
+            })
         messages.info(request, 'Coupon removed from this checkout.')
         return redirect('catalog:checkout')
 
@@ -591,9 +605,28 @@ def apply_coupon_view(request):
     if totals['discount']:
         request.session[CHECKOUT_COUPON_SESSION_KEY] = coupon_code
         request.session.modified = True
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': f'Coupon {coupon_code} applied successfully!',
+                'coupon_code': totals['coupon_code'],
+                'discount_amount': str(totals['discount_amount']),
+                'original_price': str(totals['original_price']),
+                'final_total': str(totals['final_total']),
+                'discount_name': totals['discount'].code if totals['discount'] else '',
+            })
         messages.success(request, f'Coupon {coupon_code} applied successfully.')
     else:
         request.session.pop(CHECKOUT_COUPON_SESSION_KEY, None)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'message': totals['coupon_error'] or 'Invalid coupon code.',
+                'coupon_code': '',
+                'discount_amount': '0.00',
+                'original_price': str(totals['original_price']),
+                'final_total': str(totals['final_total']),
+            })
         messages.error(request, totals['coupon_error'] or 'Invalid coupon code.')
 
     return redirect('catalog:checkout')
