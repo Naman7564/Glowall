@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initForms();
     initBarFill();
     initModernFileUpload();
+    initCategorySearch();
 });
 
 /**
@@ -364,6 +365,30 @@ function toggleAvailable(productId) {
  */
 function confirmDelete(message) {
     return confirm(message || 'Are you sure you want to delete this item?');
+}
+
+/**
+ * Discount Category Tag Search
+ */
+function initCategorySearch() {
+    const searchInput = document.getElementById('categorySearch');
+    if (!searchInput) return;
+
+    const container = document.getElementById('categoryTagContainer');
+    const tags = container ? container.querySelectorAll('.category-tag') : [];
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+
+        tags.forEach(tag => {
+            const name = tag.getAttribute('data-category-name') || '';
+            if (!query || name.includes(query)) {
+                tag.classList.remove('is-hidden');
+            } else {
+                tag.classList.add('is-hidden');
+            }
+        });
+    });
 }
 
 // Add CSS animation

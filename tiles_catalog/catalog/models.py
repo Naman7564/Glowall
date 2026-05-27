@@ -381,7 +381,6 @@ class Discount(models.Model):
     APPLY_CATEGORIES = 'categories'
     APPLY_CHOICES = [
         (APPLY_ORDER, 'Entire order'),
-        (APPLY_PRODUCTS, 'Specific products'),
         (APPLY_CATEGORIES, 'Specific categories'),
     ]
 

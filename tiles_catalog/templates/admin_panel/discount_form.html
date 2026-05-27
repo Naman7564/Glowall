@@ -107,7 +107,7 @@
                             </span>
                             <div>
                                 <h3>Discount Scope</h3>
-                                <p>Apply to the whole order, selected products, or selected categories.</p>
+                                <p>Apply to the entire order or specific categories.</p>
                             </div>
                         </div>
                     </div>
@@ -122,20 +122,23 @@
                             {% if form.applies_to.errors %}<span class="error">{{ form.applies_to.errors.0 }}</span>{% endif %}
                         </div>
 
-                        <div class="discount-target-grid">
-                            <div class="form-group discount-target-products">
-                                <label for="{{ form.products.id_for_label }}">Specific Products</label>
-                                {{ form.products }}
-                                <span class="field-hint">Used only when scope is set to specific products.</span>
-                                {% if form.products.errors %}<span class="error">{{ form.products.errors.0 }}</span>{% endif %}
+                        <div class="form-group discount-category-group" id="categorySelectionGroup">
+                            <label>Specific Categories</label>
+                            <div class="category-search-bar">
+                                <i class="fas fa-search"></i>
+                                <input type="text" class="category-search-input" id="categorySearch" placeholder="Search categories..." autocomplete="off">
                             </div>
-
-                            <div class="form-group discount-target-categories">
-                                <label for="{{ form.categories.id_for_label }}">Specific Categories</label>
-                                {{ form.categories }}
-                                <span class="field-hint">Used only when scope is set to specific categories.</span>
-                                {% if form.categories.errors %}<span class="error">{{ form.categories.errors.0 }}</span>{% endif %}
+                            <div class="category-tag-container" id="categoryTagContainer">
+                                {% for value, label in form.categories.field.choices %}
+                                <label class="category-tag" data-category-name="{{ label|lower }}">
+                                    <input type="checkbox" name="{{ form.categories.html_name }}" value="{{ value }}"
+                                           {% if value in form.categories.value %}checked{% endif %}>
+                                    <span class="tag-label">{{ label }}</span>
+                                </label>
+                                {% endfor %}
                             </div>
+                            <span class="field-hint">Select the categories this discount applies to. Only used when scope is set to "Specific categories".</span>
+                            {% if form.categories.errors %}<span class="error">{{ form.categories.errors.0 }}</span>{% endif %}
                         </div>
                     </div>
                 </section>

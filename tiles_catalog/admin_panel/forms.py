@@ -104,7 +104,7 @@ class DiscountForm(forms.ModelForm):
         fields = [
             'name', 'code', 'discount_type', 'value', 'is_active',
             'expiry_date', 'usage_limit', 'minimum_order_amount',
-            'applies_to', 'products', 'categories',
+            'applies_to', 'categories',
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -138,19 +138,13 @@ class DiscountForm(forms.ModelForm):
                 'min': '0',
             }),
             'applies_to': forms.Select(attrs={'class': 'form-control'}),
-            'products': forms.SelectMultiple(attrs={
-                'class': 'form-control discount-multi-select',
-                'size': 8,
-            }),
-            'categories': forms.SelectMultiple(attrs={
-                'class': 'form-control discount-multi-select',
-                'size': 8,
+            'categories': forms.CheckboxSelectMultiple(attrs={
+                'class': 'category-tag-input',
             }),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['products'].queryset = Product.objects.select_related('category').order_by('name')
         self.fields['categories'].queryset = Category.objects.order_by('name')
 
     def clean_code(self):
@@ -161,15 +155,12 @@ class DiscountForm(forms.ModelForm):
         discount_type = cleaned_data.get('discount_type')
         value = cleaned_data.get('value')
         applies_to = cleaned_data.get('applies_to')
-        products = cleaned_data.get('products')
         categories = cleaned_data.get('categories')
 
         if value is not None and value <= 0:
             self.add_error('value', 'Enter a discount value greater than zero.')
         if discount_type == Discount.TYPE_PERCENTAGE and value is not None and value > 100:
             self.add_error('value', 'Percentage discounts cannot be more than 100.')
-        if applies_to == Discount.APPLY_PRODUCTS and not products:
-            self.add_error('products', 'Select at least one product for this discount.')
         if applies_to == Discount.APPLY_CATEGORIES and not categories:
             self.add_error('categories', 'Select at least one category for this discount.')
         return cleaned_data

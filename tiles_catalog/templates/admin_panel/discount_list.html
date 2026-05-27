@@ -63,9 +63,7 @@
                     </td>
                     <td data-label="Scope">
                         {{ discount.get_applies_to_display }}
-                        {% if discount.applies_to == 'products' %}
-                        <br><small class="text-muted">{{ discount.products.count }} product(s)</small>
-                        {% elif discount.applies_to == 'categories' %}
+                        {% if discount.applies_to == 'categories' %}
                         <br><small class="text-muted">{{ discount.categories.count }} categor{{ discount.categories.count|pluralize:"y,ies" }}</small>
                         {% endif %}
                     </td>
