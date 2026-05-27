@@ -222,8 +222,6 @@ def _get_checkout_form_initial(request):
         full_name = ' '.join(part for part in [request.user.first_name, request.user.last_name] if part).strip()
         if full_name:
             initial['full_name'] = full_name
-        if request.user.email:
-            initial['email'] = request.user.email
         recent_order = (
             Order.objects.filter(user=request.user)
             .only('phone_number', 'address', 'city', 'state', 'pincode')
@@ -244,7 +242,6 @@ def _get_profile_snapshot(user):
         Order.objects.filter(user=user)
         .only(
             'full_name',
-            'email',
             'phone_number',
             'address',
             'city',
@@ -267,12 +264,10 @@ def _get_profile_snapshot(user):
             address_lines.append(location_line)
 
     name = user.get_full_name() or (latest_order.full_name if latest_order else '') or user.username
-    email = user.email or (latest_order.email if latest_order else '')
     phone = latest_order.phone_number if latest_order else ''
 
     return {
         'name': name,
-        'email': email,
         'phone': phone,
         'address_lines': address_lines,
         'latest_order': latest_order,

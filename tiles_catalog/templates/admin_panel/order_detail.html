@@ -103,7 +103,11 @@
                         <div class="customer-detail-item">
                             <span class="customer-detail-label">Email Address</span>
                             <span class="customer-detail-value">
-                                <a href="mailto:{{ order.email }}"><i class="far fa-envelope"></i> {{ order.email }}</a>
+                                {% if order.user and order.user.email %}
+                                <a href="mailto:{{ order.user.email }}"><i class="far fa-envelope"></i> {{ order.user.email }}</a>
+                                {% else %}
+                                <span style="color: var(--admin-text-light);">Not provided</span>
+                                {% endif %}
                             </span>
                         </div>
                         <div class="customer-detail-item">

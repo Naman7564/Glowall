@@ -567,7 +567,6 @@ def order_list(request):
     if search:
         search_filters = (
             Q(full_name__icontains=search) |
-            Q(email__icontains=search) |
             Q(phone_number__icontains=search) |
             Q(cashfree_order_id__icontains=search) |
             Q(items__product__name__icontains=search)

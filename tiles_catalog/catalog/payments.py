@@ -120,7 +120,7 @@ def create_cashfree_order(order, return_url, notify_url):
     customer_details = CustomerDetails(
         customer_id=f'CUST-{order.pk:06d}',
         customer_name=order.full_name,
-        customer_email=order.email,
+        customer_email=order.user.email if order.user and order.user.email else f'order-{order.pk:06d}@glowall.com',
         customer_phone=normalize_cashfree_phone(order.phone_number),
     )
     order_meta = OrderMeta(return_url=return_url, notify_url=notify_url)

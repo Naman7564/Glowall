@@ -523,7 +523,6 @@ class Order(models.Model):
     )
     full_name = models.CharField(max_length=120)
     phone_number = models.CharField(max_length=20)
-    email = models.EmailField()
     address = models.TextField()
     city = models.CharField(max_length=80)
     state = models.CharField(max_length=80)

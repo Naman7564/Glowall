@@ -49,7 +49,6 @@ class OrderViewsRegressionTests(TestCase):
             user=self.customer,
             full_name='Test Customer',
             phone_number='9999999999',
-            email='customer@example.com',
             address='1 Test Street',
             city='Test City',
             state='Test State',
@@ -253,7 +252,7 @@ class StorefrontPriceConsistencyTests(TestCase):
             {
                 'full_name': 'Buyer Name',
                 'phone_number': '9999999999',
-                'email': 'buyer@example.com',
+
                 'address': '1 Test Street',
                 'city': 'Test City',
                 'state': 'Test State',
@@ -327,7 +326,7 @@ class DiscountCheckoutTests(TestCase):
             {
                 'full_name': 'Coupon Buyer',
                 'phone_number': '9999999999',
-                'email': 'coupon@example.com',
+
                 'address': '10 Coupon Street',
                 'city': 'Test City',
                 'state': 'Test State',

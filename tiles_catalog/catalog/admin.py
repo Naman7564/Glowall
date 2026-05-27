@@ -117,8 +117,6 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = [
         'full_name',
         'phone_number',
-        'email',
-        'user__email',
         'user__username',
         'cashfree_order_id',
         'cashfree_payment_id',

@@ -34,8 +34,8 @@
                 <div class="profile-item">
                     <span class="profile-item-label"><i class="fas fa-envelope"></i> Email</span>
                     <p class="profile-item-value">
-                        {% if profile_data.email %}
-                        {{ profile_data.email }}
+                        {% if request.user.email %}
+                        {{ request.user.email }}
                         {% else %}
                         <span class="profile-item-muted">No email available</span>
                         {% endif %}

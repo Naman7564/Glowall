@@ -26,7 +26,7 @@
                         <p class="checkout-card-eyebrow">Billing Details</p>
                         <h2 id="checkout-details-heading">Shipping & billing information</h2>
                     </div>
-                    <p class="checkout-card-note">All fields are required for order processing.</p>
+                    <p class="checkout-card-note">All fields are required.</p>
                 </div>
 
                 {% if form.non_field_errors %}
@@ -53,15 +53,6 @@
                         <p class="checkout-field-help">Share the best number for delivery coordination.</p>
                         {% if form.phone_number.errors %}
                         <span class="error">{{ form.phone_number.errors.0 }}</span>
-                        {% endif %}
-                    </div>
-
-                    <div class="checkout-field checkout-field-full">
-                        <label for="{{ form.email.id_for_label }}">Email</label>
-                        {{ form.email }}
-                        <p class="checkout-field-help">We will send order acknowledgement to this address.</p>
-                        {% if form.email.errors %}
-                        <span class="error">{{ form.email.errors.0 }}</span>
                         {% endif %}
                     </div>
 
@@ -164,7 +155,7 @@
                                 id="coupon-input"
                                 value="{{ coupon_code }}"
                                 class="checkout-coupon-input"
-                                placeholder="GLOW10"
+                                placeholder="Enter coupon code"
                                 autocomplete="off"
                             >
                             <button

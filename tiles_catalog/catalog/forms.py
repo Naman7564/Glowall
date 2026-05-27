@@ -5,11 +5,11 @@ from .models import Order
 class OrderForm(forms.ModelForm):
     """Checkout form for direct product orders."""
 
-    REQUIRED_FIELDS = ('full_name', 'phone_number', 'email', 'address', 'city', 'state', 'pincode')
+    REQUIRED_FIELDS = ('full_name', 'phone_number', 'address', 'city', 'state', 'pincode')
 
     class Meta:
         model = Order
-        fields = ['full_name', 'phone_number', 'email', 'address', 'city', 'state', 'pincode']
+        fields = ['full_name', 'phone_number', 'address', 'city', 'state', 'pincode']
         widgets = {
             'full_name': forms.TextInput(attrs={
                 'class': 'checkout-input',
@@ -23,12 +23,6 @@ class OrderForm(forms.ModelForm):
                 'placeholder': 'Phone Number',
                 'autocomplete': 'tel',
                 'inputmode': 'tel',
-                'required': True,
-            }),
-            'email': forms.EmailInput(attrs={
-                'class': 'checkout-input',
-                'placeholder': 'Email Address',
-                'autocomplete': 'email',
                 'required': True,
             }),
             'address': forms.Textarea(attrs={
